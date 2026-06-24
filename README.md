@@ -4,8 +4,11 @@
 > 本仓库提供的是一份**高度贴合个人使用习惯**的 Mihomo (原 Clash Meta) 路由配置文件。
 > 它**不是**一份开箱即用的通用傻瓜式模板。如果您不熟悉 Mihomo 的核心机制、TUN 模式、Fake-IP 以及策略组正则表达式（filter），请**谨慎照搬**。抄作业前，请务必阅读下方说明！
 
-## [寻找真正可学习的参考?](https://t.me/xvsvts/152)       
-   [推荐客户端](https://github.com/appshubcc/Bettbox/releases)
+## 其他配置参考与客户端推荐
+   [寻找真正可学习的参考?](https://t.me/xvsvts/152)
+
+   该配置必须使用在原生mihomo内核的非魔改客户端上，否则可以出现未知错误，如
+   [Bettbox](https://github.com/appshubcc/Bettbox/releases)
 
 ## ✨ 核心特性 (为什么这么配？)
 
