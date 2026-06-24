@@ -4,10 +4,19 @@
 > 本仓库提供的是一份**高度贴合个人使用习惯**的 Mihomo (原 Clash Meta) 路由配置文件。
 > 它**不是**一份开箱即用的通用傻瓜式模板。如果您不熟悉 Mihomo 的核心机制、TUN 模式、Fake-IP 以及策略组正则表达式（filter），请**谨慎照搬**。抄作业前，请务必阅读下方说明！
 
-## 其他配置参考与客户端推荐
+## 推荐学习参考，订阅转换项目与客户端
    [寻找真正可学习的参考?](https://t.me/xvsvts/152)
 
-   该配置必须使用在原生mihomo内核的非魔改客户端上，否则可以出现未知错误，推荐如
+   强烈建议使用私人订阅转换前后端，杜绝如何互联网公用在线转换，将极大的降低敏感的节点信息泄漏：
+   [sublinkpro](https://github.com/ZeroDeng01/sublinkPro)  自用🦜
+   [Sub-Store](https://github.com/sub-store-org/Sub-Store)  🔥热门🔥
+
+   上述转换搭建太麻烦？还有本地转换🎁
+   [SubCase](https://github.com/sionnx/SubCase)  app化/Sub-Store支持🍃
+   [flclash-converter](https://github.com/JINXPIL/flclash-converter)  🟢简单易用🟢/🔴非Flclash项目
+附属🔴
+
+   该配置必须使用在原生mihomo内核的非魔改🎭客户端上，否则可以出现未知错误，推荐如
    [Bettbox](https://github.com/appshubcc/Bettbox/releases)的优秀下游GUI
 
 ## ✨ 核心特性 (为什么这么配？)
