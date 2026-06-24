@@ -1,4 +1,4 @@
-# 🚀 Mihomo (Clash Meta) 配置模板 (高度定制自用版)
+# 🚀 Mihomo (Clash Meta) [配置模板](https://raw.githubusercontent.com/XVSVTsama/mihomo-config-self/refs/heads/main/mihomo.yaml） (高度定制自用版)
 
 > ⚠️ **避坑指南 & 核心声明**
 > 本仓库提供的是一份**高度贴合个人使用习惯**的 Mihomo (原 Clash Meta) 路由配置文件。
