@@ -16,7 +16,7 @@
 
 * **使用规则TUN**：默认开启 `tun` 模式，采用 `gvisor` 协议栈，实现全设备/全协议接管，解决部分软件不走系统代理的问题。
 * **激进的 DNS 解析体验**：采用 `fake-ip` 增强模式。内置基于国内直连与 DoH/DoT 混合的智能 DNS 策略，精准防止 DNS 污染。
-* **模块化规则集 (Rule Providers)**：全面拥抱 `mrs` 格式的远程规则集（感谢 DustinWin、MetaCubeX 等维护者），剥离本地规则，实现自动无感更新。
+* **模块化规则集 (Rule Providers)**：全面拥抱 `mrs` 格式的远程规则集（感谢 [DustinWin](https://github.com/DustinWin/ruleset_geodata/releases)、[MetaCubeX](https://github.com/MetaCubeX/meta-rules-dat/tree/meta) 等维护者），剥离本地规则，实现自动无感更新。
 * **强迫症级场景分流**：
     * **🤖 AI 大模型 / ✖️ Twitter / 🎵 TikTok**：独立分流组，并且**硬编码**了正则表达式过滤，强制只使用带有 "美国|住宅" 标识的节点，防止封号或风控。
     * **🎮 游戏**：独立 UDP 代理放行与主流游戏平台路由。
