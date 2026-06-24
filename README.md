@@ -7,8 +7,8 @@
 ## 其他配置参考与客户端推荐
    [寻找真正可学习的参考?](https://t.me/xvsvts/152)
 
-   该配置必须使用在原生mihomo内核的非魔改客户端上，否则可以出现未知错误，如
-   [Bettbox](https://github.com/appshubcc/Bettbox/releases)
+   该配置必须使用在原生mihomo内核的非魔改客户端上，否则可以出现未知错误，推荐如
+   [Bettbox](https://github.com/appshubcc/Bettbox/releases)的优秀下游GUI
 
 ## ✨ 核心特性 (为什么这么配？)
 
