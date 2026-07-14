@@ -4,6 +4,8 @@
 > 本仓库提供的是一份**高度贴合个人使用习惯**的 Mihomo (原 Clash Meta) [路由配置文件](https://raw.githubusercontent.com/XVSVTsama/mihomo-config-self/refs/heads/main/mihomo.yaml)。
 > 它**不是**一份开箱即用的通用傻瓜式模板。如果您不熟悉 Mihomo 的核心机制、TUN 模式、Fake-IP 以及策略组正则表达式（filter），请**谨慎照搬**。抄作业前，请务必阅读下方说明！
 
+## 远程覆写js
+    .[远程覆写](https://raw.githubusercontent.com/XVSVTsama/mihomo-config-self/refs/heads/main/script.js)
 ## 推荐学习参考，订阅转换项目与客户端
    [寻找真正可学习的参考?](https://t.me/xvsvts/152)
 
