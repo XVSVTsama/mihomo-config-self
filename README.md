@@ -6,7 +6,7 @@
 
 ## 远程覆写js
 
-   [远程覆写](https://raw.githubusercontent.com/XVSVTsama/mihomo-config-self/refs/heads/main/script.js)
+   [远程覆写](https://raw.githubusercontent.com/XVSVTsama/mihomo-config-self/refs/heads/main/script_override.js)
 
 ## 推荐学习参考，订阅转换项目与客户端
    [寻找真正可学习的参考?](https://t.me/xvsvts/152)
