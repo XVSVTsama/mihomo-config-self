@@ -201,15 +201,7 @@ const TEMPLATE = {
       "interval": 300,
       "lazy": true,
       "name": "🔄 负载均衡",
-      "proxies": [
-        "RFC 香港|01",
-        "Akile 日本|01",
-        "dmit 美国|悲剧",
-        "aws 新加坡|01",
-        "Akile 台湾|01",
-        "Sixtynet 美国|01",
-        "野草云 香港|01"
-      ],
+      "proxies": null,
       "strategy": "sticky-sessions",
       "type": "load-balance",
       "url": "https://www.gstatic.com/generate_204"
