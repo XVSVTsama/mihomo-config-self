@@ -162,7 +162,6 @@ const TEMPLATE = {
       "services.googleapis.com"
     ]
   },
-  "interface-name": "XVSVT",
   "ipv6": true,
   "keep-alive-idle": 600,
   "keep-alive-interval": 15,
