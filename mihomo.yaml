@@ -2,7 +2,6 @@ mode: rule
 mixed-port: 7254
 port: 7249
 socks-port: 7346
-interface-name: XVSVT
 etag-support: true
 global-ua: clash.meta
 ipv6: true
