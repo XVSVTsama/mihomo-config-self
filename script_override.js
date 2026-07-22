@@ -309,7 +309,7 @@ const TEMPLATE = {
       "url": "https://cdn.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/apple.txt"
     },
     "applications": {
-      "behavior": "classical",
+      "behavior": "domain",
       "interval": 86400,
       "path": "./ruleset/applications.yaml",
       "type": "http",
