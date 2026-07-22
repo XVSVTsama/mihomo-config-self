@@ -13,7 +13,7 @@
 
    强烈建议使用私人订阅转换前后端，杜绝任何互联网公用在线转换，将极大的降低敏感的节点信息泄漏：
    
-   [sublinkpro](https://github.com/ZeroDeng01/sublinkPro)  自用🦜
+   [sublinkpro](https://github.com/ZeroDeng01/sublinkPro)  已测试可用🦜
    
    [Sub-Store](https://github.com/sub-store-org/Sub-Store)  🔥热门🔥
 
