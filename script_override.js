@@ -60,17 +60,15 @@ const Compatible_With_Bettbox = { ruleOptionsEnable: true };
  * false = 禁用
  */
 const ruleOptionsEnable = {
-  // 基础策略组
-  👉 手动切换: true, // 是否启用手动选择策略组
-  ♻️ 自动选择: true, // 是否启用自动选择策略组
-  🔄 负载均衡: true, // 是否启用负载均衡策略组
-  📲 Telegram: true, // Telegram通讯软件
-  🎮 Games-Global: true, // 游戏
-  🎵 TikTok: true, // TikTok视频平台
-  ✖️ Twitter: true, // Twitter社交平台
-  🤖 AI大模型: true, // AI
+  '👉 手动切换': true, // 是否启用手动选择策略组
+  '♻️ 自动选择': true, // 是否启用自动选择策略组
+  '🔄 负载均衡': true, // 是否启用负载均衡策略组
+  '📲 Telegram': true, // Telegram通讯软件
+  '🎮 Games-Global': true, // 游戏
+  '🎵 TikTok': true, // TikTok视频平台
+  '✖️ Twitter': true, // Twitter社交平台
+  '🤖 AI大模型': true, // AI
 };
-
 
 
 
