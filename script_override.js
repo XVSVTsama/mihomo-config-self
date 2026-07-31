@@ -811,7 +811,7 @@ function main(config, profileName) {
   ? config.proxies
   : [];
 
-for (const proxy of proxies) {
+for (const proxy of originalProxies) {
 
   const reality = proxy?.["reality-opts"];
 
