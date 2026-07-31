@@ -49,6 +49,32 @@
  * ============================================================================
  */
 
+
+
+// 适配 Bettbox 自定义配置参数
+const Compatible_With_Bettbox = { ruleOptionsEnable: true };
+
+/**
+ * 自定义配置选项
+ * true = 启用
+ * false = 禁用
+ */
+const ruleOptionsEnable = {
+  // 基础策略组
+  👉 手动切换: true, // 是否启用手动选择策略组
+  ♻️ 自动选择: true, // 是否启用自动选择策略组
+  🔄 负载均衡: true, // 是否启用负载均衡策略组
+  📲 Telegram: true, // Telegram通讯软件
+  🎮 Games-Global: true, // 游戏
+  🎵 TikTok: true, // TikTok视频平台
+  ✖️ Twitter: true, // Twitter社交平台
+  🤖 AI大模型: true, // AI
+};
+
+
+
+
+
 // 出现同一个域名规则 key 时，订阅原始配置(true) 还是模板(false) 优先
 const NAMESERVER_POLICY_PREFER_ORIGINAL = true;
 
@@ -189,8 +215,6 @@ const TEMPLATE = {
         "👉 手动切换",
         "♻️ 自动选择",
         "🔄 负载均衡",
-        "📲 Telegram",
-        "🤖 AI大模型",
         "DIRECT"
       ],
       "type": "select"
