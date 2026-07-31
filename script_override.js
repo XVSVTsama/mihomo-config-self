@@ -807,7 +807,38 @@ function main(config, profileName) {
   config = config || {};
 
   // ---- 1. 从订阅原始配置里取出会被模板覆盖、但需要保留/合并的动态数据 ----
-  const originalProxies = Array.isArray(config.proxies) ? config.proxies : [];
+  const originalProxies = Array.isArray(config.proxies)
+  ? config.proxies
+  : [];
+
+for (const proxy of proxies) {
+
+  const reality = proxy?.["reality-opts"];
+
+  // 没有 reality-opts，不处理
+  if (!reality || typeof reality !== "object") {
+    continue;
+  }
+
+  // 必须同时具有 Reality 标识字段
+  // public-key + short-id
+  if (
+    typeof reality["public-key"] !== "string" ||
+    reality["public-key"].length === 0 ||
+    typeof reality["short-id"] !== "string" ||
+    reality["short-id"].length === 0
+  ) {
+    continue;
+  }
+
+  // 已显式开启则保持
+  if (reality["support-x25519mlkem768"] === true) {
+    continue;
+  }
+
+  // 未开启或不存在，则开启
+  reality["support-x25519mlkem768"] = true;
+}
   const originalProxyProviders =
     config['proxy-providers'] && typeof config['proxy-providers'] === 'object'
       ? config['proxy-providers']
