@@ -97,8 +97,6 @@ proxy-groups:
         - 👉 手动切换
         - ♻️ 自动选择
         - 🔄 负载均衡
-        - 📲 Telegram
-        - 🤖 AI大模型
         - DIRECT
   - name: 🔄 负载均衡
     icon: "https://www.clashverge.dev/assets/icons/balance.svg"
