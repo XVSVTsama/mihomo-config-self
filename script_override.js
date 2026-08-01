@@ -839,6 +839,26 @@ for (const proxy of originalProxies) {
   // 未开启或不存在，则开启
   reality["support-x25519mlkem768"] = true;
 }
+
+// =====================================================
+// 修正节点 skip-cert-verify
+// 仅处理 config.proxies 中的节点
+// 已存在且为 true 时改为 false
+// =====================================================
+
+for (const proxy of originalProxies) {
+
+  if (!proxy || typeof proxy !== "object") {
+    continue;
+  }
+
+  if (
+    Object.prototype.hasOwnProperty.call(proxy, "skip-cert-verify") &&
+    proxy["skip-cert-verify"] === true
+  ) {
+    proxy["skip-cert-verify"] = false;
+  }
+}
   const originalProxyProviders =
     config['proxy-providers'] && typeof config['proxy-providers'] === 'object'
       ? config['proxy-providers']
