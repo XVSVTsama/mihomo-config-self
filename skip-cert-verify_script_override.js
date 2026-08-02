@@ -68,6 +68,7 @@ const ruleOptionsEnable = {
   '🎵 TikTok': true, // TikTok视频平台
   '✖️ Twitter': true, // Twitter社交平台
   '🤖 AI大模型': true, // AI
+  '跳过证书验证': false, // 是否为所有订阅节点启用 skip-cert-verify
 };
 
 
@@ -839,6 +840,26 @@ for (const proxy of originalProxies) {
   // 未开启或不存在，则开启
   reality["support-x25519mlkem768"] = true;
 }
+
+// =====================================================
+// 节点 TLS 证书验证开关
+// true：为所有订阅节点设置 skip-cert-verify: true
+// false：保留未配置的节点；将已有的 true 改为 false
+// =====================================================
+const skipCertVerify = ruleOptionsEnable['跳过证书验证'] === true;
+
+for (const proxy of originalProxies) {
+  if (!proxy || typeof proxy !== "object") {
+    continue;
+  }
+
+  if (skipCertVerify) {
+    proxy["skip-cert-verify"] = true;
+  } else if (proxy["skip-cert-verify"] === true) {
+    proxy["skip-cert-verify"] = false;
+  }
+}
+
   const originalProxyProviders =
     config['proxy-providers'] && typeof config['proxy-providers'] === 'object'
       ? config['proxy-providers']
