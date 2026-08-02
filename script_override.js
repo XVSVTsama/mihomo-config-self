@@ -926,19 +926,13 @@ function collectDnsRules(dns) {
   }
 
 
-
-  // ② proxy-server-nameserver
+  // proxy-server-nameserver 只保存 DNS 服务器列表
+  // 不直接生成 proxy-server-nameserver-policy
 
   if (Array.isArray(dns["proxy-server-nameserver"])) {
 
-    dns["proxy-server-nameserver"]
-      .forEach(v => {
-
-        if (typeof v === "string") {
-          result.policy[v] = v;
-        }
-
-      });
+    result.proxyNameserver =
+      dns["proxy-server-nameserver"];
 
   }
 
@@ -1039,7 +1033,8 @@ function smartMergeDnsNode(config, result) {
 
 
         newPolicy[rule] =
-          rules.policy[rule];
+          rules.policy[rule] ||
+          rules.proxyNameserver;
 
       }
 
