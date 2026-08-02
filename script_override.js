@@ -20,64 +20,48 @@
  *    3. proxy-groups 里，模板中显式写了 "proxies: " （值为空/null，也就是
  *       模板注释里"此处为所有单节点"的那几个分组，例如 👉 手动切换、
  *       ♻️ 自动选择、📲 Telegram、🎮 Games-Global）会自动填入订阅里全部节点
- *       的名字；其余分组（🌍 PROXY、🔄 负载均衡、✖️ Twitter、🤖 AI大模型、
- *       🎵 TikTok 等）保持模板里原样，不会被订阅节点覆盖或补充。
+ *       的名字；其余分组保持模板里原样，不会被订阅节点覆盖或补充。
  *
  *    4.【特别处理】dns.proxy-server-nameserver-policy 采用"合并"而不是
  *       "覆盖"：把模板里的 proxy-server-nameserver-policy 与订阅原始配置里的
  *       proxy-server-nameserver-policy 以及 proxy-server-nameserver/hosts 中，
  *       与订阅真实节点 server 域名匹配的条目补充到最终结果的
- *       proxy-server-nameserver-policy 中。也就是说，只有当规则 key 与订阅中
- *       某个节点 server 域名匹配时，才会被保留或补充。
- *       例如模板里是
- *         proxy-server-nameserver-policy:
- *             A: a
- *       订阅原始配置里是
- *         proxy-server-nameserver-policy:
- *             B: b
- *       合并后就是
- *         proxy-server-nameserver-policy:
- *             A: a
- *             B: b
- *       如果同一个 key（同一个域名匹配规则）在模板和订阅里都出现且取值不同，
- *       默认以订阅原始配置里的取值为准（因为这一项通常是"这条订阅自己的代理
- *       服务器域名要怎么解析"，订阅自己最清楚），可以通过下面的
- *       NAMESERVER_POLICY_PREFER_ORIGINAL 开关调整优先级。
+ *       proxy-server-nameserver-policy 中。
  *
  *  使用方法（Bettbox / FlClash 系客户端通用）：
  *    配置 → 对应订阅右上角"..." → 编辑覆写脚本（或"打开脚本"）→ 新建脚本，
  *    把本文件全部内容粘贴进去保存，然后在该订阅上启用这个脚本即可。
- *
- *  如果以后要更新"标准模板"，把新的 模板.yaml 转成 JSON 后替换下面
- *  TEMPLATE 常量的内容即可，main() 里的逻辑不需要改动。
  * ============================================================================
  */
 
-
-
 // 适配 Bettbox 自定义配置参数
-const Compatible_With_Bettbox = { ruleOptionsEnable: true };
+const Compatible_With_Bettbox = { 
+  ruleOptionsEnable: true,
+  autoRemoveDisabledGroupsFromRules: true // Bettbox 参数支持：自动从包含已被禁用策略组的引用中剔除
+};
 
 /**
  * 自定义配置选项
- * true = 启用
- * false = 禁用
+ * 为模板里的每个代理组（策略组）单独定义开关：
+ * true  = 启用该策略组
+ * false = 禁用该策略组（会自动从 proxy-groups 中移除，并清理其他组中的引用）
  */
 const ruleOptionsEnable = {
-  '👉 手动切换': true, // 是否启用手动选择策略组
-  '♻️ 自动选择': true, // 是否启用自动选择策略组
-  '🔄 负载均衡': true, // 是否启用负载均衡策略组
-  '📲 Telegram': true, // Telegram通讯软件
-  '🎮 Games-Global': true, // 游戏
-  '🎵 TikTok': true, // TikTok视频平台
-  '✖️ Twitter': true, // Twitter社交平台
-  '🤖 AI大模型': true, // AI
-  '跳过证书验证': false, // 是否为所有订阅节点启用 skip-cert-verify
+  // --- 代理组（策略组）单独控制开关 ---
+  '🌍 PROXY': true,        // 主代理策略组
+  '🔄 负载均衡': true,     // 负载均衡策略组
+  '👉 手动切换': false,    // 手动选择策略组
+  '♻️ 自动选择': true,     // 延迟自动选择策略组
+  '📲 Telegram': true,     // Telegram 通讯软件策略组
+  '🎮 Games-Global': true, // 游戏策略组
+  '✖️ Twitter': true,      // Twitter 社交平台策略组
+  '🤖 AI大模型': true,     // AI 大模型策略组
+  '🎵 TikTok': true,       // TikTok 视频平台策略组
+
+  // --- 节点与网络功能开关 ---
+  '跳过证书验证': true,    // 是否为所有订阅节点启用 skip-cert-verify
   '启用 Reality 增强': true, // 是否为 Reality 节点启用 support-x25519mlkem768（X25519MLKEM768 后量子密钥协商）
 };
-
-
-
 
 // 出现同一个域名规则 key 时，订阅原始配置(true) 还是模板(false) 优先
 const NAMESERVER_POLICY_PREFER_ORIGINAL = true;
@@ -775,7 +759,6 @@ const TEMPLATE = {
   "unified-delay": true
 };
 
-
 // ============================================================================
 // 工具函数
 // ============================================================================
@@ -790,9 +773,6 @@ function deepClone(value) {
 //   - name: 👉 手动切换
 //     proxies:
 //     type: select
-// 注意：✖️ Twitter / 🤖 AI大模型 / 🎵 TikTok 这类完全没有 proxies 字段、
-// 靠 include-all-proxies + filter 工作的分组不会被这个判断命中，
-// 会保持模板原样。
 function isAllNodesPlaceholder(group) {
   return !!group && ('proxies' in group) && group.proxies === null;
 }
@@ -800,7 +780,6 @@ function isAllNodesPlaceholder(group) {
 // =====================================================
 // DNS 节点域名智能补充逻辑
 // =====================================================
-
 
 // 判断 server 是否为 IP
 function isIPAddress(host) {
@@ -821,17 +800,14 @@ function isIPAddress(host) {
   return false;
 }
 
-
 function normalizeDomain(domain) {
   return typeof domain === "string"
     ? domain.trim().toLowerCase().replace(/\.+$/, "")
     : "";
 }
 
-
 // 通配符域名匹配
 function matchWildcardDomain(rule, host) {
-
   rule = normalizeDomain(rule);
   host = normalizeDomain(host);
 
@@ -840,30 +816,21 @@ function matchWildcardDomain(rule, host) {
   }
 
   // +.example.com
-  // 匹配自身及所有子域
   if (rule.startsWith("+.")) {
-
     const suffix = rule.substring(2);
-
     return (
       host === suffix ||
       host.endsWith("." + suffix)
     );
   }
 
-
   // .example.com
-  // 只匹配子域，不匹配自身
   if (rule.startsWith(".")) {
-
     const suffix = rule.substring(1);
-
     return host.endsWith("." + suffix);
   }
 
-
-  // * 每次只匹配一个不含 . 的域名层级；可出现在任意层级。
-  // 例如 *.example.com 和 xbox.*.microsoft.com。
+  // * 通配符
   if (rule.includes("*")) {
     const ruleParts = rule.split(".");
     const hostParts = host.split(".");
@@ -876,12 +843,9 @@ function matchWildcardDomain(rule, host) {
     );
   }
 
-
   // 普通域名
   return host === rule;
 }
-
-
 
 function hasProxyServerNameserver(dns) {
   const nameservers = dns && dns["proxy-server-nameserver"];
@@ -892,7 +856,6 @@ function hasProxyServerNameserver(dns) {
   );
 }
 
-
 function asNameserverList(nameservers) {
   if (Array.isArray(nameservers)) {
     return nameservers.filter(value => typeof value === "string");
@@ -901,10 +864,8 @@ function asNameserverList(nameservers) {
   return typeof nameservers === "string" ? [nameservers] : [];
 }
 
-
 // 从原始配置中提取 DNS 合并来源。
 function collectDnsRules(config) {
-
   const result = {
     nameserverPolicy: {},
     proxyServerNameservers: [],
@@ -912,19 +873,12 @@ function collectDnsRules(config) {
     hosts: {}
   };
 
-
   const dns = config && config.dns;
 
   if (!dns || typeof dns !== "object") {
     return result;
   }
 
-
-  /*
-   * ① 大前提：
-   * proxy-server-nameserver 存在
-   * 不检查 nameserver-policy
-   */
   if (
     !hasProxyServerNameserver(dns) &&
     dns["nameserver-policy"] &&
@@ -933,28 +887,16 @@ function collectDnsRules(config) {
     Object.assign(result.nameserverPolicy, dns["nameserver-policy"]);
   }
 
-
-  // ② proxy-server-nameserver
   result.proxyServerNameservers = asNameserverList(
     dns["proxy-server-nameserver"]
   );
-
-
-
-  // ③ proxy-server-nameserver-policy
 
   if (
     dns["proxy-server-nameserver-policy"] &&
     typeof dns["proxy-server-nameserver-policy"] === "object"
   ) {
-
     Object.assign(result.proxyServerNameserverPolicy, dns["proxy-server-nameserver-policy"]);
-
   }
-
-
-
-  // ④ hosts
 
   if (
     dns["use-hosts"] === true &&
@@ -962,60 +904,34 @@ function collectDnsRules(config) {
     typeof config.hosts === "object"
   ) {
     Object.assign(result.hosts, config.hosts);
-
   }
-
 
   return result;
 }
 
-
-
 // 根据节点域名补充 DNS
 function smartMergeDnsNode(config, result) {
-
   const rules = collectDnsRules(config);
-
-
-  const newPolicy =
-    result.dns["proxy-server-nameserver-policy"] || {};
-
-
-  const newHosts =
-    result.hosts || {};
-
-
-
-  const proxies =
-    Array.isArray(config.proxies)
-      ? config.proxies
-      : [];
-
-
+  const newPolicy = result.dns["proxy-server-nameserver-policy"] || {};
+  const newHosts = result.hosts || {};
+  const proxies = Array.isArray(config.proxies) ? config.proxies : [];
 
   for (const proxy of proxies) {
-
-
     if (!proxy || typeof proxy !== "object") {
       continue;
     }
 
-
     const server = proxy.server;
 
-
-    // 忽略 IP 节点
     if (isIPAddress(server)) {
       continue;
     }
-
 
     if (typeof server !== "string") {
       continue;
     }
 
     const domain = normalizeDomain(server);
-
     if (!domain) {
       continue;
     }
@@ -1029,14 +945,12 @@ function smartMergeDnsNode(config, result) {
       }
     };
 
-    // ① 没有 proxy-server-nameserver 时才采用 nameserver-policy。
     for (const rule in rules.nameserverPolicy) {
       if (matchWildcardDomain(rule, domain)) {
         setPolicy(rule, rules.nameserverPolicy[rule]);
       }
     }
 
-    // ③ 显式节点域名策略。
     let hasExplicitProxyServerPolicy = false;
     for (const rule in rules.proxyServerNameserverPolicy) {
       if (matchWildcardDomain(rule, domain)) {
@@ -1045,44 +959,22 @@ function smartMergeDnsNode(config, result) {
       }
     }
 
-    // ② proxy-server-nameserver 是节点域名的统一 DNS 列表，而非域名规则。
-    // 为保留原订阅对该节点的解析方式，将每个非 IP 节点域名补为精确策略。
-    // 已被③命中的节点不再写入该精确兜底，避免精确规则反而覆盖显式通配规则。
     if (!hasExplicitProxyServerPolicy && rules.proxyServerNameservers.length > 0) {
       setPolicy(domain, rules.proxyServerNameservers.slice());
     }
 
-
-
-    // ④ hosts
-
     for (const rule in rules.hosts) {
-
-
-      if (
-        matchWildcardDomain(rule, domain)
-      ) {
-
-
-        newHosts[rule] =
-          rules.hosts[rule];
-
+      if (matchWildcardDomain(rule, domain)) {
+        newHosts[rule] = rules.hosts[rule];
       }
-
     }
-
-
   }
 
-
-  result.dns["proxy-server-nameserver-policy"] =
-    newPolicy;
-
+  result.dns["proxy-server-nameserver-policy"] = newPolicy;
 
   if (Object.keys(newHosts).length) {
     result.hosts = newHosts;
   }
-
 }
 
 // ============================================================================
@@ -1092,23 +984,19 @@ function main(config, profileName) {
   config = config || {};
 
   // ---- 1. 从订阅原始配置里取出会被模板覆盖、但需要保留/合并的动态数据 ----
-  const originalProxies = Array.isArray(config.proxies)
-  ? config.proxies
-  : [];
+  const originalProxies = Array.isArray(config.proxies) ? config.proxies : [];
 
+  // 1.1 Reality 增强开关处理
   const enableRealityEnhance = ruleOptionsEnable['启用 Reality 增强'] === true;
 
   if (enableRealityEnhance) {
     for (const proxy of originalProxies) {
       const reality = proxy?.["reality-opts"];
 
-      // 没有 reality-opts，不处理
       if (!reality || typeof reality !== "object") {
         continue;
       }
 
-      // 必须同时具有 Reality 标识字段
-      // public-key + short-id
       if (
         typeof reality["public-key"] !== "string" ||
         reality["public-key"].length === 0 ||
@@ -1118,45 +1006,33 @@ function main(config, profileName) {
         continue;
       }
 
-      // 已显式开启则保持
       if (reality["support-x25519mlkem768"] === true) {
         continue;
       }
 
-      // 未开启或不存在，则开启
       reality["support-x25519mlkem768"] = true;
     }
   }
 
+  // 1.2 节点 TLS 证书验证开关处理
+  const skipCertVerify = ruleOptionsEnable['跳过证书验证'] === true;
 
-// =====================================================
-// 节点 TLS 证书验证开关
-// true：为所有订阅节点设置 skip-cert-verify: true
-// false：保留未配置的节点；将已有的 true 改为 false
-// =====================================================
-const skipCertVerify = ruleOptionsEnable['跳过证书验证'] === true;
+  for (const proxy of originalProxies) {
+    if (!proxy || typeof proxy !== "object") {
+      continue;
+    }
 
-for (const proxy of originalProxies) {
-  if (!proxy || typeof proxy !== "object") {
-    continue;
+    if (skipCertVerify) {
+      proxy["skip-cert-verify"] = true;
+    } else if (proxy["skip-cert-verify"] === true) {
+      proxy["skip-cert-verify"] = false;
+    }
   }
 
-  if (skipCertVerify) {
-    proxy["skip-cert-verify"] = true;
-  } else if (proxy["skip-cert-verify"] === true) {
-    proxy["skip-cert-verify"] = false;
-  }
-}
   const originalProxyProviders =
     config['proxy-providers'] && typeof config['proxy-providers'] === 'object'
       ? config['proxy-providers']
       : null;
-  const originalDns = config.dns && typeof config.dns === 'object' ? config.dns : {};
-  const originalNameserverPolicy =
-    originalDns['proxy-server-nameserver-policy'] &&
-    typeof originalDns['proxy-server-nameserver-policy'] === 'object'
-      ? originalDns['proxy-server-nameserver-policy']
-      : {};
 
   // ---- 2. 以模板为主体，深拷贝一份出来当作最终结果 ----
   const result = deepClone(TEMPLATE);
@@ -1167,7 +1043,7 @@ for (const proxy of originalProxies) {
     result['proxy-providers'] = originalProxyProviders;
   }
 
- // ---- 4. 动态过滤策略组：读取 ruleOptionsEnable 的单独开关 ----
+  // ---- 4. 动态过滤策略组：读取 ruleOptionsEnable 的单独开关 ----
   // 识别所有被禁用的策略组名字
   const disabledGroupNames = new Set();
   const activeGroupNames = new Set();
@@ -1205,7 +1081,8 @@ for (const proxy of originalProxies) {
   const allNodeNames = originalProxies
     .map((p) => p && p.name)
     .filter((name) => typeof name === 'string' && name.length > 0);
-result['proxy-groups'].forEach((group) => {
+
+  result['proxy-groups'].forEach((group) => {
     if (isAllNodesPlaceholder(group)) {
       group.proxies = allNodeNames.slice();
       if (originalProxyProviders) {
@@ -1219,8 +1096,8 @@ result['proxy-groups'].forEach((group) => {
     result.rules = result.rules.map(rule => {
       let updatedRule = rule;
       disabledGroupNames.forEach(disabledName => {
-        if (updatedRule.includes(,${disabledName})) {
-          updatedRule = updatedRule.replace(,${disabledName}, ,${fallbackTarget});
+        if (updatedRule.includes(`,${disabledName}`)) {
+          updatedRule = updatedRule.replace(`,${disabledName}`, `,${fallbackTarget}`);
         }
       });
       return updatedRule;
