@@ -1167,12 +1167,45 @@ for (const proxy of originalProxies) {
     result['proxy-providers'] = originalProxyProviders;
   }
 
-  // ---- 4. 把标记为"此处为所有单节点"的分组，填入订阅的真实节点名 ----
+ // ---- 4. 动态过滤策略组：读取 ruleOptionsEnable 的单独开关 ----
+  // 识别所有被禁用的策略组名字
+  const disabledGroupNames = new Set();
+  const activeGroupNames = new Set();
+
+  (result['proxy-groups'] || []).forEach(group => {
+    if (group && group.name) {
+      // 默认如果规则选项里没写这个名字，就保持启用状态
+      if (ruleOptionsEnable[group.name] === false) {
+        disabledGroupNames.add(group.name);
+      } else {
+        activeGroupNames.add(group.name);
+      }
+    }
+  });
+
+  // 过滤出启用的策略组
+  result['proxy-groups'] = (result['proxy-groups'] || []).filter(
+    group => group && group.name && !disabledGroupNames.has(group.name)
+  );
+
+  // 清理其他启用的策略组中，对“已被禁用策略组”的引用
+  const fallbackTarget = activeGroupNames.has('🌍 PROXY') ? '🌍 PROXY' : 'DIRECT';
+
+  result['proxy-groups'].forEach(group => {
+    if (Array.isArray(group.proxies)) {
+      group.proxies = group.proxies.filter(p => !disabledGroupNames.has(p));
+      // 如果剔除后列表空了，填入保底策略（优先 🌍 PROXY，其次 DIRECT）
+      if (group.proxies.length === 0) {
+        group.proxies = [fallbackTarget];
+      }
+    }
+  });
+
+  // ---- 5. 把标记为"此处为所有单节点"的分组，填入订阅的真实节点名 ----
   const allNodeNames = originalProxies
     .map((p) => p && p.name)
     .filter((name) => typeof name === 'string' && name.length > 0);
-
-  (result['proxy-groups'] || []).forEach((group) => {
+result['proxy-groups'].forEach((group) => {
     if (isAllNodesPlaceholder(group)) {
       group.proxies = allNodeNames.slice();
       if (originalProxyProviders) {
@@ -1181,12 +1214,24 @@ for (const proxy of originalProxies) {
     }
   });
 
-// ---- 5. DNS 节点智能补充 ----
+  // ---- 6. 清理 rules 中指向已禁用策略组的规则，指向保底策略组 ----
+  if (Array.isArray(result.rules)) {
+    result.rules = result.rules.map(rule => {
+      let updatedRule = rule;
+      disabledGroupNames.forEach(disabledName => {
+        if (updatedRule.includes(,${disabledName})) {
+          updatedRule = updatedRule.replace(,${disabledName}, ,${fallbackTarget});
+        }
+      });
+      return updatedRule;
+    });
+  }
 
-smartMergeDnsNode(
-  config,
-  result
-);
+  // ---- 7. DNS 节点智能补充 ----
+  smartMergeDnsNode(
+    config,
+    result
+  );
 
   return result;
 }
