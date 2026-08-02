@@ -820,37 +820,22 @@ function isIPAddress(host) {
 }
 
 
+function normalizeDomain(domain) {
+  return typeof domain === "string"
+    ? domain.trim().toLowerCase().replace(/\.+$/, "")
+    : "";
+}
+
+
 // 通配符域名匹配
 function matchWildcardDomain(rule, host) {
+
+  rule = normalizeDomain(rule);
+  host = normalizeDomain(host);
 
   if (!rule || !host) {
     return false;
   }
-
-  rule = rule.toLowerCase();
-  host = host.toLowerCase();
-
-
-  // 普通域名
-  if (!rule.includes("*") && !rule.startsWith("+.") && !rule.startsWith(".")) {
-    return host === rule;
-  }
-
-
-  // *.example.com
-  // 只匹配一级
-  if (rule.startsWith("*.")) {
-
-    const suffix = rule.substring(2);
-
-    const parts = host.split(".");
-
-    return (
-      parts.length === suffix.split(".").length + 1 &&
-      host.endsWith("." + suffix)
-    );
-  }
-
 
   // +.example.com
   // 匹配自身及所有子域
@@ -875,20 +860,58 @@ function matchWildcardDomain(rule, host) {
   }
 
 
-  // 其他 *
-  return false;
+  // * 每次只匹配一个不含 . 的域名层级；可出现在任意层级。
+  // 例如 *.example.com 和 xbox.*.microsoft.com。
+  if (rule.includes("*")) {
+    const ruleParts = rule.split(".");
+    const hostParts = host.split(".");
+
+    return (
+      ruleParts.length === hostParts.length &&
+      ruleParts.every((part, index) =>
+        part === "*" || part === hostParts[index]
+      )
+    );
+  }
+
+
+  // 普通域名
+  return host === rule;
 }
 
 
 
-// 从 DNS 配置中提取规则
-function collectDnsRules(dns) {
+function hasProxyServerNameserver(dns) {
+  const nameservers = dns && dns["proxy-server-nameserver"];
+
+  return (
+    (Array.isArray(nameservers) && nameservers.length > 0) ||
+    (typeof nameservers === "string" && nameservers.length > 0)
+  );
+}
+
+
+function asNameserverList(nameservers) {
+  if (Array.isArray(nameservers)) {
+    return nameservers.filter(value => typeof value === "string");
+  }
+
+  return typeof nameservers === "string" ? [nameservers] : [];
+}
+
+
+// 从原始配置中提取 DNS 合并来源。
+function collectDnsRules(config) {
 
   const result = {
-    policy: {},
+    nameserverPolicy: {},
+    proxyServerNameservers: [],
+    proxyServerNameserverPolicy: {},
     hosts: {}
   };
 
+
+  const dns = config && config.dns;
 
   if (!dns || typeof dns !== "object") {
     return result;
@@ -900,51 +923,19 @@ function collectDnsRules(dns) {
    * proxy-server-nameserver 存在
    * 不检查 nameserver-policy
    */
-  if (Array.isArray(dns["proxy-server-nameserver"])) {
-
-    dns["proxy-server-nameserver"]
-      .forEach(v => {
-
-        if (typeof v === "string") {
-          result.policy[v] = v;
-        }
-
-      });
-
-  } else {
-
-
-    // nameserver-policy
-    if (
-      dns["nameserver-policy"] &&
-      typeof dns["nameserver-policy"] === "object"
-    ) {
-
-      Object.assign(
-        result.policy,
-        dns["nameserver-policy"]
-      );
-
-    }
-
+  if (
+    !hasProxyServerNameserver(dns) &&
+    dns["nameserver-policy"] &&
+    typeof dns["nameserver-policy"] === "object"
+  ) {
+    Object.assign(result.nameserverPolicy, dns["nameserver-policy"]);
   }
-
 
 
   // ② proxy-server-nameserver
-
-  if (Array.isArray(dns["proxy-server-nameserver"])) {
-
+  result.proxyServerNameservers = asNameserverList(
     dns["proxy-server-nameserver"]
-      .forEach(v => {
-
-        if (typeof v === "string") {
-          result.policy[v] = v;
-        }
-
-      });
-
-  }
+  );
 
 
 
@@ -955,10 +946,7 @@ function collectDnsRules(dns) {
     typeof dns["proxy-server-nameserver-policy"] === "object"
   ) {
 
-    Object.assign(
-      result.policy,
-      dns["proxy-server-nameserver-policy"]
-    );
+    Object.assign(result.proxyServerNameserverPolicy, dns["proxy-server-nameserver-policy"]);
 
   }
 
@@ -968,14 +956,10 @@ function collectDnsRules(dns) {
 
   if (
     dns["use-hosts"] === true &&
-    dns.hosts &&
-    typeof dns.hosts === "object"
+    config.hosts &&
+    typeof config.hosts === "object"
   ) {
-
-    Object.assign(
-      result.hosts,
-      dns.hosts
-    );
+    Object.assign(result.hosts, config.hosts);
 
   }
 
@@ -988,10 +972,7 @@ function collectDnsRules(dns) {
 // 根据节点域名补充 DNS
 function smartMergeDnsNode(config, result) {
 
-
-  const dns = config.dns || {};
-
-  const rules = collectDnsRules(dns);
+  const rules = collectDnsRules(config);
 
 
   const newPolicy =
@@ -999,7 +980,7 @@ function smartMergeDnsNode(config, result) {
 
 
   const newHosts =
-    result.dns.hosts || {};
+    result.hosts || {};
 
 
 
@@ -1027,26 +1008,46 @@ function smartMergeDnsNode(config, result) {
     }
 
 
-    const domain =
-      server.toLowerCase();
+    if (typeof server !== "string") {
+      continue;
+    }
 
+    const domain = normalizeDomain(server);
 
+    if (!domain) {
+      continue;
+    }
 
-    // ①②③
-
-    for (const rule in rules.policy) {
-
-
+    const setPolicy = (rule, value) => {
       if (
-        matchWildcardDomain(rule, domain)
+        NAMESERVER_POLICY_PREFER_ORIGINAL ||
+        !Object.prototype.hasOwnProperty.call(newPolicy, rule)
       ) {
-
-
-        newPolicy[rule] =
-          rules.policy[rule];
-
+        newPolicy[rule] = value;
       }
+    };
 
+    // ① 没有 proxy-server-nameserver 时才采用 nameserver-policy。
+    for (const rule in rules.nameserverPolicy) {
+      if (matchWildcardDomain(rule, domain)) {
+        setPolicy(rule, rules.nameserverPolicy[rule]);
+      }
+    }
+
+    // ③ 显式节点域名策略。
+    let hasExplicitProxyServerPolicy = false;
+    for (const rule in rules.proxyServerNameserverPolicy) {
+      if (matchWildcardDomain(rule, domain)) {
+        setPolicy(rule, rules.proxyServerNameserverPolicy[rule]);
+        hasExplicitProxyServerPolicy = true;
+      }
+    }
+
+    // ② proxy-server-nameserver 是节点域名的统一 DNS 列表，而非域名规则。
+    // 为保留原订阅对该节点的解析方式，将每个非 IP 节点域名补为精确策略。
+    // 已被③命中的节点不再写入该精确兜底，避免精确规则反而覆盖显式通配规则。
+    if (!hasExplicitProxyServerPolicy && rules.proxyServerNameservers.length > 0) {
+      setPolicy(domain, rules.proxyServerNameservers.slice());
     }
 
 
@@ -1077,10 +1078,7 @@ function smartMergeDnsNode(config, result) {
 
 
   if (Object.keys(newHosts).length) {
-
-    result.dns.hosts =
-      newHosts;
-
+    result.hosts = newHosts;
   }
 
 }
