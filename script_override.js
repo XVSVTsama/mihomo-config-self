@@ -24,8 +24,12 @@
  *       🎵 TikTok 等）保持模板里原样，不会被订阅节点覆盖或补充。
  *
  *    4.【特别处理】dns.proxy-server-nameserver-policy 采用"合并"而不是
- *       "覆盖"：把模板里的 proxy-server-nameserver-policy 和订阅原始配置里
- *       的 proxy-server-nameserver-policy 取并集。例如模板里是
+ *       "覆盖"：把模板里的 proxy-server-nameserver-policy 与订阅原始配置里的
+ *       proxy-server-nameserver-policy 以及 proxy-server-nameserver/hosts 中，
+ *       与订阅真实节点 server 域名匹配的条目补充到最终结果的
+ *       proxy-server-nameserver-policy 中。也就是说，只有当规则 key 与订阅中
+ *       某个节点 server 域名匹配时，才会被保留或补充。
+ *       例如模板里是
  *         proxy-server-nameserver-policy:
  *             A: a
  *       订阅原始配置里是
