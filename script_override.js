@@ -791,13 +791,294 @@ function isAllNodesPlaceholder(group) {
   return !!group && ('proxies' in group) && group.proxies === null;
 }
 
-// 合并 proxy-server-nameserver-policy：模板与订阅原始配置取并集
-function mergeNameserverPolicy(templatePolicy, originalPolicy) {
-  const base = templatePolicy && typeof templatePolicy === 'object' ? templatePolicy : {};
-  const extra = originalPolicy && typeof originalPolicy === 'object' ? originalPolicy : {};
-  return NAMESERVER_POLICY_PREFER_ORIGINAL
-    ? Object.assign({}, base, extra)   // key 冲突时 extra（订阅原始配置）优先
-    : Object.assign({}, extra, base);  // key 冲突时 base（模板）优先
+// =====================================================
+// DNS 节点域名智能补充逻辑
+// =====================================================
+
+
+// 判断 server 是否为 IP
+function isIPAddress(host) {
+  if (!host || typeof host !== "string") {
+    return true;
+  }
+
+  // IPv4
+  if (/^\d{1,3}(\.\d{1,3}){3}$/.test(host)) {
+    return true;
+  }
+
+  // IPv6
+  if (host.includes(":")) {
+    return true;
+  }
+
+  return false;
+}
+
+
+// 通配符域名匹配
+function matchWildcardDomain(rule, host) {
+
+  if (!rule || !host) {
+    return false;
+  }
+
+  rule = rule.toLowerCase();
+  host = host.toLowerCase();
+
+
+  // 普通域名
+  if (!rule.includes("*") && !rule.startsWith("+.") && !rule.startsWith(".")) {
+    return host === rule;
+  }
+
+
+  // *.example.com
+  // 只匹配一级
+  if (rule.startsWith("*.")) {
+
+    const suffix = rule.substring(2);
+
+    const parts = host.split(".");
+
+    return (
+      parts.length === suffix.split(".").length + 1 &&
+      host.endsWith("." + suffix)
+    );
+  }
+
+
+  // +.example.com
+  // 匹配自身及所有子域
+  if (rule.startsWith("+.")) {
+
+    const suffix = rule.substring(2);
+
+    return (
+      host === suffix ||
+      host.endsWith("." + suffix)
+    );
+  }
+
+
+  // .example.com
+  // 只匹配子域，不匹配自身
+  if (rule.startsWith(".")) {
+
+    const suffix = rule.substring(1);
+
+    return host.endsWith("." + suffix);
+  }
+
+
+  // 其他 *
+  return false;
+}
+
+
+
+// 从 DNS 配置中提取规则
+function collectDnsRules(dns) {
+
+  const result = {
+    policy: {},
+    hosts: {}
+  };
+
+
+  if (!dns || typeof dns !== "object") {
+    return result;
+  }
+
+
+  /*
+   * ① 大前提：
+   * proxy-server-nameserver 存在
+   * 不检查 nameserver-policy
+   */
+  if (Array.isArray(dns["proxy-server-nameserver"])) {
+
+    dns["proxy-server-nameserver"]
+      .forEach(v => {
+
+        if (typeof v === "string") {
+          result.policy[v] = v;
+        }
+
+      });
+
+  } else {
+
+
+    // nameserver-policy
+    if (
+      dns["nameserver-policy"] &&
+      typeof dns["nameserver-policy"] === "object"
+    ) {
+
+      Object.assign(
+        result.policy,
+        dns["nameserver-policy"]
+      );
+
+    }
+
+  }
+
+
+
+  // ② proxy-server-nameserver
+
+  if (Array.isArray(dns["proxy-server-nameserver"])) {
+
+    dns["proxy-server-nameserver"]
+      .forEach(v => {
+
+        if (typeof v === "string") {
+          result.policy[v] = v;
+        }
+
+      });
+
+  }
+
+
+
+  // ③ proxy-server-nameserver-policy
+
+  if (
+    dns["proxy-server-nameserver-policy"] &&
+    typeof dns["proxy-server-nameserver-policy"] === "object"
+  ) {
+
+    Object.assign(
+      result.policy,
+      dns["proxy-server-nameserver-policy"]
+    );
+
+  }
+
+
+
+  // ④ hosts
+
+  if (
+    dns["use-hosts"] === true &&
+    dns.hosts &&
+    typeof dns.hosts === "object"
+  ) {
+
+    Object.assign(
+      result.hosts,
+      dns.hosts
+    );
+
+  }
+
+
+  return result;
+}
+
+
+
+// 根据节点域名补充 DNS
+function smartMergeDnsNode(config, result) {
+
+
+  const dns = config.dns || {};
+
+  const rules = collectDnsRules(dns);
+
+
+  const newPolicy =
+    result.dns["proxy-server-nameserver-policy"] || {};
+
+
+  const newHosts =
+    result.dns.hosts || {};
+
+
+
+  const proxies =
+    Array.isArray(config.proxies)
+      ? config.proxies
+      : [];
+
+
+
+  for (const proxy of proxies) {
+
+
+    if (!proxy || typeof proxy !== "object") {
+      continue;
+    }
+
+
+    const server = proxy.server;
+
+
+    // 忽略 IP 节点
+    if (isIPAddress(server)) {
+      continue;
+    }
+
+
+    const domain =
+      server.toLowerCase();
+
+
+
+    // ①②③
+
+    for (const rule in rules.policy) {
+
+
+      if (
+        matchWildcardDomain(rule, domain)
+      ) {
+
+
+        newPolicy[rule] =
+          rules.policy[rule];
+
+      }
+
+    }
+
+
+
+    // ④ hosts
+
+    for (const rule in rules.hosts) {
+
+
+      if (
+        matchWildcardDomain(rule, domain)
+      ) {
+
+
+        newHosts[rule] =
+          rules.hosts[rule];
+
+      }
+
+    }
+
+
+  }
+
+
+  result.dns["proxy-server-nameserver-policy"] =
+    newPolicy;
+
+
+  if (Object.keys(newHosts).length) {
+
+    result.dns.hosts =
+      newHosts;
+
+  }
+
 }
 
 // ============================================================================
@@ -893,14 +1174,12 @@ for (const proxy of originalProxies) {
     }
   });
 
-  // ---- 5.【特别处理】合并 dns.proxy-server-nameserver-policy ----
-  const templateNameserverPolicy =
-    (result.dns && result.dns['proxy-server-nameserver-policy']) || {};
-  const mergedPolicy = mergeNameserverPolicy(templateNameserverPolicy, originalNameserverPolicy);
-  if (Object.keys(mergedPolicy).length > 0) {
-    result.dns = result.dns || {};
-    result.dns['proxy-server-nameserver-policy'] = mergedPolicy;
-  }
+// ---- 5. DNS 节点智能补充 ----
+
+smartMergeDnsNode(
+  config,
+  result
+);
 
   return result;
 }
