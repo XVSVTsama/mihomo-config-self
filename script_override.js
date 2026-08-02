@@ -797,92 +797,22 @@ function isAllNodesPlaceholder(group) {
 
 
 // 判断 server 是否为 IP
-function isIPAddress(host) {
-  if (!host || typeof host !== "string") {
-    return true;
-  }
-
-  // IPv4
-  if (/^\d{1,3}(\.\d{1,3}){3}$/.test(host)) {
-    return true;
-  }
-
-  // IPv6
-  if (host.includes(":")) {
-    return true;
-  }
-
-  return false;
-}
-
-
-// 通配符域名匹配
-function matchWildcardDomain(rule, host) {
-
-  if (!rule || !host) {
-    return false;
-  }
-
-  rule = rule.toLowerCase();
-  host = host.toLowerCase();
-
-
-  // 普通域名
-  if (!rule.includes("*") && !rule.startsWith("+.") && !rule.startsWith(".")) {
-    return host === rule;
-  }
-
-
-  // *.example.com
-  // 只匹配一级
-  if (rule.startsWith("*.")) {
-
-    const suffix = rule.substring(2);
-
-    const parts = host.split(".");
-
-    return (
-      parts.length === suffix.split(".").length + 1 &&
-      host.endsWith("." + suffix)
-    );
-  }
-
-
-  // +.example.com
-  // 匹配自身及所有子域
-  if (rule.startsWith("+.")) {
-
-    const suffix = rule.substring(2);
-
-    return (
-      host === suffix ||
-      host.endsWith("." + suffix)
-    );
-  }
-
-
-  // .example.com
-  // 只匹配子域，不匹配自身
-  if (rule.startsWith(".")) {
-
-    const suffix = rule.substring(1);
-
-    return host.endsWith("." + suffix);
-  }
-
-
-  // 其他 *
-  return false;
-}
-
-
-
-// 从 DNS 配置中提取规则
 function collectDnsRules(dns) {
 
   const result = {
-    policy: {},
+
+    // ①
+    nameserverPolicy: {},
+
+    // ②
+    proxyServerNameserver: [],
+
+    // ③
+    proxyServerNameserverPolicy: {},
+
+    // ④
     hosts: {}
+
   };
 
 
@@ -891,62 +821,58 @@ function collectDnsRules(dns) {
   }
 
 
+
   /*
-   * ① 大前提：
-   * proxy-server-nameserver 存在
-   * 不检查 nameserver-policy
+   * ① nameserver-policy
+   *
+   * 大前提：
+   * 存在 proxy-server-nameserver 时
+   * 不读取 nameserver-policy
    */
-  if (Array.isArray(dns["proxy-server-nameserver"])) {
+  if (
+    !Array.isArray(dns["proxy-server-nameserver"]) &&
+    dns["nameserver-policy"] &&
+    typeof dns["nameserver-policy"] === "object"
+  ) {
 
-    dns["proxy-server-nameserver"]
-      .forEach(v => {
-
-        if (typeof v === "string") {
-          result.policy[v] = v;
-        }
-
-      });
-
-  } else {
-
-
-    // nameserver-policy
-    if (
-      dns["nameserver-policy"] &&
-      typeof dns["nameserver-policy"] === "object"
-    ) {
-
-      Object.assign(
-        result.policy,
-        dns["nameserver-policy"]
-      );
-
-    }
-
-  }
-
-
-  // proxy-server-nameserver 只保存 DNS 服务器列表
-  // 不直接生成 proxy-server-nameserver-policy
-
-  if (Array.isArray(dns["proxy-server-nameserver"])) {
-
-    result.proxyNameserver =
-      dns["proxy-server-nameserver"];
+    Object.assign(
+      result.nameserverPolicy,
+      dns["nameserver-policy"]
+    );
 
   }
 
 
 
-  // ③ proxy-server-nameserver-policy
+  /*
+   * ② proxy-server-nameserver
+   *
+   * 只保存 DNS server
+   * 不在这里生成规则
+   *
+   * 等节点匹配后再生成
+   */
+  if (
+    Array.isArray(dns["proxy-server-nameserver"])
+  ) {
 
+    result.proxyServerNameserver =
+      dns["proxy-server-nameserver"].slice();
+
+  }
+
+
+
+  /*
+   * ③ proxy-server-nameserver-policy
+   */
   if (
     dns["proxy-server-nameserver-policy"] &&
     typeof dns["proxy-server-nameserver-policy"] === "object"
   ) {
 
     Object.assign(
-      result.policy,
+      result.proxyServerNameserverPolicy,
       dns["proxy-server-nameserver-policy"]
     );
 
@@ -954,8 +880,12 @@ function collectDnsRules(dns) {
 
 
 
-  // ④ hosts
-
+  /*
+   * ④ hosts
+   *
+   * 大前提：
+   * use-hosts=true
+   */
   if (
     dns["use-hosts"] === true &&
     dns.hosts &&
@@ -971,6 +901,7 @@ function collectDnsRules(dns) {
 
 
   return result;
+
 }
 
 
@@ -985,7 +916,10 @@ function smartMergeDnsNode(config, result) {
 
 
   const newPolicy =
-    result.dns["proxy-server-nameserver-policy"] || {};
+    Object.assign(
+      {},
+      result.dns["proxy-server-nameserver-policy"] || {}
+    );
 
 
   const newHosts =
@@ -1024,21 +958,70 @@ function smartMergeDnsNode(config, result) {
 
     // ①②③
 
-    for (const rule in rules.policy) {
+// =============================
+// ① nameserver-policy
+// =============================
+
+for (const rule in rules.nameserverPolicy) {
+
+  if (
+    matchWildcardDomain(rule, domain)
+  ) {
+
+    newPolicy[rule] =
+      rules.nameserverPolicy[rule];
+
+  }
+
+}
 
 
-      if (
-        matchWildcardDomain(rule, domain)
-      ) {
 
+// =============================
+// ② proxy-server-nameserver
+// =============================
 
-        newPolicy[rule] =
-          rules.policy[rule] ||
-          rules.proxyNameserver;
+if (
+  rules.proxyServerNameserver.length
+) {
 
-      }
+  for (
+    const rule of Object.keys(rules.proxyServerNameserver)
+  ) {
+
+    if (
+      matchWildcardDomain(rule, domain)
+    ) {
+
+      newPolicy[rule] =
+        rules.proxyServerNameserver.slice();
 
     }
+
+  }
+
+}
+
+
+
+// =============================
+// ③ proxy-server-nameserver-policy
+// =============================
+
+for (
+  const rule in rules.proxyServerNameserverPolicy
+) {
+
+  if (
+    matchWildcardDomain(rule, domain)
+  ) {
+
+    newPolicy[rule] =
+      rules.proxyServerNameserverPolicy[rule];
+
+  }
+
+}
 
 
 
