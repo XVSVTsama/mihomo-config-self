@@ -72,6 +72,8 @@ const ruleOptionsEnable = {
   '🎵 TikTok': true, // TikTok视频平台
   '✖️ Twitter': true, // Twitter社交平台
   '🤖 AI大模型': true, // AI
+  '跳过证书验证': true, // 是否为所有订阅节点启用 skip-cert-verify
+  '启用 Reality 增强': true, // 是否为 Reality 节点启用 support-x25519mlkem768（X25519MLKEM768 后量子密钥协商）
 };
 
 
@@ -1094,6 +1096,9 @@ function main(config, profileName) {
   ? config.proxies
   : [];
 
+const enableX25519MlKem768 =
+  ruleOptionsEnable['启用 Reality 增强'] === true;
+
 for (const proxy of originalProxies) {
 
   const reality = proxy?.["reality-opts"];
@@ -1114,20 +1119,14 @@ for (const proxy of originalProxies) {
     continue;
   }
 
-  // 已显式开启则保持
-  if (reality["support-x25519mlkem768"] === true) {
-    continue;
-  }
-
-  // 未开启或不存在，则开启
-  reality["support-x25519mlkem768"] = true;
+  reality["support-x25519mlkem768"] = enableX25519MlKem768;
 }
 
 // =====================================================
-// 修正节点 skip-cert-verify
-// 仅处理 config.proxies 中的节点
-// 已存在且为 true 时改为 false
+// 节点 TLS 证书验证开关
 // =====================================================
+
+const skipCertVerify = ruleOptionsEnable['跳过证书验证'] === true;
 
 for (const proxy of originalProxies) {
 
@@ -1135,12 +1134,7 @@ for (const proxy of originalProxies) {
     continue;
   }
 
-  if (
-    Object.prototype.hasOwnProperty.call(proxy, "skip-cert-verify") &&
-    proxy["skip-cert-verify"] === true
-  ) {
-    proxy["skip-cert-verify"] = false;
-  }
+  proxy["skip-cert-verify"] = skipCertVerify;
 }
   const originalProxyProviders =
     config['proxy-providers'] && typeof config['proxy-providers'] === 'object'
