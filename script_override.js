@@ -40,61 +40,31 @@ const Compatible_With_Bettbox = {
   autoRemoveDisabledGroupsFromRules: true // Bettbox 参数支持：自动从包含已被禁用策略组的引用中剔除
 };
 
-// 仅作为兜底：如果模板里未来没有显式写 icon，则补一个默认图标。
-const DEFAULT_GROUP_ICONS = {
-  '🌍 PROXY': 'https://github.com/DustinWin/ruleset_geodata/releases/download/icons/proxy.png',
-  '🔄 负载均衡': 'https://www.clashverge.dev/assets/icons/balance.svg',
-  '👉 手动切换': 'https://github.com/DustinWin/ruleset_geodata/releases/download/icons/select.png',
-  '♻️ 自动选择': 'https://github.com/DustinWin/ruleset_geodata/releases/download/icons/auto.png',
-  '📲 Telegram': 'https://github.com/DustinWin/ruleset_geodata/releases/download/icons/telegram.png',
-  '🎮 Games-Global': 'https://github.com/DustinWin/ruleset_geodata/releases/download/icons/games-cn.png',
-  '✖️ Twitter': 'https://www.clashverge.dev/assets/icons/twitter.svg',
-  '🤖 AI大模型': 'https://github.com/DustinWin/ruleset_geodata/releases/download/icons/ai.png',
-  '🎵 TikTok': 'https://github.com/DustinWin/ruleset_geodata/releases/download/icons/tiktok.png'
-};
-
 /**
  * 自定义配置选项
- * 为模板里的每个代理组（策略组）单独定义开关与展示图标：
- * - true / false：控制是否启用该策略组
- * - 对象形式：可同时携带 enabled 和 icon，便于让 Bettbox 的 UI 入口
- *   与 proxy-groups 的显示层共享同一份图标来源
+ * 为模板里的每个代理组（策略组）单独定义开关：
+ * true  = 启用该策略组
+ * false = 禁用该策略组（会自动从 proxy-groups 中移除，并清理其他组中的引用）
  */
 const ruleOptionsEnable = {
   // --- 代理组（策略组）单独控制开关 ---
-  '🌍 PROXY': { enabled: true, icon: 'https://github.com/DustinWin/ruleset_geodata/releases/download/icons/proxy.png' },
-  '🔄 负载均衡': { enabled: true, icon: 'https://www.clashverge.dev/assets/icons/balance.svg' },
-  '👉 手动切换': { enabled: true, icon: 'https://github.com/DustinWin/ruleset_geodata/releases/download/icons/select.png' },
-  '♻️ 自动选择': { enabled: true, icon: 'https://github.com/DustinWin/ruleset_geodata/releases/download/icons/auto.png' },
-  '📲 Telegram': { enabled: true, icon: 'https://github.com/DustinWin/ruleset_geodata/releases/download/icons/telegram.png' },
-  '🎮 Games-Global': { enabled: true, icon: 'https://github.com/DustinWin/ruleset_geodata/releases/download/icons/games-cn.png' },
-  '✖️ Twitter': { enabled: true, icon: 'https://www.clashverge.dev/assets/icons/twitter.svg' },
-  '🤖 AI大模型': { enabled: true, icon: 'https://github.com/DustinWin/ruleset_geodata/releases/download/icons/ai.png' },
-  '🎵 TikTok': { enabled: true, icon: 'https://github.com/DustinWin/ruleset_geodata/releases/download/icons/tiktok.png' },
+  '🌍 PROXY': true,
+  '🔄 负载均衡': true,
+  '👉 手动切换': true,
+  '♻️ 自动选择': true,
+  '📲 Telegram': true,
+  '🎮 Games-Global': true,
+  '✖️ Twitter': true,
+  '🤖 AI大模型': true,
+  '🎵 TikTok': true,
 
   // --- 节点与网络功能开关 ---
-  '跳过证书验证': { enabled: true },
-  '启用 Reality 增强': { enabled: true }
+  '跳过证书验证': true,
+  '启用 Reality 增强': true
 };
 
 // 出现同一个域名规则 key 时，订阅原始配置(true) 还是模板(false) 优先
 const NAMESERVER_POLICY_PREFER_ORIGINAL = true;
-
-function getGroupOption(groupName) {
-  const entry = ruleOptionsEnable[groupName];
-
-  if (entry && typeof entry === 'object' && !Array.isArray(entry)) {
-    return {
-      enabled: entry.enabled !== false,
-      icon: typeof entry.icon === 'string' && entry.icon.trim() ? entry.icon : null
-    };
-  }
-
-  return {
-    enabled: entry === false ? false : true,
-    icon: null
-  };
-}
 
 // ============================================================================
 // 标准模板配置（由 模板.yaml 原样转换而来，等价于该 yaml 文件的 JSON 表示）
@@ -1080,10 +1050,8 @@ function main(config, profileName) {
 
   (result['proxy-groups'] || []).forEach(group => {
     if (group && group.name) {
-      const option = getGroupOption(group.name);
-
       // 默认如果规则选项里没写这个名字，就保持启用状态
-      if (!option.enabled) {
+      if (ruleOptionsEnable[group.name] === false) {
         disabledGroupNames.add(group.name);
       } else {
         activeGroupNames.add(group.name);
@@ -1110,14 +1078,10 @@ function main(config, profileName) {
 
     if (Compatible_With_Bettbox.ruleOptionsEnable !== false) {
       const hasTemplateIcon = typeof group.icon === 'string' && group.icon.trim();
-      const option = getGroupOption(group.name);
 
-      // 模板中的 icon 优先；其次使用策略组开关配置里的 icon；最后才使用默认映射。
+      // proxy-groups 中的 icon 已由模板完整定义，不需要兜底
       if (!hasTemplateIcon) {
-        const fallbackIcon = option.icon || DEFAULT_GROUP_ICONS[group.name];
-        if (fallbackIcon) {
-          group.icon = fallbackIcon;
-        }
+        // 此时 icon 为空是预期的（某些组可能不需要 icon）
       }
     }
   });
