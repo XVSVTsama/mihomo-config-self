@@ -35,7 +35,7 @@
  */
 
 // 适配 Bettbox 自定义配置参数
-const Compatible_With_Bettbox = {
+const Compatible_With_Bettbox = { 
   ruleOptionsEnable: true,
   autoRemoveDisabledGroupsFromRules: true // Bettbox 参数支持：自动从包含已被禁用策略组的引用中剔除
 };
@@ -48,19 +48,20 @@ const Compatible_With_Bettbox = {
  */
 const ruleOptionsEnable = {
   // --- 代理组（策略组）单独控制开关 ---
-  '🌍 PROXY': true,
-  '🔄 负载均衡': true,
-  '👉 手动切换': true,
-  '♻️ 自动选择': true,
-  '📲 Telegram': true,
-  '🎮 Games-Global': true,
-  '✖️ Twitter': true,
-  '🤖 AI大模型': true,
-  '🎵 TikTok': true,
+  '🌍 PROXY': true,        // 主代理策略组
+  '🔄 负载均衡': true,     // 负载均衡策略组
+  '👉 手动切换': true,    // 手动选择策略组
+  '♻️ 自动选择': true,     // 延迟自动选择策略组
+  '📲 Telegram': true,     // Telegram 通讯软件策略组
+  '🎮 Games-Global': true, // 游戏策略组
+  '✖️ Twitter': true,      // Twitter 社交平台策略组
+  '🤖 AI大模型': true,     // AI 大模型策略组
+  '🎵 TikTok': true,       // TikTok 视频平台策略组
 
   // --- 节点与网络功能开关 ---
-  '跳过证书验证': true,  // 是否为所有订阅节点启用 skip-cert-verify
+  '跳过证书验证': true,    // 是否为所有订阅节点启用 skip-cert-verify
   '启用 Reality 增强': true, // 是否为 Reality 节点启用 support-x25519mlkem768（X25519MLKEM768 后量子密钥协商）
+};
 
 // 出现同一个域名规则 key 时，订阅原始配置(true) 还是模板(false) 优先
 const NAMESERVER_POLICY_PREFER_ORIGINAL = true;
@@ -1072,15 +1073,6 @@ function main(config, profileName) {
       // 如果剔除后列表空了，填入保底策略（优先 🌍 PROXY，其次 DIRECT）
       if (group.proxies.length === 0) {
         group.proxies = [fallbackTarget];
-      }
-    }
-
-    if (Compatible_With_Bettbox.ruleOptionsEnable !== false) {
-      const hasTemplateIcon = typeof group.icon === 'string' && group.icon.trim();
-
-      // proxy-groups 中的 icon 已由模板完整定义，不需要兜底
-      if (!hasTemplateIcon) {
-        // 此时 icon 为空是预期的（某些组可能不需要 icon）
       }
     }
   });
