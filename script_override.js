@@ -753,6 +753,19 @@ const TEMPLATE = {
   "unified-delay": true
 };
 
+const serviceConfigs = TEMPLATE['proxy-groups']
+  .filter(
+    (group) =>
+      group &&
+      typeof group.name === 'string' &&
+      Object.prototype.hasOwnProperty.call(ruleOptionsEnable, group.name)
+  )
+  .map((group) => ({
+    name: group.name,
+    icon: group.icon
+  }));
+
+  
 // ============================================================================
 // 工具函数
 // ============================================================================
