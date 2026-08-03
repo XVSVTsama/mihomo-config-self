@@ -37,10 +37,18 @@
 // 适配 Bettbox 自定义配置参数
 const Compatible_With_Bettbox = { 
   ruleOptionsEnable: true,
-  autoRemoveDisabledGroupsFromRules: true // false = 禁用该策略组（会自动从 proxy-groups 中移除，并清理其他组中的引用）
+  autoRemoveDisabledGroupsFromRules: true // Bettbox 参数支持：自动从包含已被禁用策略组的引用中剔除
 };
 
 const ruleOptionsEnable = {
+
+  /**
+ * 自定义配置选项
+ * 为模板里的每个代理组（策略组）单独定义开关：
+ * true  = 启用该策略组
+ * false = 禁用该策略组（会自动从 proxy-groups 中移除，并清理其他组中的引用）
+ */
+
   // --- 代理组（策略组）单独控制开关 ---
   '🌍 PROXY': true,        // 主代理策略组
   '🔄 负载均衡': true,     // 负载均衡策略组
