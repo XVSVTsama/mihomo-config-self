@@ -59,9 +59,8 @@ const ruleOptionsEnable = {
   '🎵 TikTok': true,
 
   // --- 节点与网络功能开关 ---
-  '跳过证书验证': true,
-  '启用 Reality 增强': true
-};
+  '跳过证书验证': true,  // 是否为所有订阅节点启用 skip-cert-verify
+  '启用 Reality 增强': true, // 是否为 Reality 节点启用 support-x25519mlkem768（X25519MLKEM768 后量子密钥协商）
 
 // 出现同一个域名规则 key 时，订阅原始配置(true) 还是模板(false) 优先
 const NAMESERVER_POLICY_PREFER_ORIGINAL = true;
