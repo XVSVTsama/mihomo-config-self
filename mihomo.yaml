@@ -342,9 +342,6 @@ rules:
   - RULE-SET,proxy@direct,🌍 PROXY,
   - RULE-SET,private,DIRECT,no-resolve    
   - RULE-SET,lancidr,DIRECT,no-resolve
-  - RULE-SET,direct,DIRECT
-
-
 
   - DOMAIN-WILDCARD,*.deepseek.com,DIRECT
   - DOMAIN-WILDCARD,*.portal101.cn,DIRECT
@@ -412,6 +409,8 @@ rules:
 
   - RULE-SET,google,🌍 PROXY
   - RULE-SET,google-cn,🌍 PROXY
+
+  - RULE-SET,direct,DIRECT
 
   - PROCESS-NAME-REGEX,. *twitter.*,✖️ Twitter
   - RULE-SET,twitter/x-domain,✖️ Twitter
