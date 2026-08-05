@@ -333,7 +333,6 @@ rules:
   - RULE-SET,HijackingPlus,REJECT
 
   - SUB-RULE,(PROCESS-NAME,com.dragon.read.oversea.gp),fanqie
-  - RULE-SET,direct,DIRECT
   - RULE-SET,cn,DIRECT
   - RULE-SET,cncidr,DIRECT,no-resolve
   - RULE-SET,applications,DIRECT
@@ -343,6 +342,7 @@ rules:
   - RULE-SET,proxy@direct,🌍 PROXY,
   - RULE-SET,private,DIRECT,no-resolve    
   - RULE-SET,lancidr,DIRECT,no-resolve
+  - RULE-SET,direct,DIRECT
 
 
 
