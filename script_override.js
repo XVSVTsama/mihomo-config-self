@@ -618,7 +618,7 @@ const TEMPLATE = {
     ],
     "skip-dst-address": [
       "rule-set:telegramcidr",
-      "rule-set:twitter/x-ip",
+      "rule-set:twitter-x-ip",
       "rule-set:lancidr",
       "rule-set:cncidr",
   // --- 1. Google Public DNS ---
