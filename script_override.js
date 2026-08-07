@@ -52,6 +52,7 @@ const ruleOptionsEnable = {
  * 为模板里的每个代理组（策略组）单独定义开关：
  * true  = 启用该策略组
  * false = 禁用该策略组（会自动从 proxy-groups 中移除，并清理其他组中的引用）
+ * 另有功能开关（如 FCM直连）：只调整组内节点，不涉及策略组启停。
  */
 
   // --- 代理组（策略组）单独控制开关 ---
@@ -68,6 +69,7 @@ const ruleOptionsEnable = {
   // --- 节点与网络功能开关 ---
   '跳过证书验证': true,    // 是否为所有订阅节点启用 skip-cert-verify（关闭时会把订阅节点已有的 true 重置为 false）
   '启用 Reality 增强': true, // 是否为带非空 public-key/short-id 的 Reality 节点启用 support-x25519mlkem768（X25519MLKEM768 后量子密钥协商）
+  'FCM直连': true,          // 默认打开：隐藏组 FCM 含 👉 手动切换 + DIRECT；关闭后仅保留 👉 手动切换（不移除 FCM 组）。icon: https://fastly.jsdelivr.net/gh/MiToverG422/Qure@master/IconSet/Color/fcm.png
 };
 
 // 出现同一个域名规则 key 时，订阅原始配置(true) 还是模板(false) 优先（模板目前未配置
@@ -272,6 +274,16 @@ const TEMPLATE = {
       "include-all-proxies": true,
       "name": "🎵 TikTok",
       "type": "select"
+    },
+    {
+      "hidden": true,
+      "icon": "https://fastly.jsdelivr.net/gh/MiToverG422/Qure@master/IconSet/Color/fcm.png",
+      "name": "FCM",
+      "proxies": [
+        "👉 手动切换",
+        "DIRECT"
+      ],
+      "type": "select"
     }
   ],
   "rule-providers": {
@@ -436,6 +448,14 @@ const TEMPLATE = {
       "type": "http",
       "url": "https://github.com/DustinWin/ruleset_geodata/releases/download/mihomo-ruleset/google-cn.mrs"
     },
+    "googlefcm": {
+      "behavior": "domain",
+      "format": "mrs",
+      "interval": 86400,
+      "path": "./ruleset/googlefcm.mrs",
+      "type": "http",
+      "url": "https://fastly.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/googlefcm.mrs"
+    },
     "icloud": {
       "behavior": "domain",
       "interval": 86400,
@@ -533,6 +553,7 @@ const TEMPLATE = {
     "RULE-SET,echs_direct_ip,DIRECT,no-resolve",
     "RULE-SET,cn,DIRECT",
     "RULE-SET,cncidr,DIRECT,no-resolve",
+    "RULE-SET,googlefcm,FCM",
     "DOMAIN,clash.razord.top,DIRECT",
     "DOMAIN,yacd.haishan.me,DIRECT",
     "PROCESS-NAME,svchost.exe,DIRECT",
@@ -1246,6 +1267,18 @@ function main(config, profileName) {
       group.proxies = allNodeNames.slice();
       if (originalProxyProviders) {
         group.use = Object.keys(originalProxyProviders);
+      }
+    }
+  });
+
+  // ---- 5.5 FCM 直连开关：默认打开时 FCM 隐藏组含 👉 手动切换 + DIRECT；
+  //      关闭后仅保留 👉 手动切换（该开关不移除 FCM 组） ----
+  const fcmDirectEnabled = ruleOptionsEnable['FCM直连'] === true;
+  result['proxy-groups'].forEach((group) => {
+    if (group && group.name === 'FCM' && Array.isArray(group.proxies)) {
+      group.proxies = group.proxies.filter((p) => fcmDirectEnabled || p !== 'DIRECT');
+      if (group.proxies.length === 0) {
+        group.proxies = ['👉 手动切换'];
       }
     }
   });
