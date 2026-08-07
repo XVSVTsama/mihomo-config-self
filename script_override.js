@@ -3,6 +3,19 @@
  *  Bettbox（FlClash 系内核 / mihomo 下游客户端）JS 覆写脚本
  * ============================================================================
  *
+ *  来源：
+ *    JS 脚本：
+ *    https://github.com/XVSVTsama/mihomo-config-self/blob/main/script_override.js
+ *    模板：
+ *    https://raw.githubusercontent.com/XVSVTsama/mihomo-config-self/refs/heads/main/mihomo.yaml
+ *    仓库：
+ *    https://github.com/XVSVTsama/mihomo-config-self
+ *    作者：
+ *    https://github.com/XVSVTsama
+ *    最新内容（GitHub 提交）：
+ *    https://github.com/XVSVTsama/mihomo-config-self/commits/main/script_override.js
+ *    用法：本脚本可直接作为 Bettbox / FlClash 系客户端的远程覆写脚本加载。
+ *
  *  用途：
  *    把当前订阅（原始配置）与本仓库维护的"标准模板"（mihomo.yaml）合并成最终生效配置。
  *
