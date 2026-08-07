@@ -101,7 +101,7 @@ proxy-groups:
   - name: 🔄 负载均衡
     icon: "https://www.clashverge.dev/assets/icons/balance.svg"
     type: load-balance
-    proxies:
+    proxies: # 此处为所有单节点（由覆写脚本自动填入订阅全部节点）
     url: 'https://www.gstatic.com/generate_204'
     interval: 300
     lazy: true
@@ -109,19 +109,22 @@ proxy-groups:
   - name: 👉 手动切换
     icon: "https://github.com/DustinWin/ruleset_geodata/releases/download/icons/select.png"
     type: select
+    proxies: # 此处为所有单节点（由覆写脚本自动填入订阅全部节点）
   - name: ♻️ 自动选择
     icon: "https://github.com/DustinWin/ruleset_geodata/releases/download/icons/auto.png"
     type: url-test
     url: https://www.gstatic.com/generate_204
     interval: 300
     tolerance: 50
-    
+    proxies: # 此处为所有单节点（由覆写脚本自动填入订阅全部节点）
   - name: 📲 Telegram
     icon: "https://github.com/DustinWin/ruleset_geodata/releases/download/icons/telegram.png"
     type: select
+    proxies: # 此处为所有单节点（由覆写脚本自动填入订阅全部节点）
   - name: 🎮 Games-Global
     icon: "https://github.com/DustinWin/ruleset_geodata/releases/download/icons/games-cn.png"
     type: select
+    proxies: # 此处为所有单节点（由覆写脚本自动填入订阅全部节点）
 
   - name: ✖️ Twitter
     icon: "https://www.clashverge.dev/assets/icons/twitter.svg"
@@ -243,10 +246,15 @@ dns:
   fake-ip-filter: 
     - rule-set:fakeip-filter_domain
     - rule-set:private
+    - rule-set:direct
+    - rule-set:cn
+    - rule-set:echs_cn
+    - rule-set:echs_direct
+    - rule-set:applications
     - rule-set:pixiv
     - pixshaft.com
   nameserver-policy: 
-    'rule-set:private,direct,proxy@direct': https://dns.alidns.com/dns-query#DIRECT
+    'rule-set:private,direct,proxy@direct,cn,echs_cn,echs_direct': https://dns.alidns.com/dns-query#DIRECT
 
 hosts                             :                                            
   '+.clash.dev'               : [ '127.0.0.1'          ]                
@@ -284,35 +292,38 @@ hosts                             :
 
 # 规则集配置
 rule-providers:
-  ai-1: { <<: *domain_mrs, url: 'https://github.com/DustinWin/ruleset_geodata/releases/download/mihomo-ruleset/ai.mrs', path: ./ruleset/ai.mrs }
-  ai-2: { <<: *domain_mrs, url: 'https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/category-ai-!cn.mrs' }
+  Gemini_Domain: { <<: *domain_yaml, url: 'https://cdn.jsdelivr.net/gh/Accademia/Additional_Rule_For_Clash@master/Gemini/Gemini_Domain.yaml', path: ./ruleset/Gemini_Domain.yaml }
+  Grok_Domain: { <<: *domain_yaml, url: 'https://raw.githubusercontent.com/Accademia/Additional_Rule_For_Clash/refs/heads/main/Grok/Grok_Domain.yaml', path: ./ruleset/Grok_Domain.yaml }
+  HijackingPlus: { <<: *classical_yaml, url: 'https://raw.githubusercontent.com/Accademia/Additional_Rule_For_Clash/refs/heads/main/HijackingPlus/HijackingPlus_No_Resolve.yaml', path: ./ruleset/HijackingPlus.yaml }
+  TikTok: { <<: *domain_mrs, url: 'https://github.com/DustinWin/ruleset_geodata/releases/download/mihomo-ruleset/tiktok.mrs', path: ./ruleset/tiktok.mrs }
+  ai-1: { <<: *domain_mrs, url: 'https://github.com/DustinWin/ruleset_geodata/releases/download/mihomo-ruleset/ai.mrs', path: ./ruleset/ai-1.mrs }
+  ai-2: { <<: *domain_mrs, url: 'https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/category-ai-!cn.mrs', path: ./ruleset/ai-2.mrs }
   apple: { <<: *domain_yaml, url: 'https://cdn.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/apple.txt', path: ./ruleset/apple.yaml }
   applications: { <<: *domain_yaml, url: 'https://cdn.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/applications.txt', path: ./ruleset/applications.yaml }
   cn: { <<: *domain_mrs, url: 'https://github.com/DustinWin/ruleset_geodata/releases/download/mihomo-ruleset/cn.mrs', path: ./ruleset/cn.mrs }
   cncidr: { <<: *ipcidr_mrs, url: 'https://github.com/DustinWin/ruleset_geodata/releases/download/mihomo-ruleset/cnip.mrs', path: ./ruleset/cncidr.mrs }
   direct: { <<: *domain_yaml, url: 'https://cdn.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/direct.txt', path: ./ruleset/direct.yaml }
-  fakeip-filter_domain: { <<: *domain_mrs, url: 'https://github.com/DustinWin/ruleset_geodata/releases/download/mihomo-ruleset/fakeip-filter.mrs' }
+  echs_cn: { <<: *domain_mrs, url: 'https://raw.githubusercontent.com/echs-top/proxy/main/mrs/domain/cn.mrs', path: ./ruleset/echs_cn.mrs }
+  echs_cn_ip: { <<: *ipcidr_mrs, url: 'https://raw.githubusercontent.com/echs-top/proxy/main/mrs/ip/cn.mrs', path: ./ruleset/echs_cn_ip.mrs }
+  echs_direct: { <<: *domain_mrs, url: 'https://raw.githubusercontent.com/echs-top/proxy/main/mrs/domain/direct.mrs', path: ./ruleset/echs_direct.mrs }
+  echs_direct_ip: { <<: *ipcidr_mrs, url: 'https://raw.githubusercontent.com/echs-top/proxy/main/mrs/ip/direct.mrs', path: ./ruleset/echs_direct_ip.mrs }
+  fakeip-filter_domain: { <<: *domain_mrs, url: 'https://github.com/DustinWin/ruleset_geodata/releases/download/mihomo-ruleset/fakeip-filter.mrs', path: ./ruleset/fakeip-filter_domain.mrs }
   games: { <<: *domain_mrs, url: 'https://github.com/DustinWin/ruleset_geodata/releases/download/mihomo-ruleset/games.mrs', path: ./ruleset/games.mrs }
   games-cn: { <<: *domain_mrs, url: 'https://github.com/DustinWin/ruleset_geodata/releases/download/mihomo-ruleset/games-cn.mrs', path: ./ruleset/games-cn.mrs }
-  Gemini_Domain: { <<: *domain_yaml, url: 'https://cdn.jsdelivr.net/gh/Accademia/Additional_Rule_For_Clash@master/Gemini/Gemini_Domain.yaml', path: ./ruleset/Gemini_Domain.yaml }
+  gfw: { <<: *domain_mrs, url: 'https://github.com/DustinWin/ruleset_geodata/releases/download/mihomo-ruleset/gfw.mrs', path: ./ruleset/gfw.mrs }
   google: { <<: *domain_yaml, url: 'https://cdn.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/google.txt', path: ./ruleset/google.yaml }
   google-cn: { <<: *domain_mrs, url: 'https://github.com/DustinWin/ruleset_geodata/releases/download/mihomo-ruleset/google-cn.mrs', path: ./ruleset/google-cn.mrs }
-  Grok_Domain: { <<: *domain_yaml, url: 'https://raw.githubusercontent.com/Accademia/Additional_Rule_For_Clash/refs/heads/main/Grok/Grok_Domain.yaml', path: ./ruleset/Grok_Domain.yaml }
-  #Grok_IP: { <<: *ipcidr_yaml, url: 'https://cdn.jsdelivr.net/gh/Accademia/Additional_Rule_For_Clash@master/Grok/Grok_IP.yamlhttps://cdn.jsdelivr.net/gh/Accademia/Additional_Rule_For_Clash@master/Grok/Grok_IP.yaml', path: ./ruleset/Grok_IP.yaml }
-  HijackingPlus: { <<: *classical_yaml, url: 'https://raw.githubusercontent.com/Accademia/Additional_Rule_For_Clash/refs/heads/main/HijackingPlus/HijackingPlus_No_Resolve.yaml', path: ./ruleset/HijackingPlus.yaml }
   icloud: { <<: *domain_yaml, url: 'https://cdn.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/icloud.txt', path: ./ruleset/icloud.yaml }
   lancidr: { <<: *ipcidr_yaml, url: 'https://cdn.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/lancidr.txt', path: ./ruleset/lancidr.yaml }
   pixiv: { <<: *domain_mrs, url: 'https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/pixiv.mrs', path: ./ruleset/pixiv.mrs }
   private: { <<: *domain_yaml, url: 'https://cdn.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/private.txt', path: ./ruleset/private.yaml }
   proxy: { <<: *domain_mrs, url: 'https://github.com/DustinWin/ruleset_geodata/releases/download/mihomo-ruleset/proxy.mrs', path: ./ruleset/proxy.mrs }
   proxy@direct: { <<: *domain_mrs, url: 'https://raw.githubusercontent.com/echs-top/proxy/main/mrs/domain/proxy@direct.mrs', path: ./rules/proxy@direct.mrs }
-  telegram_domain: { <<: *domain_mrs, url: 'https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/telegram.mrs' }
-  telegramcidr: { <<: *ipcidr_mrs, url: 'https://github.com/DustinWin/ruleset_geodata/releases/download/mihomo-ruleset/telegramip.mrs', path: ./ruleset/telegramcidr.mrs }
-  TikTok: { <<: *domain_mrs, url: 'https://github.com/DustinWin/ruleset_geodata/releases/download/mihomo-ruleset/tiktok.mrs', path: ./ruleset/tiktok.mrs }
-  twitter/x-blackmatrix7-No_Resolve: { <<: *classical_yaml, format: yaml, url: 'https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/refs/heads/master/rule/Clash/Twitter/Twitter_No_Resolve.yaml' }
-  twitter/x-domain: { <<: *domain_mrs, url: 'https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/twitter.mrs', path: ./ruleset/twitter/x-domain.mrs  }
-  twitter/x-ip: { <<: *ipcidr_mrs, url: 'https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geoip/twitter.mrs', path: ./ruleset/twitter/x-ip.mrs  }
-  gfw: { <<: *domain_mrs, url: 'https://github.com/DustinWin/ruleset_geodata/releases/download/mihomo-ruleset/gfw.mrs', path: ./ruleset/twitter/gfw.mrs  }
+  telegram_domain: { <<: *domain_mrs, url: 'https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/telegram.mrs', path: ./rules/telegram_domain.mrs }
+  telegramcidr: { <<: *ipcidr_mrs, url: 'https://raw.githubusercontent.com/reddishJade/private_proxy/main/Mihomo/Provider/telegram%40ip.mrs', path: ./ruleset/telegramcidr.mrs }
+  twitter-x-blackmatrix7-No_Resolve: { <<: *classical_yaml, format: yaml, url: 'https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/refs/heads/master/rule/Clash/Twitter/Twitter_No_Resolve.yaml', path: ./ruleset/twitter-x-blackmartix7-noreslove.mrs }
+  twitter-x-domain: { <<: *domain_mrs, url: 'https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/twitter.mrs', path: ./ruleset/twitter/x-domain.mrs }
+  twitter-x-ip: { <<: *ipcidr_mrs, url: 'https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geoip/twitter.mrs', path: ./ruleset/twitter/x-ip.mrs }
 
 sub-rules:
   fanqie:
@@ -371,17 +382,21 @@ sub-rules:
 
     - MATCH,DIRECT                                           
 rules:
-  - AND,((NETWORK,UDP),(DST-PORT,443/3478-3479/5349-5350/19302-19309),(NOT,((RULE-SET,direct))),(NOT,((RULE-SET,cncidr))),(NOT,((RULE-SET,cn))),(NOT,((RULE-SET,applications))),(NOT,((RULE-SET,games))),(NOT,((RULE-SET,games-cn)))),REJECT
+  - AND,((NETWORK,UDP),(DST-PORT,3478-3479/5349-5350/19302-19309),(NOT,((RULE-SET,direct))),(NOT,((RULE-SET,cncidr))),(NOT,((RULE-SET,cn))),(NOT,((RULE-SET,applications))),(NOT,((RULE-SET,games))),(NOT,((RULE-SET,games-cn)))),REJECT
   - RULE-SET,HijackingPlus,REJECT
 
   - SUB-RULE,(PROCESS-NAME,com.dragon.read.oversea.gp),fanqie
+  - RULE-SET,applications,DIRECT
+  - RULE-SET,echs_cn,DIRECT
+  - RULE-SET,echs_cn_ip,DIRECT,no-resolve
+  - RULE-SET,echs_direct,DIRECT
+  - RULE-SET,echs_direct_ip,DIRECT,no-resolve
   - RULE-SET,cn,DIRECT
   - RULE-SET,cncidr,DIRECT,no-resolve
-  - RULE-SET,applications,DIRECT
   - DOMAIN,clash.razord.top,DIRECT
   - DOMAIN,yacd.haishan.me,DIRECT
   - PROCESS-NAME,svchost.exe,DIRECT
-  - RULE-SET,proxy@direct,🌍 PROXY,
+  - RULE-SET,proxy@direct,🌍 PROXY
   - RULE-SET,private,DIRECT,no-resolve    
   - RULE-SET,lancidr,DIRECT,no-resolve
 
@@ -455,9 +470,9 @@ rules:
   - RULE-SET,direct,DIRECT
 
   - PROCESS-NAME-REGEX,. *twitter.*,✖️ Twitter
-  - RULE-SET,twitter/x-domain,✖️ Twitter
-  - RULE-SET,twitter/x-ip,✖️ Twitter,no-resolve
-  - RULE-SET,twitter/x-blackmatrix7-No_Resolve,✖️ Twitter
+  - RULE-SET,twitter-x-domain,✖️ Twitter
+  - RULE-SET,twitter-x-ip,✖️ Twitter,no-resolve
+  - RULE-SET,twitter-x-blackmatrix7-No_Resolve,✖️ Twitter
 
   - RULE-SET,icloud,DIRECT
   - RULE-SET,apple,DIRECT

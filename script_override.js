@@ -4,29 +4,34 @@
  * ============================================================================
  *
  *  用途：
- *    把当前订阅（原始配置）与本机维护的"标准模板"合并成最终生效配置。
+ *    把当前订阅（原始配置）与本仓库维护的"标准模板"（mihomo.yaml）合并成最终生效配置。
  *
  *  合并规则：
  *    1. 除下面第 2、3、4 条特别说明的部分外，最终配置以 TEMPLATE
- *       （对应 模板.yaml）为准，即模板中已经写好的字段会替换掉订阅原始配置里
+ *       （对应 mihomo.yaml 模板）为准，即模板中已经写好的字段会替换掉订阅原始配置里
  *       的同名字段（例如 dns 的各项细节、rules、rule-providers、sniffer、
- *       tun、proxy-groups 的分组结构等）。订阅原始配置里模板未定义的顶层字段
- *       （比如某些订阅自带的 allow-lan、bind-address）不会被保留，如需保留
- *       请告知后再加逻辑。
+ *       tun、proxy-groups 的分组结构等）。订阅原始配置里模板未定义的顶层字段不会被保留
+ *       （比如某些订阅自带的 allow-lan、bind-address），唯一的例外是 proxy-providers：
+ *       若订阅自带 proxy-providers，会原样保留并注入最终配置。
  *
  *    2. proxies：使用订阅原始配置里的真实节点列表（模板里这一项本来就是空的，
  *       只是占位）。
  *
  *    3. proxy-groups 里，模板中显式写了 "proxies: " （值为空/null，也就是
- *       模板注释里"此处为所有单节点"的那几个分组，例如 👉 手动切换、
- *       ♻️ 自动选择、📲 Telegram、🎮 Games-Global）会自动填入订阅里全部节点
- *       的名字；其余分组保持模板里原样，不会被订阅节点覆盖或补充。
+ *       模板注释里"此处为所有单节点"的那几个分组：👉 手动切换、♻️ 自动选择、
+ *       🔄 负载均衡、📲 Telegram、🎮 Games-Global）会自动填入订阅里全部节点
+ *       的名字；若订阅还带 proxy-providers，这些分组会同时写入 use 引用全部
+ *       provider。其余分组保持模板里原样，不会被订阅节点覆盖或补充。
  *
- *    4.【特别处理】dns.proxy-server-nameserver-policy 采用"合并"而不是
- *       "覆盖"：把模板里的 proxy-server-nameserver-policy 与订阅原始配置里的
- *       proxy-server-nameserver-policy 以及 proxy-server-nameserver/hosts 中，
- *       与订阅真实节点 server 域名匹配的条目补充到最终结果的
- *       proxy-server-nameserver-policy 中。
+ *    4.【特别处理】dns.proxy-server-nameserver-policy 采用"合并"而不是"覆盖"：
+ *       模板本身没有该键（将来若写入会作为初始值保留），最终值按订阅动态生成：
+ *       遍历订阅节点中 server 为域名的节点，把订阅 proxy-server-nameserver-policy
+ *       中与域名匹配的条目写入；订阅没有 proxy-server-nameserver 时，也会参考其
+ *       nameserver-policy 中匹配的条目；没有显式 policy 匹配的节点域名，则把订阅的
+ *       整个 proxy-server-nameserver 列表作为该域名 policy 的值。另外，当订阅
+ *       dns.use-hosts=true 且 hosts 有匹配节点域名的条目时，会沿 hosts 映射链把节点
+ *       server 改写为最终 IP/域名（改写节点而非 policy）。相同 key 冲突时按
+ *       NAMESERVER_POLICY_PREFER_ORIGINAL 决定优先级。
  *
  *  使用方法（Bettbox / FlClash 系客户端通用）：
  *    配置 → 对应订阅右上角"..." → 编辑覆写脚本（或"打开脚本"）→ 新建脚本，
@@ -37,7 +42,7 @@
 // 适配 Bettbox 自定义配置参数
 const Compatible_With_Bettbox = { 
   ruleOptionsEnable: true,
-  autoRemoveDisabledGroupsFromRules: true // Bettbox 参数支持：自动从包含已被禁用策略组的引用中剔除
+  autoRemoveDisabledGroupsFromRules: true // Bettbox 参数支持：自动清理已被禁用策略组的引用（proxy-groups 剔除成员，rules 改写指向保底组）
 };
 
 const ruleOptionsEnable = {
@@ -61,15 +66,16 @@ const ruleOptionsEnable = {
   '🎵 TikTok': true,       // TikTok 视频平台策略组
 
   // --- 节点与网络功能开关 ---
-  '跳过证书验证': true,    // 是否为所有订阅节点启用 skip-cert-verify
-  '启用 Reality 增强': true, // 是否为 Reality 节点启用 support-x25519mlkem768（X25519MLKEM768 后量子密钥协商）
+  '跳过证书验证': true,    // 是否为所有订阅节点启用 skip-cert-verify（关闭时会把订阅节点已有的 true 重置为 false）
+  '启用 Reality 增强': true, // 是否为带非空 public-key/short-id 的 Reality 节点启用 support-x25519mlkem768（X25519MLKEM768 后量子密钥协商）
 };
 
-// 出现同一个域名规则 key 时，订阅原始配置(true) 还是模板(false) 优先
+// 出现同一个域名规则 key 时，订阅原始配置(true) 还是模板(false) 优先（模板目前未配置
+// proxy-server-nameserver-policy，因此该开关当前实际只影响订阅来源之间的合并）
 const NAMESERVER_POLICY_PREFER_ORIGINAL = true;
 
 // ============================================================================
-// 标准模板配置（由 模板.yaml 原样转换而来，等价于该 yaml 文件的 JSON 表示）
+// 标准模板配置（与仓库 mihomo.yaml 保持同步，等价于该 yaml 文件的 JSON 表示）
 // ============================================================================
 const TEMPLATE = {
   ".templates": {
