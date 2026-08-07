@@ -13,6 +13,7 @@
    - 订阅自带的 `proxy-providers` 会被原样保留；
    - 动态合并 DNS 的 `proxy-server-nameserver-policy`（以脚本为准，模板不预置该键）；
    - 可通过脚本顶部 `ruleOptionsEnable` 开关单独禁用策略组，并自动清理相关引用。
+   - `FCM直连` 功能开关：默认开启，隐藏组 FCM 仅含 `DIRECT`；关闭后仅保留 `👉 手动切换`（开关只改 FCM 组内节点，不会移除该组）。
 
    脚本内嵌的标准模板与仓库 [mihomo.yaml](https://raw.githubusercontent.com/XVSVTsama/mihomo-config-self/refs/heads/main/mihomo.yaml) 保持同步。
 
@@ -62,6 +63,7 @@
 | **✖️ Twitter** | 仅匹配名称包含 **"美国\|住宅"** 的节点 | 🚨 **节点命名不符将导致此策略组为空！** |
 | **🤖 AI大模型** | 仅匹配名称包含 **"美国\|住宅"** 的节点 | 🚨 **节点命名不符将导致此策略组为空！** |
 | **🎵 TikTok** | 仅匹配名称包含 **"美国\|住宅"** 的节点 | 🚨 **节点命名不符将导致此策略组为空！** |
+| **FCM** | Google FCM 相关域名（`hidden` 隐藏组） | 由 `FCM直连` 开关控制：开启=仅 `DIRECT`，关闭=仅 `👉 手动切换` |
 
 > 注：🔄 负载均衡 / 👉 手动切换 / ♻️ 自动选择 / 📲 Telegram / 🎮 Games-Global 在模板中 `proxies` 为空（注释"此处为所有单节点"），启用覆写脚本后会自动填入订阅的全部节点；不使用脚本时需手动填充。
 

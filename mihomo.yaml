@@ -141,9 +141,15 @@ proxy-groups:
     type: select
     filter: "美国|住宅"
     include-all-proxies: true
+  # FCM：Google FCM 域名分流目标（命中规则 RULE-SET,googlefcm,FCM 后进入此组）。
+  # 模板中不隐藏该组，用于表明此代理组确实存在，是配置里真实的分流目标；
+  # 覆写脚本里设置 hidden 则是为了界面简洁：脚本借助 Bettbox 自定义脚本 UI 适配，
+  # 用 FCM直连 开关控制本组的 proxies: 字段（开=仅 DIRECT，关=仅 👉 手动切换），
+  # 方便有需要但不想直接改配置文件的用户。
+  # 开关图标取自本组的 icon 字段，换图标只需改这里一处。
   - name: FCM
     icon: "https://fastly.jsdelivr.net/gh/MiToverG422/Qure@master/IconSet/Color/fcm.png"
-    hidden: true
+    # hidden: true  # 脚本中隐藏该组以保持界面简洁；模板保留可见，以表明该组确实存在
     type: select
     proxies:
       - 👉 手动切换

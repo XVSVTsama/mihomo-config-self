@@ -69,7 +69,7 @@ const ruleOptionsEnable = {
   // --- 节点与网络功能开关 ---
   '跳过证书验证': true,    // 是否为所有订阅节点启用 skip-cert-verify（关闭时会把订阅节点已有的 true 重置为 false）
   '启用 Reality 增强': true, // 是否为带非空 public-key/short-id 的 Reality 节点启用 support-x25519mlkem768（X25519MLKEM768 后量子密钥协商）
-  'FCM直连': true,          // 默认打开：隐藏组 FCM 含 👉 手动切换 + DIRECT；关闭后仅保留 👉 手动切换（不移除 FCM 组）。icon: https://fastly.jsdelivr.net/gh/MiToverG422/Qure@master/IconSet/Color/fcm.png
+  'FCM直连': true,          // 默认打开：隐藏组 FCM 仅含 DIRECT；关闭后仅保留 👉 手动切换（不移除 FCM 组）。开关图标取自 FCM 代理组的 icon 字段。
 };
 
 // 出现同一个域名规则 key 时，订阅原始配置(true) 还是模板(false) 优先（模板目前未配置
@@ -859,6 +859,9 @@ const TEMPLATE = {
   "unified-delay": true
 };
 
+// Bettbox 的可视化开关图标：客户端会读取全局 serviceConfigs（name 对应 ruleOptionsEnable 的 key，
+// icon 为该开关行显示的图标）。上面只覆盖代理组；功能开关的图标从对应代理组的 icon 字段派生，
+// 后期换图标只需改代理组（如 FCM）的 icon 一处，开关图标会同步更新。
 const serviceConfigs = TEMPLATE['proxy-groups']
   .filter(
     (group) =>
@@ -869,7 +872,13 @@ const serviceConfigs = TEMPLATE['proxy-groups']
   .map((group) => ({
     name: group.name,
     icon: group.icon
-  }));
+  }))
+  .concat([
+    {
+      name: 'FCM直连',
+      icon: (TEMPLATE['proxy-groups'].find((group) => group && group.name === 'FCM') || {}).icon
+    }
+  ]);
 
   
 // ============================================================================
@@ -1271,15 +1280,12 @@ function main(config, profileName) {
     }
   });
 
-  // ---- 5.5 FCM 直连开关：默认打开时 FCM 隐藏组含 👉 手动切换 + DIRECT；
-  //      关闭后仅保留 👉 手动切换（该开关不移除 FCM 组） ----
+  // ---- 5.5 FCM 直连开关：默认打开时 FCM 隐藏组仅含 DIRECT；
+  //      关闭后仅保留 👉 手动切换（该开关不移除 FCM 组，仅改写组内节点） ----
   const fcmDirectEnabled = ruleOptionsEnable['FCM直连'] === true;
   result['proxy-groups'].forEach((group) => {
-    if (group && group.name === 'FCM' && Array.isArray(group.proxies)) {
-      group.proxies = group.proxies.filter((p) => fcmDirectEnabled || p !== 'DIRECT');
-      if (group.proxies.length === 0) {
-        group.proxies = ['👉 手动切换'];
-      }
+    if (group && group.name === 'FCM') {
+      group.proxies = fcmDirectEnabled ? ['DIRECT'] : ['👉 手动切换'];
     }
   });
 
