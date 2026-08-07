@@ -995,6 +995,43 @@ function collectDnsRules(config) {
   return result;
 }
 
+// 解析 hosts 多级映射链：目标仍是域名时逐级跟随，直到终点为 IP、无更多映射或成环
+function resolveHostsChain(startDomain, hosts) {
+  const chain = [];
+  const visited = new Set();
+  let current = normalizeDomain(startDomain);
+
+  while (current && !visited.has(current)) {
+    visited.add(current);
+
+    let rule = null;
+    let value = "";
+    for (const candidate in hosts) {
+      if (matchWildcardDomain(candidate, current)) {
+        const mapped = hosts[candidate];
+        const first = Array.isArray(mapped) ? mapped[0] : mapped;
+        value = typeof first === "string" ? first.trim() : "";
+        rule = candidate;
+        break;
+      }
+    }
+
+    if (!rule) {
+      return { target: current, chain, type: "domain" };
+    }
+
+    chain.push(rule);
+
+    if (!value || isIPAddress(value)) {
+      return { target: value, chain, type: "ip" };
+    }
+
+    current = value;
+  }
+
+  return { target: "", chain, type: "cycle" };
+}
+
 // 根据节点域名补充 DNS
 function smartMergeDnsNode(config, result) {
   const rules = collectDnsRules(config);
@@ -1049,10 +1086,40 @@ function smartMergeDnsNode(config, result) {
       setPolicy(domain, rules.proxyServerNameservers.slice());
     }
 
+    /* 原因：部分用户覆写的原始配置带有 proxy-server-nameserver: udp://127.0.0.1:xxx，
+       节点域名解析会先走监听在 127.0.0.1:xxx 的 mihomo dns 模块（内含 hosts 里真正的
+       节点域名），再走正常 nameserver 解析流程；直接提取 hosts 改写节点域名即可得到
+       同样的解析结果，无需引入 udp://127.0.0.1:xxx 这种破坏性变更。 */
     for (const rule in rules.hosts) {
-      if (matchWildcardDomain(rule, domain)) {
-        newHosts[rule] = rules.hosts[rule];
+      if (!matchWildcardDomain(rule, domain)) {
+        continue;
       }
+
+      const mapped = rules.hosts[rule];
+      const value = Array.isArray(mapped) ? mapped[0] : mapped;
+      const target = typeof value === "string" ? value.trim() : "";
+
+      if (!target) {
+        newHosts[rule] = rules.hosts[rule];
+        continue;
+      }
+
+      if (isIPAddress(target)) {
+        proxy.server = target;
+        break;
+      }
+
+      // 目标仍是域名：沿 hosts 多级映射链继续解析到最终域名或 IP
+      const resolved = resolveHostsChain(target, rules.hosts);
+
+      // hosts 成环视为无效字段，直接忽略
+      if (!resolved || resolved.type === "cycle") {
+        continue;
+      }
+
+      proxy.server = resolved.target;
+
+      break;
     }
   }
 
