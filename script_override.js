@@ -67,7 +67,7 @@ const ruleOptionsEnable = {
   '🎵 TikTok': true,       // TikTok 视频平台策略组
 
   // --- 节点与网络功能开关 ---
-  '跳过证书验证': true,    // 是否为所有订阅节点启用 skip-cert-verify（关闭时会把订阅节点已有的 true 重置为 false）
+  '强制证书验证': false,   // 开启时统一把订阅节点 skip-cert-verify 置为 false（强制校验证书）；关闭时不干预，保留订阅节点原有设置。对全部节点一视同仁
   '启用 Reality 增强': true, // 是否为带非空 public-key/short-id 的 Reality 节点启用 support-x25519mlkem768（X25519MLKEM768 后量子密钥协商）
   'FCM直连': true,          // 默认打开：隐藏组 FCM 仅含 DIRECT；关闭后仅保留 👉 手动切换（不移除 FCM 组）。开关图标取自 FCM 代理组的 icon 字段。
 };
@@ -1203,17 +1203,16 @@ function main(config, profileName) {
     }
   }
 
-  // 1.2 节点 TLS 证书验证开关处理
-  const skipCertVerify = ruleOptionsEnable['跳过证书验证'] === true;
+  // 1.2 节点 TLS 证书验证开关处理：默认不干预订阅节点原有 skip-cert-verify；
+  //     开启「强制证书验证」时统一置为 false（强制校验证书），对全部节点一视同仁
+  const forceCertVerify = ruleOptionsEnable['强制证书验证'] === true;
 
   for (const proxy of originalProxies) {
     if (!proxy || typeof proxy !== "object") {
       continue;
     }
 
-    if (skipCertVerify) {
-      proxy["skip-cert-verify"] = true;
-    } else if (proxy["skip-cert-verify"] === true) {
+    if (forceCertVerify) {
       proxy["skip-cert-verify"] = false;
     }
   }
