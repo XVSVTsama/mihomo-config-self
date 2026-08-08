@@ -12,6 +12,7 @@ Provider rules:
   later files to DeepSeek.
 - If the active provider fails without a fallback, stop immediately.
 - English files are only replaced after local validation passes.
+- Uses a manual translation glossary to maintain consistency.
 """
 
 import json
@@ -27,6 +28,7 @@ from datetime import datetime
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
+GLOSSARY_PATH = ROOT / ".github" / "translation_glossary.json"
 
 PAIRS = [
     ("mihomo.yaml", "mihomo_en.yaml", "yaml"),
@@ -59,26 +61,37 @@ def log(msg):
     print("[%s] %s" % (datetime.now().strftime("%H:%M:%S"), msg))
 
 
-def build_prompt(kind):
-    if kind == "readme":
-        return """Translate the following GitHub README from Chinese to English.
+def build_prompt(kind, glossary=None):
+    glossary_str = ""
+    if glossary:
+        glossary_str = "\nTranslation Glossary (Priority):\n"
+        for cn, en in glossary.items():
+            glossary_str += f'- "{cn}" -> "{en}"\n'
+
+    base_rules = f"""
 Rules:
-- Keep all markdown structure, links, code blocks, URLs, and badge URLs unchanged.
-- Translate all user-facing text into natural English.
-- The language switch line must become: English | [中文](README.md)
-- Do not wrap the output in markdown code fences.
-- Return only the translated file content.
-"""
-    return """Translate the following file from Chinese to English.
-Rules:
-- Keep all code, YAML keys, JavaScript identifiers, URLs, regex filters and
-  other functional values unchanged unless listed below.
+- Keep all code, YAML keys, JavaScript identifiers, URLs, regex filters and other functional values unchanged.
 - Translate comments and user-facing text into natural English.
 {GROUP_NAME_MAP}
+{glossary_str}
+- If the source text (especially comments) matches or is semantically similar to an entry in the Glossary, you MUST use the provided English translation.
 - Keep emojis that are part of proxy group names.
 - Do not wrap the output in markdown code fences.
 - Return only the translated file content.
 """
+
+    if kind == "readme":
+        return f"""Translate the following GitHub README from Chinese to English.
+Rules:
+- Keep all markdown structure, links, code blocks, URLs, and badge URLs unchanged.
+- Translate all user-facing text into natural English.
+- The language switch line must become: English | [中文](README.md)
+{glossary_str}
+- If any section matches the Glossary, use the manual translation.
+- Do not wrap the output in markdown code fences.
+- Return only the translated file content.
+"""
+    return f"Translate the following file from Chinese to English.\n{base_rules}"
 
 
 def strip_fences(text):
@@ -280,6 +293,15 @@ def main():
     max_attempts = int(os.environ.get("SYNC_MAX_ATTEMPTS", "3"))
     file_timeout = int(os.environ.get("SYNC_FILE_TIMEOUT", "300"))
 
+    # Load Glossary
+    glossary = None
+    if GLOSSARY_PATH.exists():
+        try:
+            glossary = json.loads(GLOSSARY_PATH.read_text(encoding="utf-8"))
+            log(f"Loaded glossary with {len(glossary)} entries")
+        except Exception as e:
+            log(f"Warning: Failed to load glossary: {e}")
+
     written = []
     untouched = [dst for _, dst, _ in PAIRS]
     total = len(PAIRS)
@@ -294,7 +316,7 @@ def main():
             sys.exit(1)
 
         file_start = time.time()
-        prompt = build_prompt(kind)
+        prompt = build_prompt(kind, glossary)
         content = src_path.read_text(encoding="utf-8")
         text = None
         used_provider = None
