@@ -16,6 +16,7 @@
 [![JavaScript](https://img.shields.io/badge/JavaScript-%E8%A6%86%E5%86%99%E8%84%9A%E6%9C%AC-yellow?style=flat-square&logo=javascript&logoColor=black)](script_override.js)
 [![JavaScript Syntax](https://img.shields.io/github/actions/workflow/status/XVSVTsama/mihomo-config-self/js-syntax.yml?style=flat-square&label=JS%20Syntax&color=informational)](https://github.com/XVSVTsama/mihomo-config-self/actions/workflows/js-syntax.yml)
 [![Template Sync](https://img.shields.io/github/actions/workflow/status/XVSVTsama/mihomo-config-self/template-sync.yml?style=flat-square&label=Template%20Sync&color=informational)](https://github.com/XVSVTsama/mihomo-config-self/actions/workflows/template-sync.yml)
+[![Mihomo Real Core](https://img.shields.io/github/actions/workflow/status/XVSVTsama/mihomo-config-self/mihomo-check.yml?style=flat-square&label=Mihomo%20Real%20Core&color=informational)](https://github.com/XVSVTsama/mihomo-config-self/actions/workflows/mihomo-check.yml)
 
 > ⚠️ **避坑指南 & 核心声明**
 > 本仓库提供的是一份**高度贴合个人使用习惯**的 Mihomo (原 Clash Meta) [路由配置文件](https://raw.githubusercontent.com/XVSVTsama/mihomo-config-self/refs/heads/main/mihomo.yaml)。
