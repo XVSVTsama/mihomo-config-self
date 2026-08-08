@@ -1,5 +1,5 @@
-// Bettbox 兼容声明：必须放在脚本最前面——客户端只在文件开头检测该声明，
-// 无需全量读取即可识别并显示"自定义规则开关"；删除或下移会导致入口不显示。
+// Bettbox 兼容声明：Bettbox 客户端的预期行为是在脚本开头识别该声明（并非全量读取），
+// 脚本需遵循此约定：声明必须置顶，删除或下移会导致"自定义规则开关"入口不显示。
 const Compatible_With_Bettbox = { 
   ruleOptionsEnable: true,
   autoRemoveDisabledGroupsFromRules: true // Bettbox 参数支持：自动清理已被禁用策略组的引用（proxy-groups 剔除成员，rules 改写指向保底组）
