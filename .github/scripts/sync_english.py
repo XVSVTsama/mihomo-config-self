@@ -1,25 +1,29 @@
 #!/usr/bin/env python3
-"""Translate Chinese source files to English with the Gemini API.
+"""Translate Chinese source files to English with Gemini first, DeepSeek fallback.
 
 Pairs:
   mihomo.yaml        -> mihomo_en.yaml
   script_override.js -> script_override_en.js
   README.md          -> README_en.md
 
-Chinese files are authoritative. English files are only replaced after the
-Gemini response passes local validation, so a failed translation never
-overwrites the existing English files.
+Provider rules:
+- Start with Gemini.
+- If Gemini fails on a file, fall back to DeepSeek for that file and lock all
+  later files to DeepSeek.
+- If the active provider fails without a fallback, stop immediately.
+- English files are only replaced after local validation passes.
 """
 
 import json
 import os
-import re
+import socket
 import subprocess
 import sys
 import tempfile
 import time
 import urllib.error
 import urllib.request
+from datetime import datetime
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -45,6 +49,16 @@ GROUP_NAME_MAP = """Proxy group names must be translated as:
 """
 
 
+class ProviderError(Exception):
+    def __init__(self, provider, message):
+        self.provider = provider
+        self.message = message
+
+
+def log(msg):
+    print("[%s] %s" % (datetime.now().strftime("%H:%M:%S"), msg))
+
+
 def build_prompt(kind):
     if kind == "readme":
         return """Translate the following GitHub README from Chinese to English.
@@ -55,7 +69,7 @@ Rules:
 - Do not wrap the output in markdown code fences.
 - Return only the translated file content.
 """
-    return f"""Translate the following file from Chinese to English.
+    return """Translate the following file from Chinese to English.
 Rules:
 - Keep all code, YAML keys, JavaScript identifiers, URLs, regex filters and
   other functional values unchanged unless listed below.
@@ -79,7 +93,31 @@ def strip_fences(text):
     return text
 
 
-def call_gemini(prompt, api_key, model):
+def provider_label(provider):
+    return "Gemini" if provider == "gemini" else "DeepSeek"
+
+
+def provider_key(provider, gemini_key, deepseek_key):
+    return gemini_key if provider == "gemini" else deepseek_key
+
+
+def provider_model(provider, gemini_model, deepseek_model):
+    return gemini_model if provider == "gemini" else deepseek_model
+
+
+def sleep_before_retry(attempt, retry_after=None):
+    if retry_after:
+        try:
+            wait = min(int(retry_after), 120)
+        except ValueError:
+            wait = min(2 ** attempt, 30)
+    else:
+        wait = min(2 ** attempt, 30)
+    if wait > 0:
+        time.sleep(wait)
+
+
+def call_gemini(prompt, api_key, model, timeout):
     url = (
         "https://generativelanguage.googleapis.com/v1beta/models/%s"
         ":generateContent?key=%s" % (model, api_key)
@@ -88,42 +126,86 @@ def call_gemini(prompt, api_key, model):
         "contents": [{"parts": [{"text": prompt}]}],
         "generationConfig": {"temperature": 0.2},
     }
-    data = json.dumps(payload).encode("utf-8")
+    request = urllib.request.Request(
+        url,
+        data=json.dumps(payload).encode("utf-8"),
+        headers={"Content-Type": "application/json"},
+    )
+    with urllib.request.urlopen(request, timeout=timeout) as response:
+        body = json.loads(response.read().decode("utf-8"))
+    try:
+        return body["candidates"][0]["content"]["parts"][0]["text"].strip()
+    except (KeyError, IndexError, TypeError) as exc:
+        raise ProviderError(
+            "gemini",
+            "unexpected response: %s" % json.dumps(body)[:300],
+        ) from exc
+
+
+def call_deepseek(prompt, api_key, model, timeout):
+    url = "https://api.deepseek.com/chat/completions"
+    payload = {
+        "model": model,
+        "messages": [{"role": "user", "content": prompt}],
+        "temperature": 0.2,
+    }
+    request = urllib.request.Request(
+        url,
+        data=json.dumps(payload).encode("utf-8"),
+        headers={
+            "Content-Type": "application/json",
+            "Authorization": "Bearer %s" % api_key,
+        },
+    )
+    with urllib.request.urlopen(request, timeout=timeout) as response:
+        body = json.loads(response.read().decode("utf-8"))
+    try:
+        return body["choices"][0]["message"]["content"].strip()
+    except (KeyError, IndexError, TypeError) as exc:
+        raise ProviderError(
+            "deepseek",
+            "unexpected response: %s" % json.dumps(body)[:300],
+        ) from exc
+
+
+def call_provider(provider, prompt, api_key, model, timeout, max_attempts):
     last_error = None
-    for attempt in range(6):
-        request = urllib.request.Request(
-            url,
-            data=data,
-            headers={"Content-Type": "application/json"},
-        )
+    for attempt in range(1, max_attempts + 1):
+        started = time.time()
         try:
-            with urllib.request.urlopen(request, timeout=180) as response:
-                body = json.loads(response.read().decode("utf-8"))
-            try:
-                text = body["candidates"][0]["content"]["parts"][0]["text"]
-            except (KeyError, IndexError, TypeError) as exc:
-                raise RuntimeError(
-                    "Unexpected Gemini response: %s"
-                    % json.dumps(body)[:500]
-                ) from exc
-            return text.strip()
+            if provider == "gemini":
+                text = call_gemini(prompt, api_key, model, timeout)
+            else:
+                text = call_deepseek(prompt, api_key, model, timeout)
+            log("  attempt %d: OK (%.2fs)" % (attempt, time.time() - started))
+            return text
         except urllib.error.HTTPError as exc:
-            detail = exc.read().decode("utf-8", errors="replace")[:500]
-            last_error = "HTTP %s: %s" % (exc.code, detail)
+            detail = exc.read().decode("utf-8", errors="replace")[:300]
+            retry_after = exc.headers.get("Retry-After") if exc.headers else None
             if exc.code == 429:
-                retry_after = exc.headers.get("Retry-After") if exc.headers else None
-                wait = int(retry_after) if retry_after and retry_after.isdigit() else 5 * (2 ** attempt)
-                wait = min(wait, 120)
-                time.sleep(wait)
+                suffix = " retry-after: %ss" % retry_after if retry_after else ""
+                log("  attempt %d: HTTP 429 (rate limited)%s" % (attempt, suffix))
+                last_error = "HTTP 429: %s" % detail
+                if attempt < max_attempts:
+                    sleep_before_retry(attempt, retry_after)
                 continue
             if exc.code in (500, 502, 503):
-                time.sleep(5 * (2 ** attempt))
+                log("  attempt %d: HTTP %d (server error)" % (attempt, exc.code))
+                last_error = "HTTP %d: %s" % (exc.code, detail)
+                if attempt < max_attempts:
+                    sleep_before_retry(attempt)
                 continue
-            raise RuntimeError(last_error) from exc
-        except urllib.error.URLError as exc:
-            last_error = str(exc)
-            time.sleep(2 * (attempt + 1))
-    raise RuntimeError(last_error or "Gemini request failed")
+            log("  attempt %d: HTTP %d (fatal)" % (attempt, exc.code))
+            raise ProviderError(
+                provider,
+                "HTTP %d: %s" % (exc.code, detail),
+            ) from exc
+        except (socket.timeout, urllib.error.URLError) as exc:
+            log("  attempt %d: TIMEOUT after %ds" % (attempt, timeout))
+            last_error = "TIMEOUT after %ds: %s" % (timeout, exc)
+            if attempt < max_attempts:
+                sleep_before_retry(attempt)
+    raise ProviderError(provider, last_error or "unknown failure")
 
 
 def validate(text, kind):
@@ -170,39 +252,138 @@ def write_protected(path, text):
             tmp_path.unlink()
 
 
+def stop(idx, total, src_name, dst_name, written, untouched):
+    print(
+        "::error::English sync stopped at %d/%d (%s -> %s)"
+        % (idx, total, src_name, dst_name)
+    )
+    if written:
+        print("  written so far: %s" % ", ".join(written))
+    if untouched:
+        print("  untouched: %s" % ", ".join(untouched))
+
+
 def main():
-    api_key = os.environ.get("GEMINI_API_KEY", "")
-    if not api_key:
-        print("::error::GEMINI_API_KEY is not set; add it to Actions secrets")
+    gemini_key = os.environ.get("GEMINI_API_KEY", "")
+    deepseek_key = os.environ.get("DEEPSEEK_API_KEY", "")
+    if not gemini_key and not deepseek_key:
+        print("::error::Neither GEMINI_API_KEY nor DEEPSEEK_API_KEY is set")
         sys.exit(1)
 
-    model = os.environ.get("GEMINI_MODEL", "gemini-2.0-flash")
-    failed = []
-    for src_name, dst_name, kind in PAIRS:
+    provider = "gemini" if gemini_key else "deepseek"
+    if not gemini_key:
+        print("::warning::GEMINI_API_KEY is not set; starting with DeepSeek")
+
+    gemini_model = os.environ.get("GEMINI_MODEL", "gemini-2.0-flash")
+    deepseek_model = os.environ.get("DEEPSEEK_MODEL", "deepseek-chat")
+    request_timeout = int(os.environ.get("SYNC_REQUEST_TIMEOUT", "60"))
+    max_attempts = int(os.environ.get("SYNC_MAX_ATTEMPTS", "3"))
+    file_timeout = int(os.environ.get("SYNC_FILE_TIMEOUT", "300"))
+
+    written = []
+    untouched = [dst for _, dst, _ in PAIRS]
+    total = len(PAIRS)
+    switched = False
+
+    for idx, (src_name, dst_name, kind) in enumerate(PAIRS, start=1):
         src_path = ROOT / src_name
         dst_path = ROOT / dst_name
+        log("[%d/%d] %s -> %s" % (idx, total, src_name, dst_name))
         if not src_path.exists():
-            print("Skipping %s: file does not exist" % src_name)
-            continue
+            stop(idx, total, src_name, dst_name, written, untouched)
+            sys.exit(1)
 
+        file_start = time.time()
         prompt = build_prompt(kind)
         content = src_path.read_text(encoding="utf-8")
-        try:
-            translated = call_gemini(prompt + "\n\n" + content, api_key, model)
-            translated = strip_fences(translated)
-            error = validate(translated, kind)
-            if error:
-                raise RuntimeError(error)
-            write_protected(dst_path, translated)
-            print("Synced %s -> %s" % (src_name, dst_name))
-        except Exception as exc:
-            print("::error::Failed to sync %s -> %s: %s" % (src_name, dst_name, exc))
-            failed.append(src_name)
-        time.sleep(2)
+        text = None
+        used_provider = None
 
-    if failed:
-        sys.exit(1)
-    print("English sync finished")
+        while True:
+            if time.time() - file_start > file_timeout:
+                print(
+                    "::error::File deadline exceeded (%ds > %ds) at %s"
+                    % (time.time() - file_start, file_timeout, src_name)
+                )
+                stop(idx, total, src_name, dst_name, written, untouched)
+                sys.exit(1)
+
+            if provider == "deepseek" and switched:
+                label = "DeepSeek (locked, Gemini skipped)"
+            else:
+                label = provider_label(provider)
+            log(
+                "  provider: %s (%s)"
+                % (label, provider_model(provider, gemini_model, deepseek_model))
+            )
+
+            try:
+                text = call_provider(
+                    provider,
+                    prompt + "\n\n" + content,
+                    provider_key(provider, gemini_key, deepseek_key),
+                    provider_model(provider, gemini_model, deepseek_model),
+                    request_timeout,
+                    max_attempts,
+                )
+                used_provider = provider
+            except ProviderError as exc:
+                log("  status: FAIL")
+                log("  error: %s" % exc.message)
+                if provider == "gemini" and deepseek_key:
+                    log("  action: switching to DeepSeek")
+                    print(
+                        "::warning::Gemini failed for %s; switching to DeepSeek"
+                        % src_name
+                    )
+                    provider = "deepseek"
+                    switched = True
+                    continue
+                log("  action: STOP")
+                stop(idx, total, src_name, dst_name, written, untouched)
+                sys.exit(1)
+
+            error = validate(text, kind)
+            if error:
+                log("  status: INVALID")
+                log("  error: %s" % error)
+                if provider == "gemini" and deepseek_key:
+                    log("  action: switching to DeepSeek")
+                    print(
+                        "::warning::Gemini result invalid for %s; switching to DeepSeek"
+                        % src_name
+                    )
+                    provider = "deepseek"
+                    switched = True
+                    continue
+                log("  action: STOP")
+                stop(idx, total, src_name, dst_name, written, untouched)
+                sys.exit(1)
+            break
+
+        write_protected(dst_path, text)
+        written.append(dst_name)
+        if dst_name in untouched:
+            untouched.remove(dst_name)
+        log(
+            "  result: %s written (%s)"
+            % (dst_name, provider_label(used_provider))
+        )
+
+        elapsed = time.time() - file_start
+        if elapsed > file_timeout:
+            print(
+                "::error::File deadline exceeded (%ds > %ds) at %s"
+                % (elapsed, file_timeout, src_name)
+            )
+            stop(idx, total, src_name, dst_name, written, untouched)
+            sys.exit(1)
+
+    log("Sync finished: %d/%d files updated" % (len(written), total))
+    if switched:
+        log("chain: Gemini -> DeepSeek (locked)")
+    else:
+        log("chain: %s only" % provider_label(provider))
 
 
 if __name__ == "__main__":

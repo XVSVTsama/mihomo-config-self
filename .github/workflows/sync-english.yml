@@ -12,6 +12,7 @@ jobs:
   sync:
     if: vars.SYNC_ENGLISH_ENABLED != 'false'
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
         with:
@@ -47,7 +48,12 @@ jobs:
         if: steps.changes.outputs.run == 'true'
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
           GEMINI_MODEL: ${{ vars.GEMINI_MODEL || 'gemini-2.0-flash' }}
+          DEEPSEEK_MODEL: ${{ vars.DEEPSEEK_MODEL || 'deepseek-chat' }}
+          SYNC_REQUEST_TIMEOUT: ${{ vars.SYNC_REQUEST_TIMEOUT || '60' }}
+          SYNC_MAX_ATTEMPTS: ${{ vars.SYNC_MAX_ATTEMPTS || '3' }}
+          SYNC_FILE_TIMEOUT: ${{ vars.SYNC_FILE_TIMEOUT || '300' }}
         run: python .github/scripts/sync_english.py
       - name: Commit generated English files
         if: steps.changes.outputs.run == 'true'
