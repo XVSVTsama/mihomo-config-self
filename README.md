@@ -39,6 +39,10 @@
   <a href="#before-use">使用前必改</a>
 </p>
 
+<p align="center">
+  中文 | <a href="README_en.md">English</a>
+</p>
+
 ---
 
 > ⚠️ **避坑指南 & 核心声明**
