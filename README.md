@@ -7,10 +7,10 @@
 [![XVSVTsama](https://img.shields.io/badge/XVSVTsama-Homepage-informational?style=flat-square)](https://github.com/XVSVTsama)
 
 [![Mihomo](https://img.shields.io/badge/Mihomo-Rule--based_Tunnel-000000?style=flat-square)](https://github.com/MetaCubeX/mihomo)
-[![Mihomo Core](https://img.shields.io/badge/Mihomo_Core-Client_or_Server-000000?style=flat-square)](https://github.com/MetaCubeX/mihomo)
+[![Mihomo Core](https://img.shields.io/badge/Mihomo_Core-Client/Server-000000?style=flat-square)](https://github.com/MetaCubeX/mihomo)
 
-[![Bettbox](https://img.shields.io/badge/Bettbox-Mihomo/Clash%20Meta%20Client/GUI-000000?style=flat-square)](https://github.com/appshubcc/Bettbox)
-[![FlClash](https://img.shields.io/badge/FlClash-Mihomo/Clash%20Meta%20Client/GUI-000000?style=flat-square)](https://github.com/chen08209/FlClash)
+[![Bettbox](https://img.shields.io/badge/Bettbox-Client/GUI-000000?style=flat-square)](https://github.com/appshubcc/Bettbox)
+[![FlClash](https://img.shields.io/badge/FlClash-Client/GUI-000000?style=flat-square)](https://github.com/chen08209/FlClash)
 
 [![YAML](https://img.shields.io/badge/YAML-%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6-yellow?style=flat-square&logo=yaml&logoColor=white)](mihomo.yaml)
 [![YAML Syntax](https://img.shields.io/github/actions/workflow/status/XVSVTsama/mihomo-config-self/yaml-syntax.yml?style=flat-square&label=YAML%20Syntax&color=informational)](https://github.com/XVSVTsama/mihomo-config-self/actions/workflows/yaml-syntax.yml)
