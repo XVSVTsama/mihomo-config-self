@@ -875,8 +875,9 @@ const TEMPLATE = {
 };
 
 // Bettbox 的可视化开关图标：客户端会读取全局 serviceConfigs（name 对应 ruleOptionsEnable 的 key，
-// icon 为该开关行显示的图标）。上面只覆盖代理组；功能开关的图标从对应代理组的 icon 字段派生，
-// 后期换图标只需改代理组（如 FCM）的 icon 一处，开关图标会同步更新。
+// icon 为该开关行显示的图标）。上面只覆盖代理组；功能开关的图标来源：
+// FCM直连 从 FCM 代理组的 icon 字段派生（改代理组 icon 一处即可同步）；
+// 其余功能开关（强制证书验证、启用 Reality 增强）在此直接指定固定图标。
 const serviceConfigs = TEMPLATE['proxy-groups']
   .filter(
     (group) =>
@@ -892,6 +893,14 @@ const serviceConfigs = TEMPLATE['proxy-groups']
     {
       name: 'FCM直连',
       icon: (TEMPLATE['proxy-groups'].find((group) => group && group.name === 'FCM') || {}).icon
+    },
+    {
+      name: '强制证书验证',
+      icon: 'https://fastly.jsdelivr.net/gh/MiToverG422/Qure@master/IconSet/Color/SSL.png'
+    },
+    {
+      name: '启用 Reality 增强',
+      icon: 'https://fastly.jsdelivr.net/gh/MiToverG422/Qure@master/IconSet/Color/Spark.png'
     }
   ]);
 
