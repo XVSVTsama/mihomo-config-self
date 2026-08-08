@@ -1,23 +1,46 @@
-# 🚀 Mihomo (Clash Meta) 配置模板(高度定制自用版)
+<p align="center">
+  <img src="https://avatars.githubusercontent.com/XVSVTsama?v=4" alt="XVSVTsama" width="120" />
+</p>
 
-[![GPL-3.0 License](https://img.shields.io/github/license/XVSVTsama/mihomo-config-self?style=flat-square&label=License&color=informational)](LICENSE)
-[![Last Commit](https://img.shields.io/github/last-commit/XVSVTsama/mihomo-config-self?style=flat-square&label=Last%20Commit&color=informational)](https://github.com/XVSVTsama/mihomo-config-self/commits/main)
-[![Repo Size](https://img.shields.io/github/repo-size/XVSVTsama/mihomo-config-self?style=flat-square&label=Repo%20Size&color=informational)](https://github.com/XVSVTsama/mihomo-config-self)
-[![Stars](https://img.shields.io/github/stars/XVSVTsama/mihomo-config-self?style=flat-square&label=Stars&color=informational)](https://github.com/XVSVTsama/mihomo-config-self/stargazers)
-[![XVSVTsama](https://img.shields.io/badge/XVSVTsama-Homepage-informational?style=flat-square)](https://github.com/XVSVTsama)
+<h1 align="center">Mihomo (Clash Meta) 配置模板</h1>
 
-[![Mihomo](https://img.shields.io/badge/Mihomo-Rule--based_Tunnel-000000?style=flat-square)](https://github.com/MetaCubeX/mihomo)
-[![Mihomo Core](https://img.shields.io/badge/Mihomo_Core-Client/Server-000000?style=flat-square)](https://github.com/MetaCubeX/mihomo)
+<p align="center">
+  <strong>高度定制自用版</strong> · 路由配置 · 远程覆写脚本
+</p>
 
-[![Bettbox](https://img.shields.io/badge/Bettbox-Client/GUI-000000?style=flat-square)](https://github.com/appshubcc/Bettbox)
-[![FlClash](https://img.shields.io/badge/FlClash-Client/GUI-000000?style=flat-square)](https://github.com/chen08209/FlClash)
+<p align="center">
+  <a href="LICENSE"><img src="https://img.shields.io/github/license/XVSVTsama/mihomo-config-self?style=flat-square&label=License&color=informational" alt="License"></a>
+  <a href="https://github.com/XVSVTsama/mihomo-config-self/commits/main"><img src="https://img.shields.io/github/last-commit/XVSVTsama/mihomo-config-self?style=flat-square&label=Last%20Commit&color=informational" alt="Last Commit"></a>
+  <a href="https://github.com/XVSVTsama/mihomo-config-self"><img src="https://img.shields.io/github/repo-size/XVSVTsama/mihomo-config-self?style=flat-square&label=Repo%20Size&color=informational" alt="Repo Size"></a>
+  <a href="https://github.com/XVSVTsama/mihomo-config-self/stargazers"><img src="https://img.shields.io/github/stars/XVSVTsama/mihomo-config-self?style=flat-square&label=Stars&color=informational" alt="Stars"></a>
+  <a href="https://github.com/XVSVTsama"><img src="https://img.shields.io/badge/XVSVTsama-Homepage-informational?style=flat-square" alt="Homepage"></a>
+</p>
 
-[![YAML](https://img.shields.io/badge/YAML-%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6-yellow?style=flat-square&logo=yaml&logoColor=white)](mihomo.yaml)
-[![YAML Syntax](https://img.shields.io/github/actions/workflow/status/XVSVTsama/mihomo-config-self/yaml-syntax.yml?style=flat-square&label=YAML%20Syntax&color=informational)](https://github.com/XVSVTsama/mihomo-config-self/actions/workflows/yaml-syntax.yml)
-[![JavaScript](https://img.shields.io/badge/JavaScript-%E8%A6%86%E5%86%99%E8%84%9A%E6%9C%AC-yellow?style=flat-square&logo=javascript&logoColor=black)](script_override.js)
-[![JavaScript Syntax](https://img.shields.io/github/actions/workflow/status/XVSVTsama/mihomo-config-self/js-syntax.yml?style=flat-square&label=JS%20Syntax&color=informational)](https://github.com/XVSVTsama/mihomo-config-self/actions/workflows/js-syntax.yml)
-[![Template Sync](https://img.shields.io/github/actions/workflow/status/XVSVTsama/mihomo-config-self/template-sync.yml?style=flat-square&label=Template%20Sync&color=informational)](https://github.com/XVSVTsama/mihomo-config-self/actions/workflows/template-sync.yml)
-[![Mihomo Real Core](https://img.shields.io/github/actions/workflow/status/XVSVTsama/mihomo-config-self/mihomo-check.yml?style=flat-square&label=Mihomo%20Real%20Core&color=informational)](https://github.com/XVSVTsama/mihomo-config-self/actions/workflows/mihomo-check.yml)
+<p align="center">
+  <a href="https://github.com/MetaCubeX/mihomo"><img src="https://img.shields.io/badge/Mihomo-Rule--based_Tunnel-000000?style=flat-square" alt="Mihomo"></a>
+  <a href="https://github.com/MetaCubeX/mihomo"><img src="https://img.shields.io/badge/Mihomo_Core-Client_or_Server-000000?style=flat-square" alt="Mihomo Core"></a>
+  <a href="https://github.com/appshubcc/Bettbox"><img src="https://img.shields.io/badge/Bettbox-Client/GUI-000000?style=flat-square" alt="Bettbox"></a>
+  <a href="https://github.com/chen08209/FlClash"><img src="https://img.shields.io/badge/FlClash-Client/GUI-000000?style=flat-square" alt="FlClash"></a>
+</p>
+
+<p align="center">
+  <a href="mihomo.yaml"><img src="https://img.shields.io/badge/YAML-%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6-yellow?style=flat-square&logo=yaml&logoColor=white" alt="YAML"></a>
+  <a href="https://github.com/XVSVTsama/mihomo-config-self/actions/workflows/yaml-syntax.yml"><img src="https://img.shields.io/github/actions/workflow/status/XVSVTsama/mihomo-config-self/yaml-syntax.yml?style=flat-square&label=YAML%20Syntax&color=informational" alt="YAML Syntax"></a>
+  <a href="script_override.js"><img src="https://img.shields.io/badge/JavaScript-%E8%A6%86%E5%86%99%E8%84%9A%E6%9C%AC-yellow?style=flat-square&logo=javascript&logoColor=black" alt="JavaScript"></a>
+  <a href="https://github.com/XVSVTsama/mihomo-config-self/actions/workflows/js-syntax.yml"><img src="https://img.shields.io/github/actions/workflow/status/XVSVTsama/mihomo-config-self/js-syntax.yml?style=flat-square&label=JS%20Syntax&color=informational" alt="JavaScript Syntax"></a>
+  <a href="https://github.com/XVSVTsama/mihomo-config-self/actions/workflows/template-sync.yml"><img src="https://img.shields.io/github/actions/workflow/status/XVSVTsama/mihomo-config-self/template-sync.yml?style=flat-square&label=Template%20Sync&color=informational" alt="Template Sync"></a>
+  <a href="https://github.com/XVSVTsama/mihomo-config-self/actions/workflows/mihomo-check.yml"><img src="https://img.shields.io/github/actions/workflow/status/XVSVTsama/mihomo-config-self/mihomo-check.yml?style=flat-square&label=Mihomo%20Real%20Core&color=informational" alt="Mihomo Real Core"></a>
+</p>
+
+<p align="center">
+  <a href="https://github.com/new?template_name=mihomo-config-self&template_owner=XVSVTsama"><kbd>Use this template</kbd></a> ·
+  <a href="#远程覆写js">远程覆写js</a> ·
+  <a href="#核心特性">核心特性</a> ·
+  <a href="#分流组结构">分流组结构</a> ·
+  <a href="#使用前必改">使用前必改</a>
+</p>
+
+---
 
 > ⚠️ **避坑指南 & 核心声明**
 > 本仓库提供的是一份**高度贴合个人使用习惯**的 Mihomo (原 Clash Meta) [路由配置文件](https://raw.githubusercontent.com/XVSVTsama/mihomo-config-self/refs/heads/main/mihomo.yaml)。
