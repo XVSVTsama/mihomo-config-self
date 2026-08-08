@@ -240,12 +240,12 @@ dns:
   direct-nameserver-follow-policy: true
   nameserver:
     - https://cloudflare-dns.com/dns-query#👉 手动切换
-  # - https://dns.adguard-dns.com/dns-query     # AdGuard          # 94.140.14.14        94.140.15.15
-  # - https://dns.google/dns-query             # Google DNS       # 8.8.8.8             8.8.4.4
-  # - https://dns.quad9.net/dns-query           # IBM Quad9        # 9.9.9.11            149.112.112.11     
-  # - https://doh.opendns.com/dns-query         # OpenDNS          # 208.67.220.220      208.67.222.222
-  # - https://doh.dns.sb/dns-query              # DNS.SB           # 185.222.222.222     45.11.45.11
-  # - https://dns.twnic.tw/dns-query            # Quad101          # 101.101.101.10      101.102.103.10
+  # - https://dns.adguard-dns.com/dns-query     # AdGuard 公共 DNS  # 94.140.14.14        94.140.15.15
+  # - https://dns.google/dns-query             # Google 公共 DNS   # 8.8.8.8             8.8.4.4
+  # - https://dns.quad9.net/dns-query           # IBM Quad9 公共 DNS # 9.9.9.11            149.112.112.11
+  # - https://doh.opendns.com/dns-query         # OpenDNS 公共 DNS  # 208.67.220.220      208.67.222.222
+  # - https://doh.dns.sb/dns-query              # DNS.SB 公共 DNS   # 185.222.222.222     45.11.45.11
+  # - https://dns.twnic.tw/dns-query            # Quad101 公共 DNS  # 101.101.101.10      101.102.103.10
   prefer-h3: false
   respect-rules: false                                            
   enhanced-mode: fake-ip                  
@@ -277,7 +277,7 @@ hosts                             :
   #'dns.pub'                   : [ '119.29.29.29'       ]           # 🇨🇳 腾讯 DNS  
   #'doh.pub'                   : [ '1.12.12.12'         , '120.53.53.53'       ] # 🇨🇳 腾讯 DNS
   #'dot.pub'                   : [ '1.12.12.12'         , '120.53.53.53'       ] # 🇨🇳 腾讯 DNS
-  #'one.one.one.one'           : [ '1.0.0.1'            , '1.1.1.1'            ] # 🇺🇸 Cloudflare DNS
+  #'one.one.one.one'           : [ '1.0.0.1'            , '1.1.1.1'            ] # 🇺🇸 Cloudflare 公共 DNS
   '*.pangolin-sdk-toutiao': 0.0.0.0
   '*.pangolin-sdk-toutiao.*': 0.0.0.0
   '*.pstatp.com': 0.0.0.0
@@ -371,7 +371,7 @@ sub-rules:
     - IP-CIDR,101.36.166.16/32,REJECT,no-resolve
     - IP-CIDR,180.96.2.114/32,REJECT,no-resolve
 
-  # URL Rewrite Host 提取
+  # URL 重写 Host 提取
     - DOMAIN-WILDCARD,*.pangolin-sdk-toutiao.com,REJECT
     - DOMAIN-WILDCARD,*.pglstatp-toutiao.com,REJECT
     - DOMAIN-WILDCARD,*.pstatp.com,REJECT
@@ -379,7 +379,7 @@ sub-rules:
     - DOMAIN-WILDCARD,*.byteimg.com,REJECT
     - DOMAIN-WILDCARD,*.snssdk.com,REJECT
 
-  # MITM Host
+  # MITM 主机
     - DOMAIN-WILDCARD,*.pangolin-sdk-toutiao,REJECT
     - DOMAIN-WILDCARD,*.pangolin-sdk-toutiao.*,REJECT
     - DOMAIN-WILDCARD,*.pstatp.com.*,REJECT

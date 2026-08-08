@@ -608,47 +608,47 @@ const TEMPLATE = {
       "rule-set:twitter-x-ip",
       "rule-set:lancidr",
       "rule-set:cncidr",
-  // --- 1. Google Public DNS ---
+  // --- 1. Google 公共 DNS ---
       "8.8.8.8/32",
       "8.8.4.4/32",
       "2001:4860:4860::8888/128",
       "2001:4860:4860::8844/128",
 
-  // --- 2. Cloudflare Public DNS ---
+  // --- 2. Cloudflare 公共 DNS ---
       "1.1.1.1/32",
       "1.0.0.1/32",
       "2606:4700:4700::1111/128",
       "2606:4700:4700::1001/128",
 
-  // --- 3. Quad9 Public DNS (安全过滤) ---
+  // --- 3. Quad9 公共 DNS（安全过滤） ---
       "9.9.9.9/32",
       "149.112.112.112/32",
       "2620:fe::fe/128",
 
-  // --- 4. OpenDNS (Cisco) ---
+  // --- 4. OpenDNS（思科） ---
       "208.67.222.222/32",
       "208.67.220.220/32",
       "2620:119:35::35/128",
 
-  // --- 5. AdGuard DNS (去广告) ---
+  // --- 5. AdGuard DNS（去广告） ---
       "94.140.14.14/32",
       "94.140.15.15/32",
       "2a10:50c0::ad1:ff/128",
       "2a10:50c0::ad2:ff/128",
 
-  // --- 6. CleanBrowsing (安全/成人内容拦截) ---
+  // --- 6. CleanBrowsing（安全/成人内容拦截） ---
       "185.228.168.9/32",
       "185.228.169.9/32",
 
-  // --- 7. Verisign Public DNS ---
+  // --- 7. Verisign 公共 DNS ---
       "64.6.64.6/32",
       "64.6.65.6/32",
 
-  // --- 8. Yandex DNS ---
+  // --- 8. Yandex 公共 DNS ---
       "77.88.8.8/32",
       "77.88.8.1/32",
 
-  // --- 9. DNS.SB ---
+  // --- 9. DNS.SB 公共 DNS ---
       "185.222.222.222/32",
       "45.11.45.11/32",
 
@@ -671,7 +671,7 @@ const TEMPLATE = {
       "114.114.114.119/32",
       "114.114.115.119/32",
 
-  // --- 14. CNNIC SDNS ---
+  // --- 14. CNNIC 公共 DNS ---
       "1.2.4.8/32",
       "210.2.4.8/32",
 
@@ -874,12 +874,12 @@ function isIPAddress(host) {
     return true;
   }
 
-  // IPv4
+  // IPv4 地址
   if (/^\d{1,3}(\.\d{1,3}){3}$/.test(host)) {
     return true;
   }
 
-  // IPv6
+  // IPv6 地址
   if (host.includes(":")) {
     return true;
   }
@@ -902,7 +902,7 @@ function matchWildcardDomain(rule, host) {
     return false;
   }
 
-  // +.example.com
+  // 形如 +.example.com 的规则
   if (rule.startsWith("+.")) {
     const suffix = rule.substring(2);
     return (
@@ -911,7 +911,7 @@ function matchWildcardDomain(rule, host) {
     );
   }
 
-  // .example.com
+  // 形如 .example.com 的规则
   if (rule.startsWith(".")) {
     const suffix = rule.substring(1);
     return host.endsWith("." + suffix);
@@ -1018,7 +1018,7 @@ function hasDnsListenLoop(dns) {
     asNameserverList(dns.nameserver)
   ];
 
-  // Check the actual participating source by priority:
+  // 按优先级检查实际参与解析的来源：
   // proxy-server-nameserver-policy > proxy-server-nameserver > nameserver-policy > nameserver.
   for (const group of candidates) {
     if (group.length > 0) {
@@ -1136,9 +1136,9 @@ function smartMergeDnsNode(config, result) {
     }
   }
 
-  // hosts first: rewrite proxy.server before matching DNS policy.
-  // Some subscriptions use proxy-server-nameserver: udp://127.0.0.1:xxx with hosts
-  // inside a local mihomo DNS module; rewriting proxy.server from hosts avoids it.
+  // 先处理 hosts：在匹配 DNS 策略之前改写 proxy.server。
+  // 部分订阅的 proxy-server-nameserver 是 udp://127.0.0.1:xxx，并配合本地 mihomo DNS
+  // 模块内的 hosts；从 hosts 改写 proxy.server 可以绕开这一依赖。
   for (const proxy of proxies) {
     if (!proxy || typeof proxy !== "object") {
       continue;
@@ -1180,8 +1180,8 @@ function smartMergeDnsNode(config, result) {
     }
   }
 
-  // hosts rewrite is independent from policy matching: policy keys are matched
-  // against the subscription's original node domains only.
+  // hosts 改写与策略匹配相互独立：策略 key 仅按
+  // 订阅的原始节点域名进行匹配。
   const matchesAnyNodeDomain = (rule) => {
     for (const domain of originalDomains) {
       if (matchWildcardDomain(rule, domain)) {
@@ -1209,8 +1209,8 @@ function smartMergeDnsNode(config, result) {
     return false;
   };
 
-  // Priority: proxy-server-nameserver-policy > proxy-server-nameserver (private)
-  //           > nameserver-policy > nameserver (private).
+  // 优先级：proxy-server-nameserver-policy > proxy-server-nameserver（仅私有）
+  //           > nameserver-policy > nameserver（仅私有）。
   const matchedProxyPolicyKeys = new Set();
   for (const rule in rules.proxyServerNameserverPolicy) {
     if (matchesAnyNodeDomain(rule)) {
@@ -1269,7 +1269,7 @@ function smartMergeDnsNode(config, result) {
     }
   }
 
-  // Remove policy entries identical to the global fallback and dedupe values.
+  // 移除与全局兜底相同的策略项，并对取值去重。
   const globalProxyServerNameservers = asNameserverList(
     result.dns["proxy-server-nameserver"]
   );
