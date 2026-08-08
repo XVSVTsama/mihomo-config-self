@@ -5,6 +5,15 @@ on:
     branches: [main]
   pull_request:
   workflow_dispatch:
+    inputs:
+      enforce:
+        description: Fail the workflow when the templates are out of sync
+        type: boolean
+        default: true
+      per_commit:
+        description: Check every commit in a push
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -14,6 +23,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
@@ -23,4 +34,7 @@ jobs:
       - name: Install PyYAML
         run: pip install pyyaml
       - name: Check template sync
-        run: python .github/scripts/check_template_sync.py
+        env:
+          CHECK_ENFORCE: ${{ github.event.inputs.enforce || vars.TEMPLATE_SYNC_ENFORCE || '' }}
+          CHECK_PER_COMMIT: ${{ github.event.inputs.per_commit || vars.TEMPLATE_SYNC_PER_COMMIT || '' }}
+        run: python .github/scripts/run_check.py --file mihomo.yaml --file script_override.js -- python .github/scripts/check_template_sync.py

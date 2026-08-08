@@ -28,26 +28,29 @@ def push_commit_shas():
     ]
 
 
-def commit_has_file(sha, rel_path):
-    if not rel_path:
+def commit_has_file(sha, rel_paths):
+    if not rel_paths:
         return True
-    proc = subprocess.run(
-        ["git", "cat-file", "-e", "%s:%s" % (sha, rel_path)],
-        capture_output=True,
-        check=False,
-    )
-    return proc.returncode == 0
+    for rel_path in rel_paths:
+        proc = subprocess.run(
+            ["git", "cat-file", "-e", "%s:%s" % (sha, rel_path)],
+            capture_output=True,
+            check=False,
+        )
+        if proc.returncode != 0:
+            return False
+    return True
 
 
-def run_check(command, enforce, per_commit, file_path):
+def run_check(command, enforce, per_commit, file_paths):
     shas = push_commit_shas() if per_commit else []
     if shas:
         failed = []
         for sha in shas:
-            if not commit_has_file(sha, file_path):
+            if not commit_has_file(sha, file_paths):
                 print(
                     "Skipping %s: %s does not exist in this commit"
-                    % (sha, file_path)
+                    % (sha, ", ".join(file_paths) if file_paths else "files")
                 )
                 continue
             print("Checking commit %s" % sha)
@@ -75,7 +78,12 @@ def run_check(command, enforce, per_commit, file_path):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--file", default=None, help="repo file to gate per-commit checks")
+    parser.add_argument(
+        "--file",
+        action="append",
+        default=[],
+        help="repo file to gate per-commit checks (repeatable)",
+    )
     parser.add_argument("command", nargs=argparse.REMAINDER)
     args = parser.parse_args()
 
