@@ -167,8 +167,8 @@ def write_protected(path, text):
 def main():
     api_key = os.environ.get("GEMINI_API_KEY", "")
     if not api_key:
-        print("::warning::GEMINI_API_KEY is not set; skipping English sync")
-        return
+        print("::error::GEMINI_API_KEY is not set; add it to Actions secrets")
+        sys.exit(1)
 
     model = os.environ.get("GEMINI_MODEL", "gemini-2.0-flash")
     failed = []
