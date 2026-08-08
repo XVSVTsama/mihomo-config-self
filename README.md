@@ -4,9 +4,9 @@
 [![Last Commit](https://img.shields.io/github/last-commit/XVSVTsama/mihomo-config-self?style=flat-square&label=Last%20Commit&color=informational)](https://github.com/XVSVTsama/mihomo-config-self/commits/main)
 [![Repo Size](https://img.shields.io/github/repo-size/XVSVTsama/mihomo-config-self?style=flat-square&label=Repo%20Size&color=informational)](https://github.com/XVSVTsama/mihomo-config-self)
 [![Stars](https://img.shields.io/github/stars/XVSVTsama/mihomo-config-self?style=flat-square&label=Stars&color=informational)](https://github.com/XVSVTsama/mihomo-config-self/stargazers)
-[![Bettbox](https://img.shields.io/badge/Bettbox-Mihomo%20Client-000000?style=flat-square)](https://github.com/appshubcc/Bettbox)
-[![FlClash](https://img.shields.io/badge/FlClash-Clash%20Meta%20Client-000000?style=flat-square)](https://github.com/chen08209/FlClash)
-[![Mihomo](https://img.shields.io/badge/Mihomo-Clash%20Meta-000000?style=flat-square)](https://github.com/MetaCubeX/mihomo)
+[![Bettbox](https://img.shields.io/badge/Bettbox-Mihomo/Clash%20Meta%20Client/GUI-000000?style=flat-square)](https://github.com/appshubcc/Bettbox)
+[![FlClash](https://img.shields.io/badge/FlClash-Mihomo/Clash%20Meta%20Client/GUI-000000?style=flat-square)](https://github.com/chen08209/FlClash)
+[![Mihomo](https://img.shields.io/badge/Mihomo-ProxyCore%20Client%20Server-000000?style=flat-square)](https://github.com/MetaCubeX/mihomo)
 [![YAML](https://img.shields.io/badge/YAML-%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6-yellow?style=flat-square&logo=yaml&logoColor=white)](mihomo.yaml)
 [![JavaScript](https://img.shields.io/badge/JavaScript-%E8%A6%86%E5%86%99%E8%84%9A%E6%9C%AC-yellow?style=flat-square&logo=javascript&logoColor=black)](script_override.js)
 
