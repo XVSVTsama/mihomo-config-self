@@ -33,7 +33,6 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/new?template_name=mihomo-config-self&template_owner=XVSVTsama"><kbd>Use this template</kbd></a> ·
   <a href="#远程覆写js">远程覆写js</a> ·
   <a href="#核心特性">核心特性</a> ·
   <a href="#分流组结构">分流组结构</a> ·
