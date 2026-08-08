@@ -5,7 +5,7 @@
 <h1 align="center">Mihomo (Clash Meta) Configuration Template</h1>
 
 <p align="center">
-  <strong>Extreme Personal Tailored Edition</strong> · Routing Configuration · Remote Override Script
+  <strong>Highly Customized Personal Edition</strong> · Routing Configuration · Remote Override Script
 </p>
 
 <p align="center">
@@ -24,9 +24,9 @@
 </p>
 
 <p align="center">
-  <a href="mihomo.yaml"><img src="https://img.shields.io/badge/YAML-Configuration_File-yellow?style=flat-square&logo=yaml&logoColor=white" alt="YAML"></a>
+  <a href="mihomo.yaml"><img src="https://img.shields.io/badge/YAML-%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6-yellow?style=flat-square&logo=yaml&logoColor=white" alt="YAML"></a>
   <a href="https://github.com/XVSVTsama/mihomo-config-self/actions/workflows/yaml-syntax.yml"><img src="https://img.shields.io/github/actions/workflow/status/XVSVTsama/mihomo-config-self/yaml-syntax.yml?style=flat-square&label=YAML%20Syntax&color=informational" alt="YAML Syntax"></a>
-  <a href="script_override.js"><img src="https://img.shields.io/badge/JavaScript-Override_Script-yellow?style=flat-square&logo=javascript&logoColor=black" alt="JavaScript"></a>
+  <a href="script_override.js"><img src="https://img.shields.io/badge/JavaScript-%E8%A6%86%E5%86%99%E8%84%9A%E6%9C%AC-yellow?style=flat-square&logo=javascript&logoColor=black" alt="JavaScript"></a>
   <a href="https://github.com/XVSVTsama/mihomo-config-self/actions/workflows/js-syntax.yml"><img src="https://img.shields.io/github/actions/workflow/status/XVSVTsama/mihomo-config-self/js-syntax.yml?style=flat-square&label=JS%20Syntax&color=informational" alt="JavaScript Syntax"></a>
   <a href="https://github.com/XVSVTsama/mihomo-config-self/actions/workflows/template-sync.yml"><img src="https://img.shields.io/github/actions/workflow/status/XVSVTsama/mihomo-config-self/template-sync.yml?style=flat-square&label=Template%20Sync&color=informational" alt="Template Sync"></a>
   <a href="https://github.com/XVSVTsama/mihomo-config-self/actions/workflows/mihomo-check.yml"><img src="https://img.shields.io/github/actions/workflow/status/XVSVTsama/mihomo-config-self/mihomo-check.yml?style=flat-square&label=Mihomo%20Real%20Core&color=informational" alt="Mihomo Real Core"></a>
@@ -36,76 +36,77 @@
   <a href="#remote-override">Remote Override JS</a> ·
   <a href="#core-features">Essential Highlights</a> ·
   <a href="#proxy-groups">Proxy Group Structure</a> ·
-  <a href="#before-use">Must Read Before Use</a>
+  <a href="#before-use">Required Changes Before Use</a>
 </p>
 
 <p align="center">
-  English | [中文](README.md)
+  English | <a href="README.md">中文</a>
 </p>
 
 ---
 
 > ⚠️ **Pitfall Guide & Core Disclaimer**
-> This repository provides a Mihomo (formerly Clash Meta) [routing configuration file](https://raw.githubusercontent.com/XVSVTsama/mihomo-config-self/refs/heads/main/mihomo.yaml) **closely tailored to personal usage habits**.
-> It is **not** an out-of-the-box, beginner-friendly universal template. If you are not familiar with Mihomo's core mechanisms, TUN mode, Fake-IP, and proxy group regular expressions (`filter`), please **proceed with caution**. Be sure to read the instructions below before copying blindly!
+> This repository provides a Mihomo (formerly Clash Meta) [routing configuration file](https://raw.githubusercontent.com/XVSVTsama/mihomo-config-self/refs/heads/main/mihomo.yaml) **tailored strictly to personal usage habits**.
+> It is **not** an out-of-the-box, plug-and-play generic template. If you are unfamiliar with Mihomo's core mechanisms, TUN mode, Fake-IP, and proxy group regular expressions (filter), please **proceed with caution**. Be sure to read the instructions below before copying!
 
 <a id="remote-override"></a>
 
 ## Remote Override JS
 
-[<kbd>Create Private Config Repository</kbd>](https://github.com/new?template_name=mihomo-config-self&template_owner=XVSVTsama)
+[<kbd>Create Private Configuration Repository</kbd>](https://github.com/new?template_name=mihomo-config-self&template_owner=XVSVTsama)
 
-> After duplicating the repository, cleanup is handled automatically: `mihomo.yaml` and `script_override.js` will be kept, complete instructions will be copied to `README_full.md`, and a source-attributed `README.md` will be generated with a button to view the full instructions. Your permanent configuration link is `https://raw.githubusercontent.com/<YourUsername>/<YourRepoName>/main/<FileName>`.
+> After duplicating the repository, cleanup will happen automatically: `mihomo.yaml` and `script_override.js` will be retained, comprehensive instructions will be copied as `README_full.md`, and a source-annotated `README.md` will be generated with a button to view the full instructions. Your permanent configuration link is `https://raw.githubusercontent.com/<Your-Username>/<Your-Repo-Name>/main/<File-Name>`.
 
-   Default remote override script URL (you can copy it directly from the top right of the code block):
+   Default remote override script URL (you can copy it directly from the top-right corner of the code block):
 
 ```text
 https://raw.githubusercontent.com/XVSVTsama/mihomo-config-self/refs/heads/main/script_override.js
 ```
 
-   Simply attach this script to your subscription in Bettbox / FlClash family clients:
-   - Real nodes in the subscription are automatically populated into `proxies` and various "single-node" placeholder proxy groups (👉 Manual Switch, ♻️ Auto Select, 🔄 Load Balance, 📲 Telegram, 🎮 Games-Global);
-   - `proxy-providers` bundled with the subscription are preserved as-is;
-   - Dynamically merges DNS `proxy-server-nameserver-policy` (based on the script; the template does not preconfigure this key);
-   - Proxy groups can be disabled individually via the `ruleOptionsEnable` toggle at the top of the script, with related references automatically cleaned up.
-   - `FCM Direct` feature toggle: enabled by default, the hidden FCM group contains only `DIRECT`; when disabled, only `👉 Manual Switch` is retained (the toggle only modifies nodes within the FCM group and does not remove the group itself).
-   - The first line of the script contains the Bettbox compatibility declaration (`Compatible_With_Bettbox`): Bettbox clients are configured to recognize this declaration at the beginning of the script (rather than reading it fully). The script must comply with this convention, and the declaration must remain pinned at the top, otherwise the "Custom Rule Switch" entry will not appear.
+   Attach this script to your subscription in Bettbox / FlClash series clients:
+   - Real nodes from the subscription are automatically populated into `proxies` and various "single-node" placeholder proxy groups (👉 Manual Switch, ♻️ Auto Select, 🔄 Load Balance, 📲 Telegram, 🎮 Games-Global);
+   - The `proxy-providers` included in the subscription will be preserved as-is;
+   - Dynamically merges DNS `proxy-server-nameserver-policy` (based on the script; the template does not pre-populate this key);
+   - Proxy groups can be disabled individually via the `ruleOptionsEnable` switch at the top of the script, and related references will be cleaned up automatically.
+   - `FCM Direct` feature switch: Enabled by default, the hidden group FCM contains only `DIRECT`; when disabled, only `👉 Manual Switch` is retained (the switch only modifies nodes within the FCM group and will not remove the group itself).
+   - The first line of the script contains the Bettbox compatibility declaration (`Compatible_With_Bettbox`): Bettbox clients are designed to recognize this declaration at the beginning of the script (rather than reading it fully). The script must comply with this convention, and the declaration must remain at the very top, otherwise the "Custom Rule Switch" entry will not be displayed.
 
-   The standard template embedded in the script stays synchronized with the repository's [mihomo.yaml](https://raw.githubusercontent.com/XVSVTsama/mihomo-config-self/refs/heads/main/mihomo.yaml).
+   The standard template embedded within the script remains synchronized with [mihomo.yaml](https://raw.githubusercontent.com/XVSVTsama/mihomo-config-self/refs/heads/main/mihomo.yaml) in the repository.
 
 ## Recommended Learning References, Subscription Conversion Projects, and Clients
    [Looking for truly educational references?](https://t.me/xvsvts/152)
 
-   It is strongly recommended to use private subscription conversion backends and frontends, and avoid any public online conversion tools on the internet, which will greatly reduce the risk of sensitive node information leakage:
+   It is strongly recommended to use private subscription conversion backends and frontends to avoid any public online internet converters, which will greatly reduce the risk of sensitive node information leakage:
    
-   [sublinkpro](https://github.com/ZeroDeng01/sublinkPro)  Tested and working 🦜
+   [sublinkpro](https://github.com/ZeroDeng01/sublinkPro) Tested and working 🦜
    
-   [Sub-Store](https://github.com/sub-store-org/Sub-Store)  🔥 Hot 🔥
+   [Sub-Store](https://github.com/sub-store-org/Sub-Store) 🔥 Hot 🔥
 
-   Found online conversion setups too cumbersome? Local conversion is also available 🎁
+   Is setting up the above converters too troublesome? There's also local conversion 🎁
    
-   [SubCase](https://github.com/sionnx/SubCase)  Appified / Sub-Store supported 🍃
+   [SubCase](https://github.com/sionnx/SubCase) App version / Sub-Store support 🍃
    
-   [flclash-converter](https://github.com/JINXPIL/flclash-converter)  🟢 Simple and easy to use 🟢 / 🔴 Not a FlClash project (Sub-project) 🔴
+   [flclash-converter](https://github.com/JINXPIL/flclash-converter) 🟢 Simple and easy to use 🟢 / 🔴 Not a Flclash project
+   Affiliate 🔴
 
-   This configuration must be used on non-modified 🎭 clients running the native Mihomo core, otherwise unknown errors may occur. Recommended options include excellent downstream GUIs like
-   [Bettbox](https://github.com/appshubcc/Bettbox/releases).
+   This configuration must be used on an unmodified 🎭 client running the native Mihomo core, otherwise unknown errors may occur. Recommended options include excellent downstream GUIs like
+   [Bettbox](https://github.com/appshubcc/Bettbox/releases)
 
 <a id="core-features"></a>
 
-## ✨ Essential Highlights (Why configure it this way?)
+## ✨ Essential Highlights (Why this configuration?)
 
-This configuration integrates modular remote rules (Rule Providers) and fine-grained application-level traffic splitting strategies, born entirely to meet my personal network environment and usage pain points:
+This configuration integrates modular remote rule providers and fine-grained application-level traffic splitting strategies, born entirely to meet my personal network environment and usage pain points:
 
-* **Rule-based TUN**: `tun` mode is enabled by default using the `gvisor` stack, achieving full-device/full-protocol handling and resolving issues where certain software ignores system proxies.
-* **Aggressive DNS Resolution Experience**: Adopts `fake-ip` enhanced mode. Built-in smart DNS strategy based on domestic direct connection and DoH/DoT hybrid, precisely preventing DNS pollution.
-* **Modular Rule Sets (Rule Providers)**: Fully embraces remote rule sets in `mrs` format (thanks to maintainers like [DustinWin](https://github.com/DustinWin/ruleset_geodata/releases), [MetaCubeX](https://github.com/MetaCubeX/meta-rules-dat/tree/meta), [echs-top](https://github.com/echs-top/proxy), and [reddishJade](https://github.com/reddishJade/private_proxy)), stripping away local rules for automatic, seamless updates.
+* **Rule-based TUN**: Enables `tun` mode by default, utilizing the `gvisor` stack to achieve full-device/full-protocol traffic capture, resolving issues where certain software bypasses system proxies.
+* **Aggressive DNS Resolution Experience**: Employs enhanced `fake-ip` mode. Built-in intelligent DNS strategies based on domestic direct connection and DoH/DoT hybrid configurations effectively prevent DNS poisoning.
+* **Modular Rule Sets (Rule Providers)**: Fully embraces `mrs`-formatted remote rule sets (thanks to maintainers such as [DustinWin](https://github.com/DustinWin/ruleset_geodata/releases), [MetaCubeX](https://github.com/MetaCubeX/meta-rules-dat/tree/meta), [echs-top](https://github.com/echs-top/proxy), and [reddishJade](https://github.com/reddishJade/private_proxy)), stripping away local rules for automatic, seamless updates.
 * **OCD-Level Scenario Traffic Splitting**:
-    * **🤖 AI LLMs / ✖️ Twitter / 🎵 TikTok**: Independent splitting groups with **hardcoded** regular expression filters, forcing the use of nodes tagged with "US|Residential" (美国|住宅) only, to prevent account bans or risk controls.
-    * **🎮 Gaming**: Independent UDP proxy forwarding and routing for mainstream gaming platforms.
+    * **🤖 AI Large Models / ✖️ Twitter / 🎵 TikTok**: Independent traffic routing groups with **hardcoded** regular expression filters, strictly enforcing the use of nodes tagged with "US|Residential" to prevent account bans or risk controls.
+    * **🎮 Gaming**: Dedicated UDP proxy pass-through and mainstream gaming platform routing.
 * **Advanced Ad/Privacy Blocking**:
-    * Blocks common UDP ports used by WebRTC / voice / real-time communication (3478-3479, 5349-5350, 19302-19309) to prevent them from bypassing routing rules.
-    * **SUB-RULE Process-Level Blocking**: Hardcoded deep ad-blocking and privacy-tracking interception rules targeting specific overseas reading apps (such as the overseas version of Fanqie Novel `com.dragon.read.oversea.gp`).
+    * Blocks common UDP ports used for WebRTC / Voice / Real-time Communication (3478-3479, 5349-5350, 19302-19309) to prevent them from bypassing routing rules.
+    * **SUB-RULE Process-Level Blocking**: Hardcoded deep anti-ad and privacy-tracking blocking rules targeting specific overseas reading apps (such as the overseas version of Fanqie Novel `com.dragon.read.oversea.gp`).
 
 <a id="proxy-groups"></a>
 
@@ -113,26 +114,26 @@ This configuration integrates modular remote rules (Rule Providers) and fine-gra
 
 | Proxy Group Name | Default Behavior / Trigger Condition | Notes |
 | :--- | :--- | :--- |
-| **🌍 PROXY** | All unmatched default overseas traffic | Manual, automatic, or load balance selectable |
-| **🔄 Load Balance** | Uses `sticky-sessions` strategy | Ensures IP remains unchanged for the same domain in a short period |
-| **👉 Manual Switch** | Manually select a specific node | / |
-| **♻️ Auto Select** | `url-test` automatically tests and selects the lowest latency node | Tolerance set to 50ms |
-| **📲 Telegram** | Defaults to proxy to prevent disconnection | Matches process names and specific IP ranges |
+| **🌍 PROXY** | All unmatched default overseas traffic | Configurable to manual, automatic, or load balance |
+| **🔄 负载均衡 (Load Balance)** | Adopts the `sticky-sessions` strategy | Ensures the IP remains unchanged for the same domain in a short period |
+| **👉 手动切换 (Manual Switch)** | Manually select a specific node | / |
+| **♻️ 自动选择 (Auto Select)** | `url-test` automatically tests and selects the node with the lowest latency | Tolerance set to 50ms |
+| **📲 Telegram** | Routes through proxy by default to prevent disconnection | Matches process names and specific IP ranges |
 | **🎮 Games-Global** | International gaming traffic | / |
-| **✖️ Twitter** | Matches only nodes whose names contain **"US\|Residential"** (美国\|住宅) | 🚨 **Node naming mismatches will leave this proxy group empty!** |
-| **🤖 AI LLMs** | Matches only nodes whose names contain **"US\|Residential"** (美国\|住宅) | 🚨 **Node naming mismatches will leave this proxy group empty!** |
-| **🎵 TikTok** | Matches only nodes whose names contain **"US\|Residential"** (美国\|住宅) | 🚨 **Node naming mismatches will leave this proxy group empty!** |
-| **FCM** | Google FCM related domains (`hidden` group) | Controlled by the `FCM Direct` toggle: Enabled = `DIRECT` only, Disabled = `👉 Manual Switch` only |
+| **✖️ Twitter** | Matches only nodes whose names contain **"US\|Residential"** | 🚨 **Nodes with non-matching names will leave this group empty!** |
+| **🤖 AI大模型 (AI Models)** | Matches only nodes whose names contain **"US\|Residential"** | 🚨 **Nodes with non-matching names will leave this group empty!** |
+| **🎵 TikTok** | Matches only nodes whose names contain **"US\|Residential"** | 🚨 **Nodes with non-matching names will leave this group empty!** |
+| **FCM** | Google FCM related domains (`hidden` group) | Controlled by the `FCM Direct` switch: On = `DIRECT` only, Off = `👉 Manual Switch` only |
 
-> Note: 🔄 Load Balance / 👉 Manual Switch / ♻️ Auto Select / 📲 Telegram / 🎮 Games-Global have empty `proxies` in the template (commented as "All single nodes here"). Enabling the override script will automatically populate them with all nodes from your subscription; if not using the script, you must populate them manually.
+> Note: 🔄 Load Balance / 👉 手动切换 / ♻️ 自动选择 / 📲 Telegram / 🎮 Games-Global have empty `proxies` fields in the template (commented as "All single nodes here"). Enabling the override script will automatically populate them with all subscription nodes; otherwise, they must be populated manually if the script is not used.
 
 <a id="before-use"></a>
 
-## 🛠️ Must Read Before Use (Essential for copying)
+## 🛠️ Required Changes Before Use (Must-read for copiers)
 
 Since this is a personal configuration, `proxies: ~` is empty. You must complete the following steps yourself:
-1. **Inject Nodes**: It is recommended to use the override script above directly — real nodes in your subscription will be automatically populated into `proxies` and various placeholder proxy groups, and `proxy-providers` bundled with the subscription will be preserved. If you do not use the script, you need to manually fill in the node list or `proxy-providers` in this configuration (`proxies: ~` is left blank by default).
-2. **Modify Node Filter Rules (Filter)**: If your purchased provider's node names do not contain `US` or `Residential` (美国 or 住宅), be sure to manually modify the `filter` field of the corresponding proxy groups in the configuration file, otherwise your AI, Twitter, and TikTok will not be able to connect to the internet at all.
+1. **Inject Nodes**: It is recommended to use the override script above—real nodes from your subscription will automatically fill `proxies` and all placeholder proxy groups, and the subscription's own `proxy-providers` will be preserved. If you do not use the script, you will need to manually fill in the node list or `proxy-providers` (`proxies: ~` is left blank by default).
+2. **Modify Node Filters (Filter)**: If your purchased airport nodes do not contain the terms `US` or `Residential` in their names, be sure to manually modify the `filter` field of the corresponding proxy groups in the configuration file, otherwise your AI, Twitter, and TikTok will not be able to connect to the internet at all.
 3. **Trim Rules as Needed**: If you do not need to block ads for the overseas version of Fanqie Novel, it is recommended to delete the `fanqie`-related rules in `sub-rules` to save performance.
 
 ---
@@ -140,7 +141,7 @@ Since this is a personal configuration, `proxies: ~` is empty. You must complete
 ## ⚠️⚠️⚠️ Universal Disclaimer ⚠️⚠️⚠️
 
 
-1. **Purely Personal Tinkering, No Technical Support Provided**: The code in this repository is intended solely for personal cloud backup and configuration reference. **Basic usage questions will not be answered, non-bug-related issues will not be accepted, and regular maintenance and updates are not guaranteed.** If the configuration throws errors on your device, please consult the official Mihomo documentation to troubleshoot on your own.
+1. **Purely Personal Hobby, No Technical Support Provided**: The code in this repository serves solely as a personal cloud backup and configuration reference. **Basic usage questions will not be answered, non-bug-related issues will not be accepted, and regular maintenance and updates are not guaranteed.** If the configuration throws errors on your device, please consult the official Mihomo documentation to troubleshoot.
 2. **No Network Services Provided**: This configuration is purely for local routing rule distribution and **absolutely does not contain, provide, or sell** any form of proxy nodes, VPN services, or server subscriptions.
-3. **Compliance and Legal Liability**: Users must assume all risks associated with using this configuration. Please strictly comply with the local laws and regulations of your country and region. **The repository author is not responsible** for any cybersecurity issues, privacy leaks, data loss, or legal disputes resulting from the use, modification, or distribution of the contents of this repository.
-4. **Function Disruption Warning**: The configuration contains aggressive ad-blocking (such as intercepting specific domains and IPs) and Fake-IP settings, which are highly likely to cause some domestic apps to fail to load images properly, log in, or experience network connectivity issues. In case of network anomalies, please troubleshoot `rules` and `fake-ip-filter` in this configuration first.
+3. **Compliance and Legal Liability**: Users must assume all risks associated with using this configuration. Please strictly comply with the local laws and regulations of your country and region. **The repository author accepts no responsibility** for any network security issues, privacy leaks, data loss, or legal disputes resulting from the use, modification, or distribution of the contents of this repository.
+4. **Feature Disruption Warning**: The configuration includes aggressive ad-blocking (such as blocking specific domains and IPs) and Fake-IP settings, which are highly likely to cause some domestic apps to fail to load images properly, log in, or experience network connectivity issues. In case of network anomalies, please prioritize checking the `rules` and `fake-ip-filter` in this configuration.
