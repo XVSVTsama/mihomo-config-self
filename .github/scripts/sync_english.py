@@ -90,7 +90,7 @@ def call_gemini(prompt, api_key, model):
     }
     data = json.dumps(payload).encode("utf-8")
     last_error = None
-    for attempt in range(3):
+    for attempt in range(6):
         request = urllib.request.Request(
             url,
             data=data,
@@ -110,8 +110,14 @@ def call_gemini(prompt, api_key, model):
         except urllib.error.HTTPError as exc:
             detail = exc.read().decode("utf-8", errors="replace")[:500]
             last_error = "HTTP %s: %s" % (exc.code, detail)
-            if exc.code in (429, 500, 502, 503):
-                time.sleep(2 * (attempt + 1))
+            if exc.code == 429:
+                retry_after = exc.headers.get("Retry-After") if exc.headers else None
+                wait = int(retry_after) if retry_after and retry_after.isdigit() else 5 * (2 ** attempt)
+                wait = min(wait, 120)
+                time.sleep(wait)
+                continue
+            if exc.code in (500, 502, 503):
+                time.sleep(5 * (2 ** attempt))
                 continue
             raise RuntimeError(last_error) from exc
         except urllib.error.URLError as exc:
@@ -192,6 +198,7 @@ def main():
         except Exception as exc:
             print("::error::Failed to sync %s -> %s: %s" % (src_name, dst_name, exc))
             failed.append(src_name)
+        time.sleep(2)
 
     if failed:
         sys.exit(1)
