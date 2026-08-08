@@ -25,7 +25,7 @@ jobs:
           node-version: "20"
       - name: Install PyYAML
         run: pip install pyyaml
-      - name: Detect Chinese changes
+      - name: Detect relevant changes
         id: changes
         run: |
           if [ "$GITHUB_EVENT_NAME" = "workflow_dispatch" ]; then
@@ -38,7 +38,8 @@ jobs:
             else
               FILES="$(git diff-tree --no-commit-id --name-only -r HEAD)"
             fi
-            if echo "$FILES" | grep -qE '(^|/)(mihomo\.yaml|script_override\.js|README\.md)$'; then
+            # Trigger on Chinese sources, English files (manual edits), or Glossary updates
+            if echo "$FILES" | grep -qE '(^|/)(mihomo\.yaml|script_override\.js|README\.md|mihomo_en\.yaml|script_override_en\.js|README_en\.md|\.github/translation_glossary\.json)$'; then
               echo "run=true" >> "$GITHUB_OUTPUT"
             else
               echo "run=false" >> "$GITHUB_OUTPUT"
