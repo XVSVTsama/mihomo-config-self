@@ -42,15 +42,14 @@ const Compatible_With_Bettbox = {
  *       的名字；若订阅还带 proxy-providers，这些分组会同时写入 use 引用全部
  *       provider。其余分组保持模板里原样，不会被订阅节点覆盖或补充。
  *
- *    4.【特别处理】dns.proxy-server-nameserver-policy 采用"合并"而不是"覆盖"：
- *       模板本身没有该键（将来若写入会作为初始值保留），最终值按订阅动态生成：
- *       遍历订阅节点中 server 为域名的节点，把订阅 proxy-server-nameserver-policy
- *       中与域名匹配的条目写入；订阅没有 proxy-server-nameserver 时，也会参考其
- *       nameserver-policy 中匹配的条目；没有显式 policy 匹配的节点域名，则把订阅的
- *       整个 proxy-server-nameserver 列表作为该域名 policy 的值。另外，当订阅
- *       dns.use-hosts=true 且 hosts 有匹配节点域名的条目时，会沿 hosts 映射链把节点
- *       server 改写为最终 IP/域名（改写节点而非 policy）。相同 key 冲突时按
- *       NAMESERVER_POLICY_PREFER_ORIGINAL 决定优先级。
+ *    4.【特别处理】DNS 与 hosts：
+ *       - hosts 仅在 dns.use-hosts=true 且 dns.listen 与真正参与节点解析的 DNS 端点
+ *         构成闭环时改写节点 server，与 policy 匹配无关；
+ *       - 节点 DNS 优先级：proxy-server-nameserver-policy > proxy-server-nameserver
+ *         （仅私有） > nameserver-policy > nameserver（仅私有）；
+ *       - 公共 DNS 只用于识别私有 DNS，避免公共 DNS 进入节点解析；
+ *       - 模板全局 proxy-server-nameserver 始终保留，作为最终兜底；
+ *       相同 key 冲突时按 NAMESERVER_POLICY_PREFER_ORIGINAL 决定优先级。
  *
  *  使用方法（Bettbox / FlClash 系客户端通用）：
  *    配置 → 对应订阅右上角"..." → 编辑覆写脚本（或"打开脚本"）→ 新建脚本，
@@ -94,35 +93,6 @@ const NAMESERVER_POLICY_PREFER_ORIGINAL = true;
 // 标准模板配置（与仓库 mihomo.yaml 保持同步，等价于该 yaml 文件的 JSON 表示）
 // ============================================================================
 const TEMPLATE = {
-  ".templates": {
-    "classical_yaml": {
-      "behavior": "classical",
-      "interval": 86400,
-      "type": "http"
-    },
-    "domain_mrs": {
-      "behavior": "domain",
-      "format": "mrs",
-      "interval": 86400,
-      "type": "http"
-    },
-    "domain_yaml": {
-      "behavior": "domain",
-      "interval": 86400,
-      "type": "http"
-    },
-    "ipcidr_mrs": {
-      "behavior": "ipcidr",
-      "format": "mrs",
-      "interval": 86400,
-      "type": "http"
-    },
-    "ipcidr_yaml": {
-      "behavior": "ipcidr",
-      "interval": 86400,
-      "type": "http"
-    }
-  },
   "dns": {
     "default-nameserver": [
       "tls://223.5.5.5#DIRECT",
@@ -207,14 +177,9 @@ const TEMPLATE = {
   "mixed-port": 7254,
   "mode": "rule",
   "ntp": {
-    "benchmark-timeout": "5s",
-    "benchmark-url": "https://www.apple.com/library/test/success.html",
     "enable": true,
     "port": 123,
     "server": "time.apple.com",
-    "server-list": [
-      "time.windows.com"
-    ],
     "write-to-system": false
   },
   "port": 7249,
@@ -606,14 +571,7 @@ const TEMPLATE = {
     "DOMAIN,anthropic.com.cdn.cloudflare.net,🤖 AI大模型",
     "DOMAIN,anthropic.auth0.com,🤖 AI大模型",
     "DOMAIN,anthropic-com.ghost.io,🤖 AI大模型",
-    "DOMAIN-SUFFIX,sentry.io,🤖 AI大模型",
-    "DOMAIN-SUFFIX,statsigapi.net,🤖 AI大模型",
-    "DOMAIN,browser-intake-us5-datadoghq.com,🤖 AI大模型",
-    "DOMAIN-KEYWORD,datadog,🤖 AI大模型",
     "DOMAIN-KEYWORD,sift,🤖 AI大模型",
-    "DOMAIN-SUFFIX,intercom.io,🤖 AI大模型",
-    "DOMAIN-SUFFIX,intercomcdn.com,🤖 AI大模型",
-    "DOMAIN,cdn.usefathom.com,🤖 AI大模型",
     "IP-CIDR,160.79.104.0/21,🤖 AI大模型,no-resolve",
     "IP-CIDR6,2607:6bc0::/32,🤖 AI大模型,no-resolve",
     "IP-ASN,399358,🤖 AI大模型,no-resolve",
@@ -622,7 +580,7 @@ const TEMPLATE = {
     "RULE-SET,google,🌍 PROXY",
     "RULE-SET,google-cn,🌍 PROXY",
     "RULE-SET,direct,DIRECT",
-    "PROCESS-NAME-REGEX,. *twitter.*,✖️ Twitter",
+    "PROCESS-NAME-REGEX,.*twitter.*,✖️ Twitter",
     "RULE-SET,twitter-x-domain,✖️ Twitter",
     "RULE-SET,twitter-x-ip,✖️ Twitter,no-resolve",
     "RULE-SET,twitter-x-blackmatrix7-No_Resolve,✖️ Twitter",
@@ -796,13 +754,9 @@ const TEMPLATE = {
       "DOMAIN-WILDCARD,*.snssdk.com,REJECT",
       "DOMAIN-WILDCARD,*.pangolin-sdk-toutiao,REJECT",
       "DOMAIN-WILDCARD,*.pangolin-sdk-toutiao.*,REJECT",
-      "DOMAIN-WILDCARD,*.pstatp.com,REJECT",
       "DOMAIN-WILDCARD,*.pstatp.com.*,REJECT",
-      "DOMAIN-WILDCARD,*.pglstatp-toutiao.com,REJECT",
       "DOMAIN-WILDCARD,*.pglstatp-toutiao.com.*,REJECT",
-      "DOMAIN,gurd.snssdk.com,REJECT",
       "DOMAIN-WILDCARD,gurd.snssdk.com.*,REJECT",
-      "DOMAIN-WILDCARD,*default.ixigua.com,REJECT",
       "MATCH,DIRECT"
     ]
   },
@@ -992,15 +946,6 @@ function matchWildcardDomain(rule, host) {
   return host === rule;
 }
 
-function hasProxyServerNameserver(dns) {
-  const nameservers = dns && dns["proxy-server-nameserver"];
-
-  return (
-    (Array.isArray(nameservers) && nameservers.length > 0) ||
-    (typeof nameservers === "string" && nameservers.length > 0)
-  );
-}
-
 function asNameserverList(nameservers) {
   if (Array.isArray(nameservers)) {
     return nameservers.filter(value => typeof value === "string");
@@ -1016,9 +961,89 @@ function sameNameserverSet(a, b) {
   return sa.size === sb.size && Array.from(sa).every((value) => sb.has(value));
 }
 
+// 公共 DNS 识别表：用于区分“公共可直连 DNS”和“机场/用户的私有 DNS”。
+// 数据参考本地 MyClash 仓库里的公共 DNS 列表，但这里只借用识别表，不照搬其处理逻辑。
+const publicDnsList = [
+  // 国内
+  '223.5.5.5', '223.6.6.6', '119.29.29.29', '1.12.12.12',
+  '120.53.53.53', '114.114.114.114', '180.76.76.76', '1.2.4.8',
+  '116.116.116.116', '101.226.4.6', '123.125.81.6', '180.184.1.1',
+  '180.184.2.2',
+  // 国外
+  '1.1.1.1', '1.0.0.1', '8.8.8.8', '8.8.4.4', '9.9.9.9',
+  '149.112.112.112', '208.67.222.222', '208.67.220.220',
+  '94.140.14.14', '94.140.15.15', '76.76.2.0', '76.76.10.0',
+  '185.228.168.9', '185.228.169.9', '77.88.8.8', '77.88.8.1',
+  '156.154.70.1', '156.154.71.1', '127.0.0.1',
+  // 域名关键词
+  'alidns', 'doh.pub', 'dot.pub', 'dns.pub', 'dnspod', 'dns.baidu',
+  'dns.google', 'cloudflare', 'quad9', 'opendns', 'nextdns', 'adguard',
+  'system'
+];
+
+function dnsServerAddress(value) {
+  const str = String(value);
+  const hashIndex = str.indexOf('#');
+  return (hashIndex === -1 ? str : str.slice(0, hashIndex)).toLowerCase();
+}
+
+function isPublicDnsServer(value) {
+  const address = dnsServerAddress(value);
+  return publicDnsList.some((dns) => address.includes(dns.toLowerCase()));
+}
+
+function dnsServerEndpoint(value) {
+  let endpoint = dnsServerAddress(value);
+  const schemeIndex = endpoint.indexOf('://');
+  if (schemeIndex !== -1) {
+    endpoint = endpoint.slice(schemeIndex + 3);
+  }
+  const slashIndex = endpoint.indexOf('/');
+  if (slashIndex !== -1) {
+    endpoint = endpoint.slice(0, slashIndex);
+  }
+  return endpoint;
+}
+
+function hasDnsListenLoop(dns) {
+  if (!dns || typeof dns !== "object") {
+    return false;
+  }
+  const listen = dnsServerEndpoint(dns.listen);
+  if (!listen) {
+    return false;
+  }
+
+  const policyValues = (policy) => {
+    if (!policy || typeof policy !== "object") {
+      return [];
+    }
+    return Object.values(policy).flatMap((value) =>
+      Array.isArray(value) ? value : [value]
+    ).filter((value) => typeof value === "string");
+  };
+
+  const candidates = [
+    policyValues(dns["proxy-server-nameserver-policy"]),
+    asNameserverList(dns["proxy-server-nameserver"]),
+    policyValues(dns["nameserver-policy"]),
+    asNameserverList(dns.nameserver)
+  ];
+
+  // Check the actual participating source by priority:
+  // proxy-server-nameserver-policy > proxy-server-nameserver > nameserver-policy > nameserver.
+  for (const group of candidates) {
+    if (group.length > 0) {
+      return group.some((nameserver) => dnsServerEndpoint(nameserver) === listen);
+    }
+  }
+  return false;
+}
+
 // 从原始配置中提取 DNS 合并来源。
 function collectDnsRules(config) {
   const result = {
+    nameservers: [],
     nameserverPolicy: {},
     proxyServerNameservers: [],
     proxyServerNameserverPolicy: {},
@@ -1031,8 +1056,9 @@ function collectDnsRules(config) {
     return result;
   }
 
+  result.nameservers = asNameserverList(dns.nameserver);
+
   if (
-    !hasProxyServerNameserver(dns) &&
     dns["nameserver-policy"] &&
     typeof dns["nameserver-policy"] === "object"
   ) {
@@ -1050,8 +1076,10 @@ function collectDnsRules(config) {
     Object.assign(result.proxyServerNameserverPolicy, dns["proxy-server-nameserver-policy"]);
   }
 
+  // hosts 只有在 use-hosts=true 且 DNS 监听形成闭环时才参与节点 server 改写
   if (
     dns["use-hosts"] === true &&
+    hasDnsListenLoop(dns) &&
     config.hosts &&
     typeof config.hosts === "object"
   ) {
@@ -1105,62 +1133,41 @@ function smartMergeDnsNode(config, result) {
   const newHosts = result.hosts || {};
   const proxies = Array.isArray(config.proxies) ? config.proxies : [];
 
+  const originalDomains = new Set();
   for (const proxy of proxies) {
     if (!proxy || typeof proxy !== "object") {
       continue;
     }
-
     const server = proxy.server;
-
-    if (isIPAddress(server)) {
+    if (typeof server !== "string" || isIPAddress(server)) {
       continue;
     }
+    const domain = normalizeDomain(server);
+    if (domain) {
+      originalDomains.add(domain);
+    }
+  }
 
-    if (typeof server !== "string") {
+  // hosts first: rewrite proxy.server before matching DNS policy.
+  // Some subscriptions use proxy-server-nameserver: udp://127.0.0.1:xxx with hosts
+  // inside a local mihomo DNS module; rewriting proxy.server from hosts avoids it.
+  for (const proxy of proxies) {
+    if (!proxy || typeof proxy !== "object") {
       continue;
     }
-
+    const server = proxy.server;
+    if (typeof server !== "string" || isIPAddress(server)) {
+      continue;
+    }
     const domain = normalizeDomain(server);
     if (!domain) {
       continue;
     }
 
-    const setPolicy = (rule, value) => {
-      if (
-        NAMESERVER_POLICY_PREFER_ORIGINAL ||
-        !Object.prototype.hasOwnProperty.call(newPolicy, rule)
-      ) {
-        newPolicy[rule] = value;
-      }
-    };
-
-    for (const rule in rules.nameserverPolicy) {
-      if (matchWildcardDomain(rule, domain)) {
-        setPolicy(rule, rules.nameserverPolicy[rule]);
-      }
-    }
-
-    let hasExplicitProxyServerPolicy = false;
-    for (const rule in rules.proxyServerNameserverPolicy) {
-      if (matchWildcardDomain(rule, domain)) {
-        setPolicy(rule, rules.proxyServerNameserverPolicy[rule]);
-        hasExplicitProxyServerPolicy = true;
-      }
-    }
-
-    if (!hasExplicitProxyServerPolicy && rules.proxyServerNameservers.length > 0) {
-      setPolicy(domain, rules.proxyServerNameservers.slice());
-    }
-
-    /* 原因：部分用户覆写的原始配置带有 proxy-server-nameserver: udp://127.0.0.1:xxx，
-       节点域名解析会先走监听在 127.0.0.1:xxx 的 mihomo dns 模块（内含 hosts 里真正的
-       节点域名），再走正常 nameserver 解析流程；直接提取 hosts 改写节点域名即可得到
-       同样的解析结果，无需引入 udp://127.0.0.1:xxx 这种破坏性变更。 */
     for (const rule in rules.hosts) {
       if (!matchWildcardDomain(rule, domain)) {
         continue;
       }
-
       const mapped = rules.hosts[rule];
       const value = Array.isArray(mapped) ? mapped[0] : mapped;
       const target = typeof value === "string" ? value.trim() : "";
@@ -1175,24 +1182,106 @@ function smartMergeDnsNode(config, result) {
         break;
       }
 
-      // 目标仍是域名：沿 hosts 多级映射链继续解析到最终域名或 IP
       const resolved = resolveHostsChain(target, rules.hosts);
-
-      // hosts 成环视为无效字段，直接忽略
       if (!resolved || resolved.type === "cycle") {
         continue;
       }
 
       proxy.server = resolved.target;
-
       break;
     }
   }
 
-  // 去冗余：模板 dns 已提供全局 proxy-server-nameserver（最终配置保留该全局列表），
-  // 若某条 policy 的值与全局列表等价，则删除该条（mihomo 会先按全局列表解析节点域名，
-  // 效果相同），避免同一 DNS 地址在 policy 里逐域名重复；
-  // 同时对保留下来的 value 列表做去重。
+  // hosts rewrite is independent from policy matching: policy keys are matched
+  // against the subscription's original node domains only.
+  const matchesAnyNodeDomain = (rule) => {
+    for (const domain of originalDomains) {
+      if (matchWildcardDomain(rule, domain)) {
+        return true;
+      }
+    }
+    return false;
+  };
+
+  const setPolicy = (rule, value) => {
+    if (
+      NAMESERVER_POLICY_PREFER_ORIGINAL ||
+      !Object.prototype.hasOwnProperty.call(newPolicy, rule)
+    ) {
+      newPolicy[rule] = value;
+    }
+  };
+
+  const domainCovered = (domain) => {
+    for (const rule of Object.keys(newPolicy)) {
+      if (matchWildcardDomain(rule, domain)) {
+        return true;
+      }
+    }
+    return false;
+  };
+
+  // Priority: proxy-server-nameserver-policy > proxy-server-nameserver (private)
+  //           > nameserver-policy > nameserver (private).
+  const matchedProxyPolicyKeys = new Set();
+  for (const rule in rules.proxyServerNameserverPolicy) {
+    if (matchesAnyNodeDomain(rule)) {
+      setPolicy(rule, rules.proxyServerNameserverPolicy[rule]);
+      matchedProxyPolicyKeys.add(rule);
+    }
+  }
+  const proxyCoveredDomains = new Set();
+  for (const rule of matchedProxyPolicyKeys) {
+    for (const domain of originalDomains) {
+      if (matchWildcardDomain(rule, domain)) {
+        proxyCoveredDomains.add(domain);
+      }
+    }
+  }
+
+  const privateProxyServerNameservers = rules.proxyServerNameservers.filter(
+    (nameserver) => !isPublicDnsServer(nameserver)
+  );
+  const privateNameservers = rules.nameservers.filter(
+    (nameserver) => !isPublicDnsServer(nameserver)
+  );
+
+  if (privateProxyServerNameservers.length > 0) {
+    for (const domain of originalDomains) {
+      if (!domainCovered(domain)) {
+        setPolicy(domain, privateProxyServerNameservers.slice());
+      }
+    }
+  } else {
+    for (const rule in rules.nameserverPolicy) {
+      if (matchedProxyPolicyKeys.has(rule)) {
+        continue;
+      }
+      if (!matchesAnyNodeDomain(rule)) {
+        continue;
+      }
+      let overlapsProxy = false;
+      for (const domain of originalDomains) {
+        if (matchWildcardDomain(rule, domain) && proxyCoveredDomains.has(domain)) {
+          overlapsProxy = true;
+          break;
+        }
+      }
+      if (overlapsProxy) {
+        continue;
+      }
+      setPolicy(rule, rules.nameserverPolicy[rule]);
+    }
+    if (privateNameservers.length > 0) {
+      for (const domain of originalDomains) {
+        if (!domainCovered(domain)) {
+          setPolicy(domain, privateNameservers.slice());
+        }
+      }
+    }
+  }
+
+  // Remove policy entries identical to the global fallback and dedupe values.
   const globalProxyServerNameservers = asNameserverList(
     result.dns["proxy-server-nameserver"]
   );

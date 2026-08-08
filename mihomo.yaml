@@ -79,12 +79,8 @@ ntp:
   enable: true              
   write-to-system: false      
   server: 'time.apple.com'   
-  server-list:               
-    - 'time.windows.com'      
   # - 'ntp.aliyun.com'        
   # - 'time1.cloud.tencent.com' 
-  benchmark-url: 'https://www.apple.com/library/test/success.html'
-  benchmark-timeout: 5s
   port: 123
 
 
@@ -357,7 +353,6 @@ sub-rules:
 
     - DOMAIN,v6-novelapp.ixigua.com,REJECT
     - DOMAIN-WILDCARD,*novelapp.ixigua.com,REJECT
-    - DOMAIN-WILDCARD,*default.ixigua.com,REJECT
     - DOMAIN,msync-im1-vip6-std.easemob.com,REJECT
     - DOMAIN,apd-pcdnwxlogin.teg.tencent-cloud.net,REJECT
     - DOMAIN,api.iegadp.qq.com,REJECT
@@ -377,9 +372,6 @@ sub-rules:
 
   # URL Rewrite Host 提取
     - DOMAIN-WILDCARD,*.pangolin-sdk-toutiao.com,REJECT
-    - DOMAIN-WILDCARD,*.pglstatp-toutiao.com,REJECT
-    - DOMAIN-WILDCARD,*.pstatp.com,REJECT
-    - DOMAIN,gurd.snssdk.com,REJECT
     - DOMAIN-WILDCARD,*.byteimg.com,REJECT
     - DOMAIN-WILDCARD,*.snssdk.com,REJECT
 
@@ -432,17 +424,6 @@ rules:
   - RULE-SET,telegramcidr,📲 Telegram,no-resolve
   - RULE-SET,telegram_domain,📲 Telegram
 
-  # 监控和遥测
-  - DOMAIN-SUFFIX,sentry.io,🤖 AI大模型
-  - DOMAIN-SUFFIX,statsigapi.net,🤖 AI大模型
-  - DOMAIN,browser-intake-us5-datadoghq.com,🤖 AI大模型
-  - DOMAIN-KEYWORD,datadog,🤖 AI大模型
-
-  # 客服 / 第三方widget
-  - DOMAIN-SUFFIX,intercom.io,🤖 AI大模型
-  - DOMAIN-SUFFIX,intercomcdn.com,🤖 AI大模型
-  - DOMAIN,cdn.usefathom.com,🤖 AI大模型
-
   - RULE-SET,Gemini_Domain,🤖 AI大模型
   - RULE-SET,Grok_Domain,🤖 AI大模型
  # - RULE-SET,Grok_IP,🤖 AI大模型
@@ -484,7 +465,7 @@ rules:
 
   - RULE-SET,direct,DIRECT
 
-  - PROCESS-NAME-REGEX,. *twitter.*,✖️ Twitter
+  - PROCESS-NAME-REGEX,.*twitter.*,✖️ Twitter
   - RULE-SET,twitter-x-domain,✖️ Twitter
   - RULE-SET,twitter-x-ip,✖️ Twitter,no-resolve
   - RULE-SET,twitter-x-blackmatrix7-No_Resolve,✖️ Twitter
