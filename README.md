@@ -25,7 +25,7 @@
 
 [<kbd>Use this template</kbd>](https://github.com/new?template_name=mihomo-config-self&template_owner=XVSVTsama)
 
-> 复制仓库后会自动清理，最终只保留 `mihomo.yaml` 与 `script_override.js`。你的永久配置链接为 `https://raw.githubusercontent.com/<你的用户名>/<你的仓库名>/main/<文件名>`。
+> 复制仓库后会自动清理：`mihomo.yaml` 与 `script_override.js` 会保留，完整说明会复制为 `README_full.md`，同时生成一份带来源标注的 `README.md` 并提供查看完整说明的按钮。你的永久配置链接为 `https://raw.githubusercontent.com/<你的用户名>/<你的仓库名>/main/<文件名>`。
 
    [远程覆写脚本](https://raw.githubusercontent.com/XVSVTsama/mihomo-config-self/refs/heads/main/script_override.js)
 

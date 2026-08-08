@@ -13,10 +13,30 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Keep only mihomo.yaml and script_override.js
+      - name: Preserve original README
+        run: cp README.md README_full.md
+      - name: Generate default README
         run: |
-          rm -rf .github .yamllint .editorconfig .gitignore README.md LICENSE
+          cat > README.md <<'EOF'
+          # Mihomo (Clash Meta) 配置模板
+
+          本仓库由 GitHub 模板仓库生成，仅保留配置所需的文件。
+
+          - `README.md`
+          - `README_full.md`
+          - `mihomo.yaml`
+          - `script_override.js`
+
+          源仓库：https://github.com/XVSVTsama/mihomo-config-self
+
+          源作者：https://github.com/XVSVTsama
+
+          [<kbd>查看完整说明</kbd>](README_full.md)
+          EOF
+      - name: Remove template-only files
+        run: |
+          rm -rf .github .yamllint .editorconfig .gitignore LICENSE
       - name: Commit cleanup
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
-          commit_message: "Template cleanup: keep only mihomo.yaml and script_override.js"
+          commit_message: "Template cleanup: keep config files and README"
