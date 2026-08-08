@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://avatars.githubusercontent.com/XVSVTsama?v=4" alt="XVSVTsama" width="120" />
+  <img src="assets/avatar.png" alt="XVSVTsama" width="120" />
 </p>
 
 <h1 align="center">Mihomo (Clash Meta) 配置模板</h1>

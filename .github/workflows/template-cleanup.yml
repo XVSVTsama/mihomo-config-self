@@ -18,12 +18,17 @@ jobs:
       - name: Generate default README
         run: |
           cat > README.md <<'EOF'
+          <p align="center">
+            <img src="assets/avatar.png" alt="XVSVTsama" width="120" />
+          </p>
+
           # Mihomo (Clash Meta) 配置模板
 
           本仓库由 GitHub 模板仓库生成，仅保留配置所需的文件。
 
           - `README.md`
           - `README_full.md`
+          - `assets/avatar.png`
           - `mihomo.yaml`
           - `script_override.js`
 
