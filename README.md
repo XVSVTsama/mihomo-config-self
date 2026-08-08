@@ -12,7 +12,9 @@
 [![FlClash](https://img.shields.io/badge/FlClash-Mihomo/Clash%20Meta%20Client/GUI-000000?style=flat-square)](https://github.com/chen08209/FlClash)
 
 [![YAML](https://img.shields.io/badge/YAML-%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6-yellow?style=flat-square&logo=yaml&logoColor=white)](mihomo.yaml)
+[![YAML Syntax](https://img.shields.io/github/actions/workflow/status/XVSVTsama/mihomo-config-self/yaml-syntax.yml?style=flat-square&label=YAML%20Syntax&color=informational)](https://github.com/XVSVTsama/mihomo-config-self/actions/workflows/yaml-syntax.yml)
 [![JavaScript](https://img.shields.io/badge/JavaScript-%E8%A6%86%E5%86%99%E8%84%9A%E6%9C%AC-yellow?style=flat-square&logo=javascript&logoColor=black)](script_override.js)
+[![JavaScript Syntax](https://img.shields.io/github/actions/workflow/status/XVSVTsama/mihomo-config-self/js-syntax.yml?style=flat-square&label=JS%20Syntax&color=informational)](https://github.com/XVSVTsama/mihomo-config-self/actions/workflows/js-syntax.yml)
 
 > ⚠️ **避坑指南 & 核心声明**
 > 本仓库提供的是一份**高度贴合个人使用习惯**的 Mihomo (原 Clash Meta) [路由配置文件](https://raw.githubusercontent.com/XVSVTsama/mihomo-config-self/refs/heads/main/mihomo.yaml)。
