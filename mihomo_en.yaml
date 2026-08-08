@@ -1,0 +1,469 @@
+mode: rule
+mixed-port: 7254
+port: 7249
+socks-port: 7346
+etag-support: true
+global-ua: clash.meta
+ipv6: true
+log-level: info
+external-controller: 127.0.0.1:9090
+external-ui: dashboard
+unified-delay: true
+tcp-concurrent: true
+keep-alive-idle: 600
+keep-alive-interval: 15
+store-selected: true
+store-fake-ip: true
+tun:                                                    
+  enable: true 
+  device: XVSVT
+  auto-detect-interface: true
+  auto-route: true 
+  auto-redirect: true
+  strict-route: true
+  stack: gvisor                                           
+  dns-hijack:
+    - "any:53"  
+    - "udp://any:53"
+    - "tcp://any:53"                                                             
+  route-address:
+  - "198.51.100.0/30"
+  - "1.0.0.0/8"
+  - "2.0.0.0/7"
+  - "4.0.0.0/6"
+  - "8.0.0.0/7"
+  - "11.0.0.0/8"
+  - "12.0.0.0/6"
+  - "16.0.0.0/4"
+  - "32.0.0.0/3"
+  - "64.0.0.0/3"
+  - "96.0.0.0/4"
+  - "112.0.0.0/5"
+  - "120.0.0.0/6"
+  - "124.0.0.0/7"
+  - "126.0.0.0/8"
+  - "128.0.0.0/3"
+  - "160.0.0.0/5"
+  - "168.0.0.0/8"
+  - "169.0.0.0/9"
+  - "169.128.0.0/10"
+  - "169.192.0.0/11"
+  - "169.224.0.0/12"
+  - "169.240.0.0/13"
+  - "169.248.0.0/14"
+  - "169.252.0.0/15"
+  - "169.255.0.0/16"
+  - "170.0.0.0/7"
+  - "172.0.0.0/12"
+  - "172.32.0.0/11"
+  - "172.64.0.0/10"
+  - "172.128.0.0/9"
+  - "173.0.0.0/8"
+  - "174.0.0.0/7"
+  - "176.0.0.0/4"
+  - "192.0.0.0/9"
+  - "192.128.0.0/11"
+  - "192.160.0.0/13"
+  - "192.169.0.0/16"
+  - "192.170.0.0/15"
+  - "192.172.0.0/14"
+  - "192.176.0.0/12"
+  - "192.192.0.0/10"
+  - "193.0.0.0/8"
+  - "194.0.0.0/7"
+  - "196.0.0.0/6"
+  - "200.0.0.0/5"
+  - "208.0.0.0/4"
+  
+ntp:
+  enable: true              
+  write-to-system: false      
+  server: 'time.apple.com'   
+  # - 'ntp.aliyun.com'        
+  # - 'time1.cloud.tencent.com' 
+  port: 123
+
+
+proxies: ~
+proxy-groups:
+  - name: 🌍 PROXY
+    icon: "https://github.com/DustinWin/ruleset_geodata/releases/download/icons/proxy.png"
+    type: select
+    proxies:
+        - 👉 手动切换
+        - ♻️ 自动选择
+        - 🔄 负载均衡
+        - DIRECT
+  - name: 🔄 负载均衡
+    icon: "https://www.clashverge.dev/assets/icons/balance.svg"
+    type: load-balance
+    proxies: # Contains all individual nodes (automatically filled by override script)
+    url: 'https://www.gstatic.com/generate_204'
+    interval: 300
+    lazy: true
+    strategy: sticky-sessions
+  - name: 👉 手动切换
+    icon: "https://github.com/DustinWin/ruleset_geodata/releases/download/icons/select.png"
+    type: select
+    proxies: # Contains all individual nodes (automatically filled by override script)
+  - name: ♻️ 自动选择
+    icon: "https://github.com/DustinWin/ruleset_geodata/releases/download/icons/auto.png"
+    type: url-test
+    url: https://www.gstatic.com/generate_204
+    interval: 300
+    tolerance: 50
+    proxies: # Contains all individual nodes (automatically filled by override script)
+  - name: 📲 Telegram
+    icon: "https://github.com/DustinWin/ruleset_geodata/releases/download/icons/telegram.png"
+    type: select
+    proxies: # Contains all individual nodes (automatically filled by override script)
+  - name: 🎮 Games-Global
+    icon: "https://github.com/DustinWin/ruleset_geodata/releases/download/icons/games-cn.png"
+    type: select
+    proxies: # Contains all individual nodes (automatically filled by override script)
+
+  - name: ✖️ Twitter
+    icon: "https://www.clashverge.dev/assets/icons/twitter.svg"
+    type: select
+    filter: "美国|住宅"
+    include-all-proxies: true
+  - name: 🤖 AI大模型
+    icon: "https://github.com/DustinWin/ruleset_geodata/releases/download/icons/ai.png"
+    type: select
+    filter: "美国|住宅"
+    include-all-proxies: true
+  - name: 🎵 TikTok
+    icon: "https://github.com/DustinWin/ruleset_geodata/releases/download/icons/tiktok.png"
+    type: select
+    filter: "美国|住宅"
+    include-all-proxies: true
+  # FCM: Google FCM domain traffic routing target (routed to this group after matching RULE-SET,googlefcm,FCM).
+  # This group is not hidden in the template to show that this proxy group actually exists and is a real routing target in the configuration;
+  # Hiding it via `hidden` in the override script is for interface simplicity: the script uses the Bettbox custom script UI to
+  # control the proxies: field of this group via the "FCM Direct" switch (ON = DIRECT only, OFF = Manual Switch only),
+  # making it convenient for users who need it without directly modifying the configuration file.
+  # The switch icon is taken from the icon field of this group; changing the icon only requires modifying it here.
+  - name: FCM
+    icon: "https://fastly.jsdelivr.net/gh/MiToverG422/Qure@master/IconSet/Color/fcm.png"
+    # hidden: true  # Hide this group in the script to keep the UI clean; kept visible in the template to indicate its existence
+    type: select
+    proxies:
+      - 👉 手动切换
+      - DIRECT
+
+sniffer:
+  enable: true
+  force-dns-mapping: true
+  parse-pure-ip: true
+  override-destination: true
+  sniff:
+    HTTP: {ports: [80, 8080-8880]}
+    TLS: {ports: [443, 8443]}
+    QUIC: {ports: [443, 8443]}
+  force-domain:
+    - '+.v2ex.com'
+  skip-domain:
+    - 'Mijia Cloud'
+    - 'dlg.io.mi.com'
+    - '+.apple.com'
+    - '+.icloud.com'
+    - '+.wechat.com'
+    - '+.qpic.cn'
+    - '+.qq.com'
+    - '+.wechatapp.com'
+    - '+.vivox.com'
+    - '+.oray.com'
+    - '+.sunlogin.net'
+  skip-dst-address:
+    - 'rule-set:telegramcidr'
+    - 'rule-set:twitter-x-ip'
+    - 'rule-set:lancidr'
+    - 'rule-set:cncidr'
+    - 8.8.8.8/32
+    - 8.8.4.4/32
+    - 2001:4860:4860::8888/128
+    - 2001:4860:4860::8844/128
+    - 1.1.1.1/32
+    - 1.0.0.1/32
+    - 2606:4700:4700::1111/128
+    - 2606:4700:4700::1001/128
+    - 9.9.9.9/32
+    - 149.112.112.112/32
+    - 2620:fe::fe/128
+    - 208.67.222.222/32
+    - 208.67.220.220/32
+    - 2620:119:35::35/128
+    - 94.140.14.14/32
+    - 94.140.15.15/32
+    - 2a10:50c0::ad1:ff/128
+    - 2a10:50c0::ad2:ff/128
+    - 185.228.168.9/32
+    - 185.228.169.9/32
+    - 64.6.64.6/32
+    - 64.6.65.6/32
+    - 77.88.8.8/32
+    - 77.88.8.1/32
+    - 185.222.222.222/32
+    - 45.11.45.11/32
+    - 223.5.5.5/32
+    - 223.6.6.6/32
+    - 2400:3200::1/128
+    - 2400:3200:baba::1/128
+    - 119.29.29.29/32
+    - 182.254.116.116/32
+    - 180.76.76.76/32
+    - 114.114.114.114/32
+    - 114.114.115.115/32
+    - 114.114.114.119/32
+    - 114.114.115.119/32
+    - 1.2.4.8/32
+    - 210.2.4.8/32
+    - 101.226.4.6/32
+    - 218.30.118.6/32
+
+dns:
+  enable: true                                             
+ #prefer-h3: true                                             
+  ipv6: true                                       
+  listen: '0.0.0.0:1053'  
+ #listen: '0.0.0.0:53'                               
+  use-hosts: true                                            
+  use-system-hosts: false                                            
+  default-nameserver:     
+    - tls://223.5.5.5#DIRECT
+    - tls://223.6.6.6#DIRECT
+  proxy-server-nameserver: 
+    - https://hrbgyitz34.cloudflare-gateway.com/dns-query#DIRECT
+  direct-nameserver: 
+    - https://dns.alidns.com/dns-query#DIRECT
+    - https://doh.pub/dns-query#DIRECT
+  direct-nameserver-follow-policy: true
+  nameserver:
+    - https://cloudflare-dns.com/dns-query#👉 手动切换
+  # - https://dns.adguard-dns.com/dns-query     # AdGuard Public DNS  # 94.140.14.14        94.140.15.15
+  # - https://dns.google/dns-query             # Google Public DNS   # 8.8.8.8             8.8.4.4
+  # - https://dns.quad9.net/dns-query           # IBM Quad9 Public DNS # 9.9.9.11            149.112.112.11
+  # - https://doh.opendns.com/dns-query         # OpenDNS Public DNS  # 208.67.220.220      208.67.222.222
+  # - https://doh.dns.sb/dns-query              # DNS.SB Public DNS   # 185.222.222.222     45.11.45.11
+  # - https://dns.twnic.tw/dns-query            # Quad101 Public DNS  # 101.101.101.10      101.102.103.10
+  prefer-h3: false
+  respect-rules: false                                            
+  enhanced-mode: fake-ip                  
+  fake-ip-range: '198.18.0.1/16'
+  fake-ip-range6: fdfe:dcba:9876::1/64
+  fake-ip-filter-mode: blacklist                    
+  fake-ip-filter: 
+    - rule-set:fakeip-filter_domain
+    - rule-set:private
+    - rule-set:direct
+    - rule-set:cn
+    - rule-set:echs_cn
+    - rule-set:echs_direct
+    - rule-set:applications
+    - rule-set:pixiv
+    - pixshaft.com
+  nameserver-policy: 
+    'rule-set:private,direct,proxy@direct,cn,echs_cn,echs_direct': https://dns.alidns.com/dns-query#DIRECT
+
+hosts                             :                                            
+  '+.clash.dev'               : [ '127.0.0.1'          ]                
+  'services.googleapis.cn'    : [ 'services.googleapis.com' ]
+  '+.mcdn.bilivideo.com'      : [ '0.0.0.0'            ]
+  '+.mcdn.bilivideo.cn'       : [ '0.0.0.0'            ]
+  'mtalk.google.com'          : [ '142.250.107.188'    , '108.177.125.188'    ]
+  'dns.msftncsi.com'          : [ '131.107.255.255'    , 'fd3e:4f5a:5b81::1'  ]
+  #'dns.alidns.com'            : [ '223.5.5.5'          , '223.6.6.6'          ] # 🇨🇳 Alibaba DNS
+  #'pdns.dnspod.cn'            : [ '119.29.29.29'       , '119.28.28.28'       ] # 🇨🇳 Tencent DNS
+  #'dns.pub'                   : [ '119.29.29.29'       ]           # 🇨🇳 Tencent DNS  
+  #'doh.pub'                   : [ '1.12.12.12'         , '120.53.53.53'       ] # 🇨🇳 Tencent DNS
+  #'dot.pub'                   : [ '1.12.12.12'         , '120.53.53.53'       ] # 🇨🇳 Tencent DNS
+  #'one.one.one.one'           : [ '1.0.0.1'            , '1.1.1.1'            ] # 🇺🇸 Cloudflare Public DNS
+  '*.pangolin-sdk-toutiao': 0.0.0.0
+  '*.pangolin-sdk-toutiao.*': 0.0.0.0
+  '*.pstatp.com': 0.0.0.0
+  '*.pstatp.com.*': 0.0.0.0
+  '*.pglstatp-toutiao.com': 0.0.0.0
+  '*.pglstatp-toutiao.com.*': 0.0.0.0
+  'gurd.snssdk.com': 0.0.0.0
+  'gurd.snssdk.com.*': 0.0.0.0
+  '*default.ixigua.com': 0.0.0.0
+
+
+
+
+# Public template configuration (anchor definitions)
+.templates:
+  domain_mrs: &domain_mrs { type: http, interval: 86400, behavior: domain, format: mrs }
+  ipcidr_mrs: &ipcidr_mrs { type: http, interval: 86400, behavior: ipcidr, format: mrs }
+  domain_yaml: &domain_yaml { type: http, interval: 86400, behavior: domain }
+  ipcidr_yaml: &ipcidr_yaml { type: http, interval: 86400, behavior: ipcidr }
+  classical_yaml: &classical_yaml { type: http, interval: 86400, behavior: classical }
+
+# Rule provider configuration
+rule-providers:
+  Gemini_Domain: { <<: *domain_yaml, url: 'https://cdn.jsdelivr.net/gh/Accademia/Additional_Rule_For_Clash@master/Gemini/Gemini_Domain.yaml', path: ./ruleset/Gemini_Domain.yaml }
+  Grok_Domain: { <<: *domain_yaml, url: 'https://raw.githubusercontent.com/Accademia/Additional_Rule_For_Clash/refs/heads/main/Grok/Grok_Domain.yaml', path: ./ruleset/Grok_Domain.yaml }
+  HijackingPlus: { <<: *classical_yaml, url: 'https://raw.githubusercontent.com/Accademia/Additional_Rule_For_Clash/refs/heads/main/HijackingPlus/HijackingPlus_No_Resolve.yaml', path: ./ruleset/HijackingPlus.yaml }
+  TikTok: { <<: *domain_mrs, url: 'https://github.com/DustinWin/ruleset_geodata/releases/download/mihomo-ruleset/tiktok.mrs', path: ./ruleset/tiktok.mrs }
+  ai-1: { <<: *domain_mrs, url: 'https://github.com/DustinWin/ruleset_geodata/releases/download/mihomo-ruleset/ai.mrs', path: ./ruleset/ai-1.mrs }
+  ai-2: { <<: *domain_mrs, url: 'https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/category-ai-!cn.mrs', path: ./ruleset/ai-2.mrs }
+  apple: { <<: *domain_yaml, url: 'https://cdn.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/apple.txt', path: ./ruleset/apple.yaml }
+  applications: { <<: *domain_yaml, url: 'https://cdn.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/applications.txt', path: ./ruleset/applications.yaml }
+  cn: { <<: *domain_mrs, url: 'https://github.com/DustinWin/ruleset_geodata/releases/download/mihomo-ruleset/cn.mrs', path: ./ruleset/cn.mrs }
+  cncidr: { <<: *ipcidr_mrs, url: 'https://github.com/DustinWin/ruleset_geodata/releases/download/mihomo-ruleset/cnip.mrs', path: ./ruleset/cncidr.mrs }
+  direct: { <<: *domain_yaml, url: 'https://cdn.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/direct.txt', path: ./ruleset/direct.yaml }
+  echs_cn: { <<: *domain_mrs, url: 'https://raw.githubusercontent.com/echs-top/proxy/main/mrs/domain/cn.mrs', path: ./ruleset/echs_cn.mrs }
+  echs_cn_ip: { <<: *ipcidr_mrs, url: 'https://raw.githubusercontent.com/echs-top/proxy/main/mrs/ip/cn.mrs', path: ./ruleset/echs_cn_ip.mrs }
+  echs_direct: { <<: *domain_mrs, url: 'https://raw.githubusercontent.com/echs-top/proxy/main/mrs/domain/direct.mrs', path: ./ruleset/echs_direct.mrs }
+  echs_direct_ip: { <<: *ipcidr_mrs, url: 'https://raw.githubusercontent.com/echs-top/proxy/main/mrs/ip/direct.mrs', path: ./ruleset/echs_direct_ip.mrs }
+  fakeip-filter_domain: { <<: *domain_mrs, url: 'https://github.com/DustinWin/ruleset_geodata/releases/download/mihomo-ruleset/fakeip-filter.mrs', path: ./ruleset/fakeip-filter_domain.mrs }
+  games: { <<: *domain_mrs, url: 'https://github.com/DustinWin/ruleset_geodata/releases/download/mihomo-ruleset/games.mrs', path: ./ruleset/games.mrs }
+  games-cn: { <<: *domain_mrs, url: 'https://github.com/DustinWin/ruleset_geodata/releases/download/mihomo-ruleset/games-cn.mrs', path: ./ruleset/games-cn.mrs }
+  gfw: { <<: *domain_mrs, url: 'https://github.com/DustinWin/ruleset_geodata/releases/download/mihomo-ruleset/gfw.mrs', path: ./ruleset/gfw.mrs }
+  google: { <<: *domain_yaml, url: 'https://cdn.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/google.txt', path: ./ruleset/google.yaml }
+  google-cn: { <<: *domain_mrs, url: 'https://github.com/DustinWin/ruleset_geodata/releases/download/mihomo-ruleset/google-cn.mrs', path: ./ruleset/google-cn.mrs }
+  googlefcm: { <<: *domain_mrs, url: 'https://fastly.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/googlefcm.mrs', path: ./ruleset/googlefcm.mrs }
+  icloud: { <<: *domain_yaml, url: 'https://cdn.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/icloud.txt', path: ./ruleset/icloud.yaml }
+  lancidr: { <<: *ipcidr_yaml, url: 'https://cdn.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/lancidr.txt', path: ./ruleset/lancidr.yaml }
+  pixiv: { <<: *domain_mrs, url: 'https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/pixiv.mrs', path: ./ruleset/pixiv.mrs }
+  private: { <<: *domain_yaml, url: 'https://cdn.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/private.txt', path: ./ruleset/private.yaml }
+  proxy: { <<: *domain_mrs, url: 'https://github.com/DustinWin/ruleset_geodata/releases/download/mihomo-ruleset/proxy.mrs', path: ./ruleset/proxy.mrs }
+  proxy@direct: { <<: *domain_mrs, url: 'https://raw.githubusercontent.com/echs-top/proxy/main/mrs/domain/proxy@direct.mrs', path: ./rules/proxy@direct.mrs }
+  telegram_domain: { <<: *domain_mrs, url: 'https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/telegram.mrs', path: ./rules/telegram_domain.mrs }
+  telegramcidr: { <<: *ipcidr_mrs, url: 'https://raw.githubusercontent.com/reddishJade/private_proxy/main/Mihomo/Provider/telegram%40ip.mrs', path: ./ruleset/telegramcidr.mrs }
+  twitter-x-blackmatrix7-No_Resolve: { <<: *classical_yaml, format: yaml, url: 'https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/refs/heads/master/rule/Clash/Twitter/Twitter_No_Resolve.yaml', path: ./ruleset/twitter-x-blackmartix7-noreslove.mrs }
+  twitter-x-domain: { <<: *domain_mrs, url: 'https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/twitter.mrs', path: ./ruleset/twitter/x-domain.mrs }
+  twitter-x-ip: { <<: *ipcidr_mrs, url: 'https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geoip/twitter.mrs', path: ./ruleset/twitter/x-ip.mrs }
+
+sub-rules:
+  fanqie:
+    - DOMAIN,p6-ad-sign.byteimg.com,REJECT
+    - DOMAIN,p9-ad-sign.byteimg.com,REJECT
+    - DOMAIN,i.snssdk.com,REJECT
+    - DOMAIN,i-lq.snssdk.com,REJECT
+    - DOMAIN,dig.bdurl.net,REJECT
+    - DOMAIN-KEYWORD,zijieapi,REJECT
+    - DOMAIN,activity-ag.awemeughun.com,REJECT
+
+    - DOMAIN,mcs.snssdk.com,REJECT
+    - DOMAIN,tnc3-alisc1.snssdk.com,REJECT
+    - DOMAIN,security-lq.snssdk.com,REJECT
+    - DOMAIN,tnc3-aliec2.snssdk.com,REJECT
+    - DOMAIN,is.snssdk.com,REJECT
+
+    - DOMAIN,v6-novelapp.ixigua.com,REJECT
+    - DOMAIN-WILDCARD,*novelapp.ixigua.com,REJECT
+    - DOMAIN-WILDCARD,*default.ixigua.com,REJECT
+    - DOMAIN,msync-im1-vip6-std.easemob.com,REJECT
+    - DOMAIN,apd-pcdnwxlogin.teg.tencent-cloud.net,REJECT
+    - DOMAIN,api.iegadp.qq.com,REJECT
+    - DOMAIN,sf3-ttcdn-tos.pstatp.com,REJECT
+    - DOMAIN-SUFFIX,pglstatp-toutiao.com,REJECT
+
+    - DOMAIN-SUFFIX,byteorge.com,REJECT
+    - DOMAIN-SUFFIX,bytegoofy.com,REJECT
+    - DOMAIN-SUFFIX,bytedance.com,REJECT
+
+    - IP-CIDR,49.71.37.101/32,REJECT,no-resolve
+    - IP-CIDR,117.71.105.23/32,REJECT,no-resolve
+    - IP-CIDR,218.94.207.205/32,REJECT,no-resolve
+    - IP-CIDR,117.92.229.188/32,REJECT,no-resolve
+    - IP-CIDR,101.36.166.16/32,REJECT,no-resolve
+    - IP-CIDR,180.96.2.114/32,REJECT,no-resolve
+
+  # URL rewrite host extraction
+    - DOMAIN-WILDCARD,*.pangolin-sdk-toutiao.com,REJECT
+    - DOMAIN-WILDCARD,*.pglstatp-toutiao.com,REJECT
+    - DOMAIN-WILDCARD,*.pstatp.com,REJECT
+    - DOMAIN,gurd.snssdk.com,REJECT
+    - DOMAIN-WILDCARD,*.byteimg.com,REJECT
+    - DOMAIN-WILDCARD,*.snssdk.com,REJECT
+
+  # MITM hosts
+    - DOMAIN-WILDCARD,*.pangolin-sdk-toutiao,REJECT
+    - DOMAIN-WILDCARD,*.pangolin-sdk-toutiao.*,REJECT
+    - DOMAIN-WILDCARD,*.pstatp.com.*,REJECT
+    - DOMAIN-WILDCARD,*.pglstatp-toutiao.com.*,REJECT
+    - DOMAIN-WILDCARD,gurd.snssdk.com.*,REJECT
+
+    - MATCH,DIRECT                                           
+rules:
+  - AND,((NETWORK,UDP),(DST-PORT,3478-3479/5349-5350/19302-19309),(NOT,((RULE-SET,direct))),(NOT,((RULE-SET,cncidr))),(NOT,((RULE-SET,cn))),(NOT,((RULE-SET,applications))),(NOT,((RULE-SET,games))),(NOT,((RULE-SET,games-cn)))),REJECT
+  - RULE-SET,HijackingPlus,REJECT
+
+  - SUB-RULE,(PROCESS-NAME,com.dragon.read.oversea.gp),fanqie
+  - RULE-SET,applications,DIRECT
+  - RULE-SET,echs_cn,DIRECT
+  - RULE-SET,echs_cn_ip,DIRECT,no-resolve
+  - RULE-SET,echs_direct,DIRECT
+  - RULE-SET,echs_direct_ip,DIRECT,no-resolve
+  - RULE-SET,cn,DIRECT
+  - RULE-SET,cncidr,DIRECT,no-resolve
+  - RULE-SET,googlefcm,FCM
+  - DOMAIN,clash.razord.top,DIRECT
+  - DOMAIN,yacd.haishan.me,DIRECT
+  - PROCESS-NAME,svchost.exe,DIRECT
+  - RULE-SET,proxy@direct,🌍 PROXY
+  - RULE-SET,private,DIRECT,no-resolve    
+  - RULE-SET,lancidr,DIRECT,no-resolve
+
+  - DOMAIN-WILDCARD,*.deepseek.com,DIRECT
+  - DOMAIN-WILDCARD,*.portal101.cn,DIRECT
+  # Huawei Cloud CDN distribution domain
+  - DOMAIN-SUFFIX,cdnhwcqwg14.com,DIRECT
+  - DOMAIN-SUFFIX,cdnhwcxcy07.com,DIRECT
+  # Alibaba Cloud CDN distribution domain
+  - DOMAIN-SUFFIX,cdngslb.com,DIRECT
+  # Akamai CDN distribution domain
+  - DOMAIN-SUFFIX,edgekey.net,DIRECT
+  # Amazon CloudFront distribution domain (API interface CDN)
+  - DOMAIN-SUFFIX,cloudfront.net,DIRECT
+
+  - PROCESS-NAME-REGEX,.*nagram.*,📲 Telegram
+  - "PROCESS-NAME-REGEX,.*telegram.*,📲 Telegram"
+  - RULE-SET,telegramcidr,📲 Telegram,no-resolve
+  - RULE-SET,telegram_domain,📲 Telegram
+
+  - RULE-SET,Gemini_Domain,🤖 AI大模型
+  - RULE-SET,Grok_Domain,🤖 AI大模型
+ # - RULE-SET,Grok_IP,🤖 AI大模型
+  - IP-CIDR,17.253.4.0/23,🤖 AI大模型,no-resolve
+
+  # CDN and static assets
+  - DOMAIN,anthropic.com.cdn.cloudflare.net,🤖 AI大模型
+  # Authentication / Content
+  - DOMAIN,anthropic-com.ghost.io,🤖 AI大模型
+  # Monitoring and telemetry
+  - DOMAIN-SUFFIX,sentry.io,🤖 AI大模型
+  - DOMAIN-SUFFIX,statsigapi.net,🤖 AI大模型
+  - DOMAIN,browser-intake-us5-datadoghq.com,🤖 AI大模型
+  - DOMAIN-KEYWORD,datadog,🤖 AI大模型
+  - DOMAIN-KEYWORD,sift,🤖 AI大模型
+  # Customer service / Third-party widgets
+  - DOMAIN,cdn.usefathom.com,🤖 AI大模型
+  # IP range fallback
+  - IP-CIDR,160.79.104.0/21,🤖 AI大模型,no-resolve
+  - IP-CIDR6,2607:6bc0::/32,🤖 AI大模型,no-resolve
+  - RULE-SET,ai-1,🤖 AI大模型
+  - RULE-SET,ai-2,🤖 AI大模型
+
+  - RULE-SET,google,🌍 PROXY
+  - RULE-SET,google-cn,🌍 PROXY
+
+  - RULE-SET,direct,DIRECT
+
+  - PROCESS-NAME-REGEX,.*twitter.*,✖️ Twitter
+  - RULE-SET,twitter-x-domain,✖️ Twitter
+  - RULE-SET,twitter-x-ip,✖️ Twitter,no-resolve
+  - RULE-SET,twitter-x-blackmatrix7-No_Resolve,✖️ Twitter
+
+  - RULE-SET,icloud,DIRECT
+  - RULE-SET,apple,DIRECT
+  - RULE-SET,games-cn,DIRECT
+
+  - PROCESS-NAME,bf6.exe,🎮 Games-Global
+  - RULE-SET,games,🎮 Games-Global
+  - RULE-SET,TikTok,🎵 TikTok
+  - RULE-SET,proxy,🌍 PROXY
+  - RULE-SET,gfw,🌍 PROXY
+  - MATCH,🌍 PROXY
