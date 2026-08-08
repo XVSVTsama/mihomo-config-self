@@ -1008,6 +1008,13 @@ function asNameserverList(nameservers) {
   }
 
   return typeof nameservers === "string" ? [nameservers] : [];
+} 
+// 比较两个 nameserver 列表是否等价（忽略顺序与重复，按集合比较）
+function sameNameserverSet(a, b) {
+  if (!Array.isArray(a) || !Array.isArray(b)) return false;
+  const sa = new Set(a);
+  const sb = new Set(b);
+  return sa.size === sb.size && Array.from(sa).every((value) => sb.has(value));
 }
 
 // 从原始配置中提取 DNS 合并来源。
@@ -1180,6 +1187,33 @@ function smartMergeDnsNode(config, result) {
       proxy.server = resolved.target;
 
       break;
+    }
+  }
+
+  // 去冗余：模板 dns 已提供全局 proxy-server-nameserver（最终配置保留该全局列表），
+  // 若某条 policy 的值与全局列表等价，则删除该条（mihomo 会先按全局列表解析节点域名，
+  // 效果相同），避免同一 DNS 地址在 policy 里逐域名重复；
+  // 同时对保留下来的 value 列表做去重。
+  const globalProxyServerNameservers = asNameserverList(
+    result.dns["proxy-server-nameserver"]
+  );
+  if (globalProxyServerNameservers.length > 0) {
+    for (const rule of Object.keys(newPolicy)) {
+      if (
+        sameNameserverSet(
+          asNameserverList(newPolicy[rule]),
+          globalProxyServerNameservers
+        )
+      ) {
+        delete newPolicy[rule];
+      }
+    }
+  }
+  for (const rule of Object.keys(newPolicy)) {
+    const value = asNameserverList(newPolicy[rule]);
+    const deduped = Array.from(new Set(value));
+    if (deduped.length !== value.length) {
+      newPolicy[rule] = deduped;
     }
   }
 
