@@ -1,0 +1,35 @@
+name: Code Sync Check (JS)
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      enforce:
+        description: Fail the workflow when code mismatch is found
+        type: boolean
+        default: true
+      per_commit:
+        description: Check every commit in a push
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+jobs:
+  check-js:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Check JS code sync
+        env:
+          CHECK_ENFORCE: ${{ github.event.inputs.enforce || vars.CODE_SYNC_CHECK_ENFORCE || '' }}
+          CHECK_PER_COMMIT: ${{ github.event.inputs.per_commit || vars.CODE_SYNC_CHECK_PER_COMMIT || '' }}
+        run: python .github/scripts/run_check.py --file script_override.js --file script_override_en.js -- python .github/scripts/check_code_sync.py js script_override.js script_override_en.js
