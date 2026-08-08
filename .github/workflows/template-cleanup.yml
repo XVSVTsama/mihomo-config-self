@@ -1,0 +1,22 @@
+name: Template Cleanup
+
+on:
+  create:
+  push:
+
+permissions:
+  contents: write
+
+jobs:
+  cleanup:
+    if: github.repository != 'XVSVTsama/mihomo-config-self' && github.run_number == 1 && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Keep only mihomo.yaml and script_override.js
+        run: |
+          rm -rf .github .yamllint .editorconfig .gitignore README.md LICENSE
+      - name: Commit cleanup
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "Template cleanup: keep only mihomo.yaml and script_override.js"
