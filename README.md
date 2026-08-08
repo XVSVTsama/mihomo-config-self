@@ -33,10 +33,10 @@
 </p>
 
 <p align="center">
-  <a href="#远程覆写js">远程覆写js</a> ·
-  <a href="#核心特性">核心特性</a> ·
-  <a href="#分流组结构">分流组结构</a> ·
-  <a href="#使用前必改">使用前必改</a>
+  <a href="#remote-override">远程覆写js</a> ·
+  <a href="#core-features">核心特性</a> ·
+  <a href="#proxy-groups">分流组结构</a> ·
+  <a href="#before-use">使用前必改</a>
 </p>
 
 ---
@@ -44,6 +44,8 @@
 > ⚠️ **避坑指南 & 核心声明**
 > 本仓库提供的是一份**高度贴合个人使用习惯**的 Mihomo (原 Clash Meta) [路由配置文件](https://raw.githubusercontent.com/XVSVTsama/mihomo-config-self/refs/heads/main/mihomo.yaml)。
 > 它**不是**一份开箱即用的通用傻瓜式模板。如果您不熟悉 Mihomo 的核心机制、TUN 模式、Fake-IP 以及策略组正则表达式（filter），请**谨慎照搬**。抄作业前，请务必阅读下方说明！
+
+<a id="remote-override"></a>
 
 ## 远程覆写js
 
@@ -86,6 +88,8 @@ https://raw.githubusercontent.com/XVSVTsama/mihomo-config-self/refs/heads/main/s
    该配置必须使用在原生mihomo内核的非魔改🎭客户端上，否则可以出现未知错误，推荐如
    [Bettbox](https://github.com/appshubcc/Bettbox/releases)的优秀下游GUI
 
+<a id="core-features"></a>
+
 ## ✨ 核心特性 (为什么这么配？)
 
 本配置集成了模块化远程规则（Rule Providers）以及精细化的应用层级分流策略，完全为满足我个人的网络环境与使用痛点而生：
@@ -99,6 +103,8 @@ https://raw.githubusercontent.com/XVSVTsama/mihomo-config-self/refs/heads/main/s
 * **高级广告/隐私拦截**：
     * 拦截 WebRTC / 语音 / 实时通信常用的 UDP 端口（3478-3479、5349-5350、19302-19309），防止其绕过分流策略。
     * **SUB-RULE 进程级拦截**：针对特定海外阅读应用（如番茄小说海外版 `com.dragon.read.oversea.gp`）写死了深度的去广告与隐私追踪拦截规则。
+
+<a id="proxy-groups"></a>
 
 ## 🗂 分流组结构 (Proxy Groups)
 
@@ -116,6 +122,8 @@ https://raw.githubusercontent.com/XVSVTsama/mihomo-config-self/refs/heads/main/s
 | **FCM** | Google FCM 相关域名（`hidden` 隐藏组） | 由 `FCM直连` 开关控制：开启=仅 `DIRECT`，关闭=仅 `👉 手动切换` |
 
 > 注：🔄 负载均衡 / 👉 手动切换 / ♻️ 自动选择 / 📲 Telegram / 🎮 Games-Global 在模板中 `proxies` 为空（注释"此处为所有单节点"），启用覆写脚本后会自动填入订阅的全部节点；不使用脚本时需手动填充。
+
+<a id="before-use"></a>
 
 ## 🛠️ 使用前必改 (抄作业必看)
 
