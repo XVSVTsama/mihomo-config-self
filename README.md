@@ -1,5 +1,15 @@
 # 🚀 Mihomo (Clash Meta) 配置模板(高度定制自用版)
 
+[![GPL-3.0 License](https://img.shields.io/github/license/XVSVTsama/mihomo-config-self?style=flat-square&label=License&color=informational)](LICENSE)
+[![Last Commit](https://img.shields.io/github/last-commit/XVSVTsama/mihomo-config-self?style=flat-square&label=Last%20Commit&color=informational)](https://github.com/XVSVTsama/mihomo-config-self/commits/main)
+[![Repo Size](https://img.shields.io/github/repo-size/XVSVTsama/mihomo-config-self?style=flat-square&label=Repo%20Size&color=informational)](https://github.com/XVSVTsama/mihomo-config-self)
+[![Stars](https://img.shields.io/github/stars/XVSVTsama/mihomo-config-self?style=flat-square&label=Stars&color=informational)](https://github.com/XVSVTsama/mihomo-config-self/stargazers)
+[![Mihomo](https://img.shields.io/badge/Mihomo-Clash%20Meta-000000?style=flat-square)](https://github.com/MetaCubeX/mihomo)
+[![YAML](https://img.shields.io/badge/YAML-%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6-yellow?style=flat-square&logo=yaml&logoColor=white)](mihomo.yaml)
+[![JavaScript](https://img.shields.io/badge/JavaScript-%E8%A6%86%E5%86%99%E8%84%9A%E6%9C%AC-yellow?style=flat-square&logo=javascript&logoColor=black)](script_override.js)
+[![Bettbox](https://img.shields.io/badge/Bettbox-Mihomo%20Client-000000?style=flat-square)](https://github.com/appshubcc/Bettbox)
+[![FlClash](https://img.shields.io/badge/FlClash-Clash%20Meta%20Client-000000?style=flat-square)](https://github.com/chen08209/FlClash)
+
 > ⚠️ **避坑指南 & 核心声明**
 > 本仓库提供的是一份**高度贴合个人使用习惯**的 Mihomo (原 Clash Meta) [路由配置文件](https://raw.githubusercontent.com/XVSVTsama/mihomo-config-self/refs/heads/main/mihomo.yaml)。
 > 它**不是**一份开箱即用的通用傻瓜式模板。如果您不熟悉 Mihomo 的核心机制、TUN 模式、Fake-IP 以及策略组正则表达式（filter），请**谨慎照搬**。抄作业前，请务必阅读下方说明！
