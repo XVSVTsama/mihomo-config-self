@@ -14,6 +14,7 @@
    - 动态合并 DNS 的 `proxy-server-nameserver-policy`（以脚本为准，模板不预置该键）；
    - 可通过脚本顶部 `ruleOptionsEnable` 开关单独禁用策略组，并自动清理相关引用。
    - `FCM直连` 功能开关：默认开启，隐藏组 FCM 仅含 `DIRECT`；关闭后仅保留 `👉 手动切换`（开关只改 FCM 组内节点，不会移除该组）。
+   - 脚本首行为 Bettbox 兼容声明（`Compatible_With_Bettbox`），必须保持置顶：客户端仅在文件开头检测该声明，无需全量读取到脚本末尾即可识别并显示"自定义规则开关"；删除或下移会导致该入口不显示。
 
    脚本内嵌的标准模板与仓库 [mihomo.yaml](https://raw.githubusercontent.com/XVSVTsama/mihomo-config-self/refs/heads/main/mihomo.yaml) 保持同步。
 
