@@ -4,6 +4,7 @@
 [![Last Commit](https://img.shields.io/github/last-commit/XVSVTsama/mihomo-config-self?style=flat-square&label=Last%20Commit&color=informational)](https://github.com/XVSVTsama/mihomo-config-self/commits/main)
 [![Repo Size](https://img.shields.io/github/repo-size/XVSVTsama/mihomo-config-self?style=flat-square&label=Repo%20Size&color=informational)](https://github.com/XVSVTsama/mihomo-config-self)
 [![Stars](https://img.shields.io/github/stars/XVSVTsama/mihomo-config-self?style=flat-square&label=Stars&color=informational)](https://github.com/XVSVTsama/mihomo-config-self/stargazers)
+[![XVSVTsama](https://img.shields.io/badge/XVSVTsama-Homepage-informational?style=flat-square)](https://github.com/XVSVTsama)
 
 [![Mihomo](https://img.shields.io/badge/Mihomo-ProxyCore%20Client/Server-000000?style=flat-square)](https://github.com/MetaCubeX/mihomo)
 
