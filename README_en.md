@@ -5,7 +5,7 @@
 <h1 align="center">Mihomo (Clash Meta) Configuration Template</h1>
 
 <p align="center">
-  <strong>Highly Customized Personal Edition</strong> · Routing Configuration · Remote Override Script
+  <strong>Extreme Personal Tailored Edition</strong> · Routing Configuration · Remote Override Script
 </p>
 
 <p align="center">
