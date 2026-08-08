@@ -1,0 +1,47 @@
+name: Sync English Translations
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    if: vars.SYNC_ENGLISH_ENABLED != 'false'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Install PyYAML
+        run: pip install pyyaml
+      - name: Detect Chinese changes
+        id: changes
+        run: |
+          FILES="$(git diff-tree --no-commit-id --name-only -r HEAD)"
+          if echo "$FILES" | grep -qE '(^|/)(mihomo\.yaml|script_override\.js|README\.md)$'; then
+            echo "run=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "run=false" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Sync English translations
+        if: steps.changes.outputs.run == 'true'
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GEMINI_MODEL: ${{ vars.GEMINI_MODEL || 'gemini-2.0-flash' }}
+        run: python .github/scripts/sync_english.py
+      - name: Commit generated English files
+        if: steps.changes.outputs.run == 'true'
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "chore: sync English translations from Chinese"
+          file_pattern: "mihomo_en.yaml script_override_en.js README_en.md"
