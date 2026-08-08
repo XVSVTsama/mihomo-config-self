@@ -353,6 +353,7 @@ sub-rules:
 
     - DOMAIN,v6-novelapp.ixigua.com,REJECT
     - DOMAIN-WILDCARD,*novelapp.ixigua.com,REJECT
+    - DOMAIN-WILDCARD,*default.ixigua.com,REJECT
     - DOMAIN,msync-im1-vip6-std.easemob.com,REJECT
     - DOMAIN,apd-pcdnwxlogin.teg.tencent-cloud.net,REJECT
     - DOMAIN,api.iegadp.qq.com,REJECT
@@ -372,19 +373,18 @@ sub-rules:
 
   # URL Rewrite Host 提取
     - DOMAIN-WILDCARD,*.pangolin-sdk-toutiao.com,REJECT
+    - DOMAIN-WILDCARD,*.pglstatp-toutiao.com,REJECT
+    - DOMAIN-WILDCARD,*.pstatp.com,REJECT
+    - DOMAIN,gurd.snssdk.com,REJECT
     - DOMAIN-WILDCARD,*.byteimg.com,REJECT
     - DOMAIN-WILDCARD,*.snssdk.com,REJECT
 
   # MITM Host
     - DOMAIN-WILDCARD,*.pangolin-sdk-toutiao,REJECT
     - DOMAIN-WILDCARD,*.pangolin-sdk-toutiao.*,REJECT
-    - DOMAIN-WILDCARD,*.pstatp.com,REJECT
     - DOMAIN-WILDCARD,*.pstatp.com.*,REJECT
-    - DOMAIN-WILDCARD,*.pglstatp-toutiao.com,REJECT
     - DOMAIN-WILDCARD,*.pglstatp-toutiao.com.*,REJECT
-    - DOMAIN,gurd.snssdk.com,REJECT
     - DOMAIN-WILDCARD,gurd.snssdk.com.*,REJECT
-    - DOMAIN-WILDCARD,*default.ixigua.com,REJECT
 
     - MATCH,DIRECT                                           
 rules:
@@ -429,19 +429,9 @@ rules:
  # - RULE-SET,Grok_IP,🤖 AI大模型
   - IP-CIDR,17.253.4.0/23,🤖 AI大模型,no-resolve
 
-    # 核心域名
-  - DOMAIN-SUFFIX,anthropic.com,🤖 AI大模型
-  - DOMAIN-SUFFIX,claude.ai,🤖 AI大模型
-  - DOMAIN-SUFFIX,claude.com,🤖 AI大模型
-  - DOMAIN-SUFFIX,clau.de,🤖 AI大模型
-  - DOMAIN-SUFFIX,claudemcpclient.com,🤖 AI大模型
-  - DOMAIN-SUFFIX,claudemcpcontent.com,🤖 AI大模型
-  - DOMAIN-SUFFIX,claudeusercontent.com,🤖 AI大模型
   # CDN 和静态资源
-  - DOMAIN,servd-anthropic-website.b-cdn.net,🤖 AI大模型
   - DOMAIN,anthropic.com.cdn.cloudflare.net,🤖 AI大模型
   # 认证 / 内容
-  - DOMAIN,anthropic.auth0.com,🤖 AI大模型
   - DOMAIN,anthropic-com.ghost.io,🤖 AI大模型
   # 监控和遥测
   - DOMAIN-SUFFIX,sentry.io,🤖 AI大模型
@@ -450,13 +440,10 @@ rules:
   - DOMAIN-KEYWORD,datadog,🤖 AI大模型
   - DOMAIN-KEYWORD,sift,🤖 AI大模型
   # 客服 / 第三方 widget
-  - DOMAIN-SUFFIX,intercom.io,🤖 AI大模型
-  - DOMAIN-SUFFIX,intercomcdn.com,🤖 AI大模型
   - DOMAIN,cdn.usefathom.com,🤖 AI大模型
-  # IP 段 / ASN 兜底
+  # IP 段兜底
   - IP-CIDR,160.79.104.0/21,🤖 AI大模型,no-resolve
   - IP-CIDR6,2607:6bc0::/32,🤖 AI大模型,no-resolve
-  - IP-ASN,399358,🤖 AI大模型,no-resolve
   - RULE-SET,ai-1,🤖 AI大模型
   - RULE-SET,ai-2,🤖 AI大模型
 
