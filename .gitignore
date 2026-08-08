@@ -1,0 +1,34 @@
+# OS / Finder / Explorer
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Logs
+*.log
+logs/
+*.tmp
+
+# Editors / IDEs
+.idea/
+.vscode/
+*.swp
+*~
+.history
+
+# Windows
+*.lnk
+
+# Node
+node_modules/
+
+# Python
+__pycache__/
+*.py[cod]
+
+# Backups
+*.bak
+*.orig
+
+# Local env / secrets
+.env
+.env.*
