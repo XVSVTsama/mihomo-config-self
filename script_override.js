@@ -1,3 +1,9 @@
+// Bettbox 兼容声明：客户端只检测脚本前 2000 字符，因此必须放在文件最前面，
+// 检测通过后才会出现"自定义规则开关"入口（参见下方"来源"注释）
+const Compatible_With_Bettbox = { 
+  ruleOptionsEnable: true,
+  autoRemoveDisabledGroupsFromRules: true // Bettbox 参数支持：自动清理已被禁用策略组的引用（proxy-groups 剔除成员，rules 改写指向保底组）
+};
 /**
  * ============================================================================
  *  Bettbox（FlClash 系内核 / mihomo 下游客户端）JS 覆写脚本
@@ -14,7 +20,8 @@
  *    https://github.com/XVSVTsama
  *    最新内容（GitHub 提交）：
  *    https://github.com/XVSVTsama/mihomo-config-self/commits/main/script_override.js
- *    用法：本脚本可直接作为 Bettbox / FlClash 系客户端的远程覆写脚本加载。
+ *    用法：本脚本可直接作为 Bettbox / FlClash 系客户端的远程覆写脚本加载
+ *         （文件首行为 Bettbox 兼容声明，请勿删除）。
  *
  *  用途：
  *    把当前订阅（原始配置）与本仓库维护的"标准模板"（mihomo.yaml）合并成最终生效配置。
@@ -52,11 +59,6 @@
  * ============================================================================
  */
 
-// 适配 Bettbox 自定义配置参数
-const Compatible_With_Bettbox = { 
-  ruleOptionsEnable: true,
-  autoRemoveDisabledGroupsFromRules: true // Bettbox 参数支持：自动清理已被禁用策略组的引用（proxy-groups 剔除成员，rules 改写指向保底组）
-};
 
 const ruleOptionsEnable = {
 
