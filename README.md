@@ -6,7 +6,8 @@
 [![Stars](https://img.shields.io/github/stars/XVSVTsama/mihomo-config-self?style=flat-square&label=Stars&color=informational)](https://github.com/XVSVTsama/mihomo-config-self/stargazers)
 [![XVSVTsama](https://img.shields.io/badge/XVSVTsama-Homepage-informational?style=flat-square)](https://github.com/XVSVTsama)
 
-[![Mihomo](https://img.shields.io/badge/Mihomo-ProxyCore%20Client/Server-000000?style=flat-square)](https://github.com/MetaCubeX/mihomo)
+[![Mihomo](https://img.shields.io/badge/Mihomo-Rule-based%20Tunnel-000000?style=flat-square)](https://github.com/MetaCubeX/mihomo)
+[![Mihomo Core](https://img.shields.io/badge/Mihomo%20Core-Client%20or%20Server-000000?style=flat-square)](https://github.com/MetaCubeX/mihomo)
 
 [![Bettbox](https://img.shields.io/badge/Bettbox-Mihomo/Clash%20Meta%20Client/GUI-000000?style=flat-square)](https://github.com/appshubcc/Bettbox)
 [![FlClash](https://img.shields.io/badge/FlClash-Mihomo/Clash%20Meta%20Client/GUI-000000?style=flat-square)](https://github.com/chen08209/FlClash)
