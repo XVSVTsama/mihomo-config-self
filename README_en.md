@@ -34,7 +34,7 @@
 
 <p align="center">
   <a href="#remote-override">Remote Override JS</a> ·
-  <a href="#core-features">Core Features</a> ·
+  <a href="#core-features">Essential Highlights</a> ·
   <a href="#proxy-groups">Proxy Group Structure</a> ·
   <a href="#before-use">Must Read Before Use</a>
 </p>
@@ -93,7 +93,7 @@ https://raw.githubusercontent.com/XVSVTsama/mihomo-config-self/refs/heads/main/s
 
 <a id="core-features"></a>
 
-## ✨ Core Features (Why configure it this way?)
+## ✨ Essential Highlights (Why configure it this way?)
 
 This configuration integrates modular remote rules (Rule Providers) and fine-grained application-level traffic splitting strategies, born entirely to meet my personal network environment and usage pain points:
 
