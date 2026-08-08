@@ -2,7 +2,7 @@
   <img src="assets/avatar.png" alt="XVSVTsama" width="120" />
 </p>
 
-<h1 align="center">Mihomo (Clash Meta) 配置模板</h1>
+<h1 align="center">Mihomo (Clash Meta) 配置模板 </h1>
 
 <p align="center">
   <strong>高度定制自用版</strong> · 路由配置 · 远程覆写脚本
