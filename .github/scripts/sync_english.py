@@ -303,11 +303,21 @@ def main():
             log(f"Warning: Failed to load glossary: {e}")
 
     written = []
-    untouched = [dst for _, dst, _ in PAIRS]
-    total = len(PAIRS)
+    sync_targets = [
+        name.strip()
+        for name in os.environ.get("SYNC_TARGETS", "").split(",")
+        if name.strip()
+    ]
+    pairs = PAIRS
+    if sync_targets:
+        pairs = [
+            pair for pair in PAIRS if pair[0] in sync_targets
+        ]
+    untouched = [dst for _, dst, _ in pairs]
+    total = len(pairs)
     switched = False
 
-    for idx, (src_name, dst_name, kind) in enumerate(PAIRS, start=1):
+    for idx, (src_name, dst_name, kind) in enumerate(pairs, start=1):
         src_path = ROOT / src_name
         dst_path = ROOT / dst_name
         log("[%d/%d] %s -> %s" % (idx, total, src_name, dst_name))

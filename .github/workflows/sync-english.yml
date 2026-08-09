@@ -44,6 +44,8 @@ jobs:
             else
               echo "run=false" >> "$GITHUB_OUTPUT"
             fi
+            TARGETS="$(printf '%s\n' "$FILES" | grep -E '(^|/)(mihomo\.yaml|script_override\.js|README\.md)$' | sed 's#^.*/##' | sort -u | tr '\n' ',')"
+            echo "targets=${TARGETS%,}" >> "$GITHUB_OUTPUT"
           fi
       - name: Sync English translations
         if: steps.changes.outputs.run == 'true'
@@ -55,6 +57,7 @@ jobs:
           SYNC_REQUEST_TIMEOUT: ${{ vars.SYNC_REQUEST_TIMEOUT || '60' }}
           SYNC_MAX_ATTEMPTS: ${{ vars.SYNC_MAX_ATTEMPTS || '3' }}
           SYNC_FILE_TIMEOUT: ${{ vars.SYNC_FILE_TIMEOUT || '300' }}
+          SYNC_TARGETS: ${{ steps.changes.outputs.targets }}
         run: python .github/scripts/sync_english.py
       - name: Commit generated English files
         if: steps.changes.outputs.run == 'true'

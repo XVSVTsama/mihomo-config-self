@@ -57,11 +57,12 @@
 
 > 复制仓库后会生成双语仓库：`mihomo.yaml`、`mihomo_en.yaml`、`script_override.js`、`script_override_en.js` 与 `assets/avatar.png` 会保留；完整说明会保存为 `README_full.md` 和 `README_full_en.md`，并生成简化中文 `README.md` 与简化英文 `README_en.md`。你的永久配置链接为 `https://raw.githubusercontent.com/<你的用户名>/<你的仓库名>/main/<文件名>`。
 
-   默认远程覆写脚本地址（代码块右上角可直接复制）：
+   默认远程覆写脚本地址：
 
-```text
-https://raw.githubusercontent.com/XVSVTsama/mihomo-config-self/refs/heads/main/script_override.js
-```
+| 注释 | 远程覆写脚本地址 |
+| --- | --- |
+| 中文注释 | [https://raw.githubusercontent.com/XVSVTsama/mihomo-config-self/refs/heads/main/script_override.js](https://raw.githubusercontent.com/XVSVTsama/mihomo-config-self/refs/heads/main/script_override.js) |
+| 英文注释 | [https://raw.githubusercontent.com/XVSVTsama/mihomo-config-self/refs/heads/main/script_override_en.js](https://raw.githubusercontent.com/XVSVTsama/mihomo-config-self/refs/heads/main/script_override_en.js) |
 
    在 Bettbox / FlClash 系客户端中给订阅挂上该脚本即可：
    - 订阅里的真实节点自动填入 `proxies` 与各"单节点"占位策略组（👉 手动切换、♻️ 自动选择、🔄 负载均衡、📲 Telegram、🎮 Games-Global）；
