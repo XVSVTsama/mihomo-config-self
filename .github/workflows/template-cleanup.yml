@@ -14,8 +14,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Preserve original README
-        run: cp README.md README_full.md
-      - name: Generate default README
+        run: |
+          cp README.md README_full.md
+          cp README_en.md README_full_en.md
+      - name: Generate simplified Chinese README
         run: |
           cat > README.md <<'EOF'
           <p align="center">
@@ -24,19 +26,42 @@ jobs:
 
           # Mihomo (Clash Meta) 配置模板
 
-          本仓库由 GitHub 模板仓库生成，仅保留配置所需的文件。
+          本仓库由 GitHub 模板仓库生成，保留双语配置与完整说明。
 
-          - `README.md`
-          - `README_full.md`
+          - `README.md`（简化中文） · `README_en.md`（简化英文）
+          - `README_full.md`（完整中文） · `README_full_en.md`（完整英文）
+          - `mihomo.yaml` · `mihomo_en.yaml`
+          - `script_override.js` · `script_override_en.js`
           - `assets/avatar.png`
-          - `mihomo.yaml`
-          - `script_override.js`
 
           源仓库：https://github.com/XVSVTsama/mihomo-config-self
 
           源作者：https://github.com/XVSVTsama
 
-          [<kbd>查看完整说明</kbd>](README_full.md)
+          [English](README_en.md) · [查看完整说明](README_full.md) · [Read Full Docs](README_full_en.md)
+          EOF
+      - name: Generate simplified English README
+        run: |
+          cat > README_en.md <<'EOF'
+          <p align="center">
+            <img src="assets/avatar.png" alt="XVSVTsama" width="120" />
+          </p>
+
+          # Mihomo (Clash Meta) Configuration Template
+
+          This repository is generated from the GitHub template and keeps bilingual configuration files plus full documentation.
+
+          - `README.md` (Simplified Chinese) · `README_en.md` (Simplified English)
+          - `README_full.md` (Full Chinese) · `README_full_en.md` (Full English)
+          - `mihomo.yaml` · `mihomo_en.yaml`
+          - `script_override.js` · `script_override_en.js`
+          - `assets/avatar.png`
+
+          Source repository: https://github.com/XVSVTsama/mihomo-config-self
+
+          Source author: https://github.com/XVSVTsama
+
+          [中文](README.md) · [查看完整说明](README_full.md) · [Read Full Docs](README_full_en.md)
           EOF
       - name: Remove template-only files
         run: |
