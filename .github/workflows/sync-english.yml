@@ -38,8 +38,8 @@ jobs:
             else
               FILES="$(git diff-tree --no-commit-id --name-only -r HEAD)"
             fi
-            # Trigger on Chinese sources, English files (manual edits), or Glossary updates
-            if echo "$FILES" | grep -qE '(^|/)(mihomo\.yaml|script_override\.js|README\.md|mihomo_en\.yaml|script_override_en\.js|README_en\.md|\.github/translation_glossary\.json)$'; then
+            # Trigger on Chinese sources or Glossary updates
+            if echo "$FILES" | grep -qE '(^|/)(mihomo\.yaml|script_override\.js|README\.md|\.github/translation_glossary\.json)$'; then
               echo "run=true" >> "$GITHUB_OUTPUT"
             else
               echo "run=false" >> "$GITHUB_OUTPUT"

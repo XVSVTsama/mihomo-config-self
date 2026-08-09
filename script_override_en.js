@@ -80,7 +80,7 @@ const ruleOptionsEnable = {
   // --- Node and Network Feature Switches ---
   '强制证书验证': false,   // When enabled, uniformly sets subscription nodes skip-cert-verify to false (forcing certificate verification); when disabled, does not interfere and retains the subscription nodes' original settings. Applies equally to all nodes
   '启用 Reality 增强': true, // Whether to enable support-x25519mlkem768 (X25519MLKEM768 post-quantum key agreement) for Reality nodes with non-empty public-key/short-id
-  'FCM直_直连': true,          // Default ON: The hidden FCM group contains only DIRECT; when disabled, only 👉 Manual Select is retained (FCM group is not removed). The switch icon is taken from the icon field of the FCM proxy group.
+  'FCM直连': true,          // Default ON: The hidden FCM group contains only DIRECT; when disabled, only 👉 Manual Select is retained (FCM group is not removed). The switch icon is taken from the icon field of the FCM proxy group.
 };
 
 // When the same domain rule key appears, whether the subscription's original configuration (true) or template (false) takes priority (the template currently does not configure
@@ -830,7 +830,7 @@ const serviceConfigs = TEMPLATE['proxy-groups']
   }))
   .concat([
     {
-      name: 'FCM直_直连',
+      name: 'FCM直连',
       icon: (TEMPLATE['proxy-groups'].find((group) => group && group.name === 'FCM') || {}).icon
     },
     {
@@ -1413,7 +1413,7 @@ function main(config, profileName) {
 
   // ---- 5.5 FCM Direct Switch: When enabled by default, the hidden FCM group contains only DIRECT;
   //      when disabled, only 👉 Manual Select is retained (this switch does not remove the FCM group, only rewrites the nodes inside the group) ----
-  const fcmDirectEnabled = ruleOptionsEnable['FCM直_直连'] === true;
+  const fcmDirectEnabled = ruleOptionsEnable['FCM直连'] === true;
   result['proxy-groups'].forEach((group) => {
     if (group && group.name === 'FCM') {
       group.proxies = fcmDirectEnabled ? ['DIRECT'] : ['👉 手动切换'];
