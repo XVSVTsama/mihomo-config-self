@@ -125,17 +125,17 @@ proxy-groups:
   - name: ✖️ Twitter
     icon: "https://www.clashverge.dev/assets/icons/twitter.svg"
     type: select
-    filter: "US|Residential"
+    filter: "美国|住宅"
     include-all-proxies: true
-  - name: 🤖 AI
+  - name: 🤖 AI大模型
     icon: "https://github.com/DustinWin/ruleset_geodata/releases/download/icons/ai.png"
     type: select
-    filter: "US|Residential"
+    filter: "美国|住宅"
     include-all-proxies: true
   - name: 🎵 TikTok
     icon: "https://github.com/DustinWin/ruleset_geodata/releases/download/icons/tiktok.png"
     type: select
-    filter: "US|Residential"
+    filter: "美国|住宅"
     include-all-proxies: true
   # FCM: Google FCM domain traffic routing target (routed to this group after hitting RULE-SET,googlefcm,FCM).
   # This group is not hidden in the template to show that this proxy group actually exists and is a real traffic routing target in the configuration;
@@ -424,28 +424,28 @@ rules:
   - RULE-SET,telegramcidr,📲 Telegram,no-resolve
   - RULE-SET,telegram_domain,📲 Telegram
 
-  - RULE-SET,Gemini_Domain,🤖 AI
-  - RULE-SET,Grok_Domain,🤖 AI
- # - RULE-SET,Grok_IP,🤖 AI
-  - IP-CIDR,17.253.4.0/23,🤖 AI,no-resolve
+  - RULE-SET,Gemini_Domain,🤖 AI大模型
+  - RULE-SET,Grok_Domain,🤖 AI大模型
+ # - RULE-SET,Grok_IP,🤖 AI大模型
+  - IP-CIDR,17.253.4.0/23,🤖 AI大模型,no-resolve
 
   # CDN and static resources
-  - DOMAIN,anthropic.com.cdn.cloudflare.net,🤖 AI
+  - DOMAIN,anthropic.com.cdn.cloudflare.net,🤖 AI大模型
   # Authentication / Content
-  - DOMAIN,anthropic-com.ghost.io,🤖 AI
+  - DOMAIN,anthropic-com.ghost.io,🤖 AI大模型
   # Monitoring and telemetry
-  - DOMAIN-SUFFIX,sentry.io,🤖 AI
-  - DOMAIN-SUFFIX,statsigapi.net,🤖 AI
-  - DOMAIN,browser-intake-us5-datadoghq.com,🤖 AI
-  - DOMAIN-KEYWORD,datadog,🤖 AI
-  - DOMAIN-KEYWORD,sift,🤖 AI
+  - DOMAIN-SUFFIX,sentry.io,🤖 AI大模型
+  - DOMAIN-SUFFIX,statsigapi.net,🤖 AI大模型
+  - DOMAIN,browser-intake-us5-datadoghq.com,🤖 AI大模型
+  - DOMAIN-KEYWORD,datadog,🤖 AI大模型
+  - DOMAIN-KEYWORD,sift,🤖 AI大模型
   # Customer service / Third-party widget
-  - DOMAIN,cdn.usefathom.com,🤖 AI
+  - DOMAIN,cdn.usefathom.com,🤖 AI大模型
   # IP range fallback
-  - IP-CIDR,160.79.104.0/21,🤖 AI,no-resolve
-  - IP-CIDR6,2607:6bc0::/32,🤖 AI,no-resolve
-  - RULE-SET,ai-1,🤖 AI
-  - RULE-SET,ai-2,🤖 AI
+  - IP-CIDR,160.79.104.0/21,🤖 AI大模型,no-resolve
+  - IP-CIDR6,2607:6bc0::/32,🤖 AI大模型,no-resolve
+  - RULE-SET,ai-1,🤖 AI大模型
+  - RULE-SET,ai-2,🤖 AI大模型
 
   - RULE-SET,google,🌍 PROXY
   - RULE-SET,google-cn,🌍 PROXY

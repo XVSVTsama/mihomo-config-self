@@ -55,6 +55,11 @@ def strip_yaml_comments(text):
     return "\n".join(new_lines)
 
 def main():
+    try:
+        sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+    except (AttributeError, ValueError):
+        pass
+
     if len(sys.argv) != 4:
         print("Usage: check_code_sync.py <type: js|yaml> <file1> <file2>")
         sys.exit(1)

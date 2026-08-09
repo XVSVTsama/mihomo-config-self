@@ -27,7 +27,8 @@ const Compatible_With_Bettbox = {
  *
  *  Merge Rules:
  *    1. Except for the parts specially described in items 2, 3, and 4 below, the final configuration is subject to TEMPLATE
- *       (corresponding to the mihomo.yaml template), meaning that fields already written in the template will replace fields with the same name in the subscription's original configuration
+ *       (corresponding to the mihomo.yaml template), meaning that fields already written in the template will replace
+ *       fields with the same name in the subscription's original configuration
  *       (such as DNS details, rules, rule-providers, sniffer,
  *       TUN, proxy-groups group structures, etc.). Top-level fields undefined in the template within the subscription's original configuration will not be retained
  *       (such as allow-lan or bind-address that come with certain subscriptions). The only exception is proxy-providers:
@@ -39,7 +40,8 @@ const Compatible_With_Bettbox = {
  *    3. In proxy-groups, groups where the template explicitly writes "proxies: " (value is empty/null, i.e.,
  *       those groups noted as "All single nodes here" in the template comments: 👉 Manual Select, ♻️ Auto Select,
  *       🔄 Load Balance, 📲 Telegram, 🎮 Games-Global) will automatically be filled with the names of all nodes in the subscription;
- *       if the subscription also includes proxy-providers, these groups will simultaneously write use references for all providers. Other groups remain as they are in the template and will not be overwritten or supplemented by subscription nodes.
+ *       if the subscription also includes proxy-providers, these groups will simultaneously write use references for all providers.
+ *       Other groups remain as they are in the template and will not be overwritten or supplemented by subscription nodes.
  *
  *    4. [Special Processing] DNS and hosts:
  *       - hosts rewrites node servers only when dns.use-hosts=true and dns.listen forms a closed loop with the DNS endpoints actually participating in node resolution, unrelated to policy matching;
