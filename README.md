@@ -59,10 +59,9 @@
 
    默认远程覆写脚本地址：
 
-| 注释 | 远程覆写脚本地址 |
-| --- | --- |
-| 中文注释 | [https://raw.githubusercontent.com/XVSVTsama/mihomo-config-self/refs/heads/main/script_override.js](https://raw.githubusercontent.com/XVSVTsama/mihomo-config-self/refs/heads/main/script_override.js) |
-| 英文注释 | [https://raw.githubusercontent.com/XVSVTsama/mihomo-config-self/refs/heads/main/script_override_en.js](https://raw.githubusercontent.com/XVSVTsama/mihomo-config-self/refs/heads/main/script_override_en.js) |
+中文注释：[https://raw.githubusercontent.com/XVSVTsama/mihomo-config-self/refs/heads/main/script_override.js](https://raw.githubusercontent.com/XVSVTsama/mihomo-config-self/refs/heads/main/script_override.js)
+
+英文注释：[https://raw.githubusercontent.com/XVSVTsama/mihomo-config-self/refs/heads/main/script_override_en.js](https://raw.githubusercontent.com/XVSVTsama/mihomo-config-self/refs/heads/main/script_override_en.js)
 
    在 Bettbox / FlClash 系客户端中给订阅挂上该脚本即可：
    - 订阅里的真实节点自动填入 `proxies` 与各"单节点"占位策略组（👉 手动切换、♻️ 自动选择、🔄 负载均衡、📲 Telegram、🎮 Games-Global）；
