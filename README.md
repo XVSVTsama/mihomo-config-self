@@ -55,7 +55,7 @@
 
 [<kbd>建立私人配置仓库</kbd>](https://github.com/new?template_name=mihomo-config-self&template_owner=XVSVTsama)
 
-> 复制仓库后会自动清理：`mihomo.yaml` 与 `script_override.js` 会保留，完整说明会复制为 `README_full.md`，同时生成一份带来源标注的 `README.md` 并提供查看完整说明的按钮。你的永久配置链接为 `https://raw.githubusercontent.com/<你的用户名>/<你的仓库名>/main/<文件名>`。
+> 复制仓库后会生成双语仓库：`mihomo.yaml`、`mihomo_en.yaml`、`script_override.js`、`script_override_en.js` 与 `assets/avatar.png` 会保留；完整说明会保存为 `README_full.md` 和 `README_full_en.md`，并生成简化中文 `README.md` 与简化英文 `README_en.md`。你的永久配置链接为 `https://raw.githubusercontent.com/<你的用户名>/<你的仓库名>/main/<文件名>`。
 
    默认远程覆写脚本地址（代码块右上角可直接复制）：
 
