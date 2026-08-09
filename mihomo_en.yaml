@@ -127,7 +127,7 @@ proxy-groups:
     type: select
     filter: "US|Residential"
     include-all-proxies: true
-  - name: 🤖 AI
+  - name: 🤖 AI大模型
     icon: "https://github.com/DustinWin/ruleset_geodata/releases/download/icons/ai.png"
     type: select
     filter: "US|Residential"
@@ -137,15 +137,15 @@ proxy-groups:
     type: select
     filter: "US|Residential"
     include-all-proxies: true
-  # FCM: Google FCM domain traffic routing target (routed to this group after matching RULE-SET,googlefcm,FCM).
-  # This group is not hidden in the template to show that this proxy group actually exists and is a real traffic routing target in the configuration;
-  # Setting hidden in the override script is for a cleaner interface: the script uses Bettbox custom script UI adaptation,
-  # and controls this group's proxies: field with the FCM Direct Connect switch (on = DIRECT only, off = 👉 Manual Select only),
+  # FCM: Google FCM domain traffic splitting target (routes to this group after hitting RULE-SET,googlefcm,FCM).
+  # This group is not hidden in the template to indicate that this proxy group actually exists and is a real traffic splitting target in the configuration;
+  # Hiding it in the override script is for a cleaner UI: the script leverages the Bettbox custom script UI adaptation,
+  # using the FCM Direct switch to control this group's proxies: field (on = DIRECT only, off = 👉 Manual Select only),
   # making it convenient for users who need it without directly modifying the configuration file.
   # The switch icon is taken from this group's icon field, and changing the icon only requires modifying it here.
   - name: FCM
     icon: "https://fastly.jsdelivr.net/gh/MiToverG422/Qure@master/IconSet/Color/fcm.png"
-    # hidden: true  # Hide this group in the script to keep the interface clean; template keeps it visible to indicate the group actually exists
+    # hidden: true  # Hide this group in the script to keep the UI clean; kept visible in the template to indicate the group actually exists
     type: select
     proxies:
       - 👉 手动切换
@@ -416,7 +416,7 @@ rules:
   - DOMAIN-SUFFIX,cdngslb.com,DIRECT
   # Akamai CDN distribution domain
   - DOMAIN-SUFFIX,edgekey.net,DIRECT
-  # Amazon CloudFront distribution domain (API CDN)
+  # Amazon CloudFront distribution domain (API interface CDN)
   - DOMAIN-SUFFIX,cloudfront.net,DIRECT
 
   - PROCESS-NAME-REGEX,.*nagram.*,📲 Telegram
@@ -429,7 +429,7 @@ rules:
  # - RULE-SET,Grok_IP,🤖 AI
   - IP-CIDR,17.253.4.0/23,🤖 AI,no-resolve
 
-  # CDN and static resources
+  # CDN and static assets
   - DOMAIN,anthropic.com.cdn.cloudflare.net,🤖 AI
   # Authentication / Content
   - DOMAIN,anthropic-com.ghost.io,🤖 AI
