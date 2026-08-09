@@ -1,11 +1,11 @@
 // Bettbox Compatibility Declaration: The expected behavior of the Bettbox client is to recognize this declaration at the beginning of the script (rather than reading it fully).
-// The script must follow this convention: The declaration must be placed at the top; deleting or moving it down will cause the "Custom Rule Switch" entry not to be displayed.
+// The script must follow this convention: the declaration must be at the very top, and deleting or moving it down will cause the "Custom Rule Switch" entry to not be displayed.
 const Compatible_With_Bettbox = {
   ruleOptionsEnable: true
 };
 /**
  * ============================================================================
- *  Bettbox (FlClash Series Kernel / Mihomo Downstream Client) JS Override Script
+ *  Bettbox (FlClash-based Kernel / mihomo Downstream Client) JS Override Script
  * ============================================================================
  *
  *  Source:
@@ -19,41 +19,34 @@ const Compatible_With_Bettbox = {
  *    https://github.com/XVSVTsama
  *    Latest Content (GitHub Commit):
  *    https://github.com/XVSVTsama/mihomo-config-self/commits/main/script_override.js
- *    Usage: This script can be loaded directly as a remote override script for Bettbox / FlClash series clients
- *         (the first line of the file is the Bettbox compatibility declaration, please do not delete it).
+ *    Usage: This script can be loaded directly as a remote override script for Bettbox / FlClash-based clients
+ *         (The first line of the file is the Bettbox compatibility declaration, please do not delete it).
  *
  *  Purpose:
- *    Merge the current subscription (original configuration) with the "Standard Template" (mihomo.yaml) maintained in this repository into the final effective configuration.
+ *    Merges the current subscription (original configuration) with the "Standard Template" (mihomo.yaml) maintained in this repository into the final effective configuration.
  *
  *  Merge Rules:
- *    1. Except for the parts specially described in items 2, 3, and 4 below, the final configuration is subject to TEMPLATE
- *       (corresponding to the mihomo.yaml template), meaning that fields already written in the template will replace
- *       fields with the same name in the subscription's original configuration
- *       (such as DNS details, rules, rule-providers, sniffer,
- *       TUN, proxy-groups group structures, etc.). Top-level fields undefined in the template within the subscription's original configuration will not be retained
+ *    1. Except for the special instructions in items 2, 3, and 4 below, the final configuration is subject to the TEMPLATE
+ *       (corresponding to the mihomo.yaml template). That is, fields already written in the template will replace the fields with the same name in the subscription's original configuration
+ *       (such as DNS details, rules, rule-providers, sniffer, tun, proxy-groups grouping structures, etc.). Top-level fields undefined by the template in the subscription's original configuration will not be retained
  *       (such as allow-lan or bind-address that come with certain subscriptions). The only exception is proxy-providers:
  *       If the subscription comes with proxy-providers, they will be retained as-is and injected into the final configuration.
  *
- *    2. proxies: Use the real node list from the subscription's original configuration (this item in the template is empty by default,
- *       acting merely as a placeholder).
+ *    2. proxies: Uses the real node list from the subscription's original configuration (this item is empty in the template by default, serving just as a placeholder).
  *
- *    3. In proxy-groups, groups where the template explicitly writes "proxies: " (value is empty/null, i.e.,
- *       those groups noted as "All single nodes here" in the template comments: 👉 Manual Select, ♻️ Auto Select,
- *       🔄 Load Balance, 📲 Telegram, 🎮 Games-Global) will automatically be filled with the names of all nodes in the subscription;
- *       if the subscription also includes proxy-providers, these groups will simultaneously write use references for all providers.
- *       Other groups remain as they are in the template and will not be overwritten or supplemented by subscription nodes.
+ *    3. In proxy-groups, groups where "proxies:" is explicitly written in the template (with a value of empty/null, which are the groups marked as "all single nodes here" in the template comments: 👉 Manual Select, ♻️ Auto Select, 🔄 Load Balance, 📲 Telegram, 🎮 Games-Global) will automatically be populated with the names of all nodes in the subscription; if the subscription also contains proxy-providers, these groups will simultaneously have their `use` references set to all providers. The remaining groups remain as they are in the template and will not be overwritten or supplemented by subscription nodes.
  *
- *    4. [Special Processing] DNS and hosts:
- *       - hosts rewrites node servers only when dns.use-hosts=true and dns.listen forms a closed loop with the DNS endpoints actually participating in node resolution, unrelated to policy matching;
+ *    4. [Special Handling] DNS and hosts:
+ *       - hosts rewrites node servers only when `dns.use-hosts=true` and `dns.listen` forms a closed loop with the DNS endpoint actually participating in node resolution, and has nothing to do with policy matching;
  *       - Node DNS priority: proxy-server-nameserver-policy > proxy-server-nameserver
  *         (private only) > nameserver-policy > nameserver (private only);
- *       - Public DNS is only used to identify private DNS, preventing public DNS from entering node resolution;
+ *       - Public DNS is used only to identify private DNS and prevent public DNS from entering node resolution;
  *       - The template's global proxy-server-nameserver is always retained as the final fallback;
- *       Conflicts of the same key are determined by NAMESERVER_POLICY_PREFER_ORIGINAL.
+ *       When identical key conflicts occur, priority is determined by NAMESERVER_POLICY_PREFER_ORIGINAL.
  *
- *  Usage Method (Common for Bettbox / FlClash series clients):
- *    Config → Click "..." in the top-right corner of the corresponding subscription → Edit Override Script (or "Open Script") → Create new script,
- *    Paste the entire contents of this file and save, then enable this script on that subscription.
+ *  Usage (General for Bettbox / FlClash series clients):
+ *    Profiles → Click "..." on the corresponding subscription → Edit Override Script (or "Open Script") → New Script,
+ *    Paste the entire contents of this file, save it, and then enable this script on that subscription.
  * ============================================================================
  */
 
@@ -62,17 +55,17 @@ const ruleOptionsEnable = {
 
   /**
  * Custom Configuration Options
- * Define switches individually for each proxy group (policy group) in the template:
+ * Define individual switches for each proxy group (policy group) in the template:
  * true  = Enable this policy group
- * false = Disable this policy group (automatically removed from proxy-groups, and references in other groups will be cleaned up)
- * Additionally, there are functional switches (such as FCM Direct): only adjust nodes within the group, without involving the start/stop of the policy group.
+ * false = Disable this policy group (automatically removed from proxy-groups, and references in other groups are cleaned up)
+ * There are also feature switches (such as FCM Direct): only adjusts nodes within the group, without involving the start/stop of the policy group.
  */
 
   // --- Individual Control Switches for Proxy Groups ---
   '🌍 PROXY': true,        // Main proxy policy group
-  '🔄 负载均衡': true,     // Load balance policy group
-  '👉 手动切换': true,    // Manual select policy group
-  '♻️ 自动选择': true,     // Delay auto select policy group
+  '🔄 负载均衡': true,     // Load Balance policy group
+  '👉 手动切换': true,    // Manual Select policy group
+  '♻️ 自动选择': true,     // Delay Auto Select policy group
   '📲 Telegram': true,     // Telegram communication software policy group
   '🎮 Games-Global': true, // Gaming policy group
   '✖️ Twitter': true,      // Twitter social platform policy group
@@ -80,13 +73,12 @@ const ruleOptionsEnable = {
   '🎵 TikTok': true,       // TikTok video platform policy group
 
   // --- Node and Network Feature Switches ---
-  '强制证书验证': false,   // When enabled, uniformly sets skip-cert-verify of subscription nodes to false (forces certificate validation); when disabled, does not interfere and retains the original settings of subscription nodes. Applies equally to all nodes.
-  '启用 Reality 增强': true, // Whether to enable support-x25519mlkem768 (X25519MLKEM768 post-quantum key agreement) for Reality nodes with non-empty public-key/short-id
-  'FCM直连': true,          // Enabled by default: Hidden group FCM contains DIRECT only; when disabled, only 👉 Manual Select is retained (FCM group is not removed). The switch icon is taken from the icon field of the FCM proxy group.
+  '强制证书验证': false,   // When enabled, uniformly sets `skip-cert-verify` to false for all subscription nodes (forcing certificate verification); when disabled, leaves them untouched, preserving the original settings of the subscription nodes. Applies equally to all nodes.
+  '启用 Reality 增强': true, // Whether to enable support-x25519mlkem768 (X25519MLKEM768 post-quantum key exchange) for Reality nodes with non-empty public-key/short-id.
+  'FCM直连': true,          // Enabled by default: hides the FCM group to contain DIRECT only; when disabled, only 👉 Manual Select is retained (FCM group is not removed). Switch icon is fetched from the icon field of the FCM proxy group.
 };
 
-// When the same domain rule key appears, whether the subscription's original configuration (true) or the template (false) takes priority (the template currently does not configure
-// proxy-server-nameserver-policy, so this switch currently only affects merging between subscription sources)
+// When the same domain rule key appears, determines whether the subscription's original configuration (true) or the template (false) takes priority (the template currently does not configure proxy-server-nameserver-policy, so this switch currently only affects merging between subscription sources).
 const NAMESERVER_POLICY_PREFER_ORIGINAL = true;
 
 // ============================================================================
@@ -234,21 +226,21 @@ const TEMPLATE = {
       "type": "select"
     },
     {
-      "filter": "美国|住宅",
+      "filter": "US|Residential",
       "icon": "https://www.clashverge.dev/assets/icons/twitter.svg",
       "include-all-proxies": true,
       "name": "✖️ Twitter",
       "type": "select"
     },
     {
-      "filter": "美国|住宅",
+      "filter": "US|Residential",
       "icon": "https://github.com/DustinWin/ruleset_geodata/releases/download/icons/ai.png",
       "include-all-proxies": true,
       "name": "🤖 AI大模型",
       "type": "select"
     },
     {
-      "filter": "美国|住宅",
+      "filter": "US|Residential",
       "icon": "https://github.com/DustinWin/ruleset_geodata/releases/download/icons/tiktok.png",
       "include-all-proxies": true,
       "name": "🎵 TikTok",
@@ -636,7 +628,7 @@ const TEMPLATE = {
       "2a10:50c0::ad1:ff/128",
       "2a10:50c0::ad2:ff/128",
 
-  // --- 6. CleanBrowsing (Security/Adult Content Blocking) ---
+  // --- 6. CleanBrowsing (Safety/Adult Content Blocking) ---
       "185.228.168.9/32",
       "185.228.169.9/32",
 
@@ -815,10 +807,9 @@ const TEMPLATE = {
   "unified-delay": true
 };
 
-// Bettbox visual switch icons: The client reads global serviceConfigs (name corresponds to the key in ruleOptionsEnable,
-// icon is the icon displayed for that switch row). Only proxy groups are covered above; source of icons for functional switches:
-// FCM Direct is derived from the icon field of the FCM proxy group (changing the proxy group icon in one place synchronizes it);
-// The remaining functional switches (Force Certificate Verification, Enable Reality Enhancement) specify fixed icons directly here.
+// Bettbox visual switch icons: The client will read global serviceConfigs (where `name` corresponds to the key in ruleOptionsEnable, and `icon` is the icon displayed for that switch row). Only proxy groups are covered above; source of icons for feature switches:
+// FCM Direct is derived from the icon field of the FCM proxy group (changing the proxy group icon in one place syncs it);
+// The remaining feature switches (Force Certificate Verification, Enable Reality Enhancement) explicitly specify fixed icons here.
 const serviceConfigs = TEMPLATE['proxy-groups']
   .filter(
     (group) =>
@@ -850,13 +841,13 @@ const serviceConfigs = TEMPLATE['proxy-groups']
 // Utility Functions
 // ============================================================================
 
-// Deep clone: Prevents mutual pollution of the same TEMPLATE instance when main() is called multiple times
+// Deep clone: Prevents mutual pollution of the same TEMPLATE instance when main() is called multiple times.
 function deepClone(value) {
   return JSON.parse(JSON.stringify(value));
 }
 
-// Determine whether it is a placeholder group of "All single nodes here" in the template:
-// proxies field is explicitly written, and its value is null, e.g.:
+// Determines whether a group is the placeholder group corresponding to "all single nodes here" in the template:
+// Explicitly writes the proxies field with a value of null, for example:
 //   - name: 👉 手动切换
 //     proxies:
 //     type: select
@@ -868,7 +859,7 @@ function isAllNodesPlaceholder(group) {
 // DNS Node Domain Smart Supplement Logic
 // =====================================================
 
-// Check whether the server is an IP
+// Determines whether the server is an IP
 function isIPAddress(host) {
   if (!host || typeof host !== "string") {
     return true;
@@ -930,7 +921,7 @@ function matchWildcardDomain(rule, host) {
     );
   }
 
-  // Regular domain
+  // Normal domain
   return host === rule;
 }
 
@@ -941,7 +932,7 @@ function asNameserverList(nameservers) {
 
   return typeof nameservers === "string" ? [nameservers] : [];
 } 
-// Compare whether two nameserver lists are equivalent (ignoring order and duplicates, compared as sets)
+// Compares whether two nameserver lists are equivalent (ignoring order and duplicates, compared as sets)
 function sameNameserverSet(a, b) {
   if (!Array.isArray(a) || !Array.isArray(b)) return false;
   const sa = new Set(a);
@@ -949,15 +940,15 @@ function sameNameserverSet(a, b) {
   return sa.size === sb.size && Array.from(sa).every((value) => sb.has(value));
 }
 
-// Public DNS identification table: Used to distinguish between "public directly connectable DNS" and "subscription provider/user private DNS".
-// Data refers to the public DNS list in the local MyClash repository, but only borrows the identification table here, not copying its processing logic.
+// Public DNS identification table: Used to distinguish between "public directly connectable DNS" and "airport/user private DNS".
+// Data references the public DNS list in the local MyClash repository, but only borrows the identification table here without copying its processing logic.
 const publicDnsList = [
   // Domestic
   '223.5.5.5', '223.6.6.6', '119.29.29.29', '1.12.12.12',
   '120.53.53.53', '114.114.114.114', '180.76.76.76', '1.2.4.8',
   '116.116.116.116', '101.226.4.6', '123.125.81.6', '180.184.1.1',
   '180.184.2.2',
-  // Foreign
+  // Overseas
   '1.1.1.1', '1.0.0.1', '8.8.8.8', '8.8.4.4', '9.9.9.9',
   '149.112.112.112', '208.67.222.222', '208.67.220.220',
   '94.140.14.14', '94.140.15.15', '76.76.2.0', '76.76.10.0',
@@ -1028,7 +1019,7 @@ function hasDnsListenLoop(dns) {
   return false;
 }
 
-// Extract DNS merge sources from the original configuration.
+// Extract DNS merge sources from original configuration.
 function collectDnsRules(config) {
   const result = {
     nameservers: [],
@@ -1077,7 +1068,7 @@ function collectDnsRules(config) {
   return result;
 }
 
-// Resolve multi-level hosts mapping chains: follow step-by-step when the target is still a domain, until the end point is an IP, no further mappings exist, or a loop forms
+// Resolve hosts multi-level mapping chain: Follows step-by-step when the target is still a domain, until the endpoint is an IP, no more mappings exist, or a cycle is formed.
 function resolveHostsChain(startDomain, hosts) {
   const chain = [];
   const visited = new Set();
@@ -1114,7 +1105,7 @@ function resolveHostsChain(startDomain, hosts) {
   return { target: "", chain, type: "cycle" };
 }
 
-// Smart DNS supplementation based on node domains
+// Smartly supplement DNS based on node domains
 function smartMergeDnsNode(config, result) {
   const rules = collectDnsRules(config);
   const newPolicy = result.dns["proxy-server-nameserver-policy"] || {};
@@ -1137,8 +1128,7 @@ function smartMergeDnsNode(config, result) {
   }
 
   // Process hosts first: rewrite proxy.server before matching DNS policies.
-  // Some subscriptions' proxy-server-nameserver is udp://127.0.0.1:xxx, combined with local mihomo DNS
-  // module's hosts; rewriting proxy.server from hosts can bypass this dependency.
+  // Some subscriptions use proxy-server-nameserver as udp://127.0.0.1:xxx, coupled with hosts inside the local mihomo DNS module; rewriting proxy.server from hosts bypasses this dependency.
   for (const proxy of proxies) {
     if (!proxy || typeof proxy !== "object") {
       continue;
@@ -1180,8 +1170,7 @@ function smartMergeDnsNode(config, result) {
     }
   }
 
-  // Hosts rewriting and policy matching are independent: policy keys are matched only against
-  // the subscription's original node domains.
+  // Hosts rewriting and policy matching are independent: policy keys are matched exclusively against the subscription's original node domains.
   const matchesAnyNodeDomain = (rule) => {
     for (const domain of originalDomains) {
       if (matchWildcardDomain(rule, domain)) {
@@ -1269,7 +1258,7 @@ function smartMergeDnsNode(config, result) {
     }
   }
 
-  // Remove policy items identical to the global fallback, and deduplicate values.
+  // Remove policy items that are identical to the global fallback, and deduplicate values.
   const globalProxyServerNameservers = asNameserverList(
     result.dns["proxy-server-nameserver"]
   );
@@ -1301,15 +1290,15 @@ function smartMergeDnsNode(config, result) {
 }
 
 // ============================================================================
-// Entry Function: Bettbox / FlClash series clients call main(config) and use its return value
+// Entry Function: Bettbox / FlClash-based clients will call main(config) and use its return value
 // ============================================================================
 function main(config, profileName) {
   config = config || {};
 
-  // ---- 1. Extract dynamic data from the subscription's original configuration that will be overwritten by the template but needs to be retained/merged ----
+  // ---- 1. Extract dynamic data from the subscription's original configuration that would otherwise be overwritten by the template but needs to be retained/merged ----
   const originalProxies = Array.isArray(config.proxies) ? config.proxies : [];
 
-  // 1.1 Reality enhancement switch handling
+  // 1.1 Reality Enhancement Switch Handling
   const enableRealityEnhance = ruleOptionsEnable['启用 Reality 增强'] === true;
 
   if (enableRealityEnhance) {
@@ -1337,8 +1326,8 @@ function main(config, profileName) {
     }
   }
 
-  // 1.2 Node TLS certificate verification switch handling: By default, does not interfere with the subscription nodes' original skip-cert-verify;
-  //     When "Force Certificate Verification" is enabled, uniformly set to false (forces certificate validation), treating all nodes equally
+  // 1.2 Node TLS Certificate Verification Switch Handling: By default, does not interfere with the subscription node's original skip-cert-verify;
+  //     When "Force Certificate Verification" is enabled, uniformly sets it to false (forcing certificate verification), applying equally to all nodes.
   const forceCertVerify = ruleOptionsEnable['强制证书验证'] === true;
 
   for (const proxy of originalProxies) {
@@ -1356,23 +1345,23 @@ function main(config, profileName) {
       ? config['proxy-providers']
       : null;
 
-  // ---- 2. Use the template as the primary body, deep clone one copy as the final result ----
+  // ---- 2. Treat the template as the primary body, and create a deep clone to use as the final result ----
   const result = deepClone(TEMPLATE);
 
-  // ---- 3. Replace the node list with real nodes from the subscription ----
+  // ---- 3. Replace the node list with the real nodes from the subscription ----
   result.proxies = originalProxies;
   if (originalProxyProviders) {
     result['proxy-providers'] = originalProxyProviders;
   }
 
   // ---- 4. Dynamically filter policy groups: Read individual switches from ruleOptionsEnable ----
-  // Identify names of all disabled policy groups
+  // Identify all disabled policy group names
   const disabledGroupNames = new Set();
   const activeGroupNames = new Set();
 
   (result['proxy-groups'] || []).forEach(group => {
     if (group && group.name) {
-      // By default, if this name is not written in the rule options, keep it enabled
+      // By default, if this name is not specified in rule options, keep it enabled
       if (ruleOptionsEnable[group.name] === false) {
         disabledGroupNames.add(group.name);
       } else {
@@ -1386,20 +1375,20 @@ function main(config, profileName) {
     group => group && group.name && !disabledGroupNames.has(group.name)
   );
 
-  // Clean up references to "disabled policy groups" in other enabled policy groups
+  // Clean up references to "disabled policy groups" within other enabled policy groups
   const fallbackTarget = activeGroupNames.has('🌍 PROXY') ? '🌍 PROXY' : 'DIRECT';
 
   result['proxy-groups'].forEach(group => {
     if (Array.isArray(group.proxies)) {
       group.proxies = group.proxies.filter(p => !disabledGroupNames.has(p));
-      // If the list is empty after removal, fill in the fallback policy (prioritize 🌍 PROXY, then DIRECT)
+      // If the list is empty after filtering, fill in the fallback policy (prefer 🌍 PROXY, otherwise DIRECT)
       if (group.proxies.length === 0) {
         group.proxies = [fallbackTarget];
       }
     }
   });
 
-  // ---- 5. Fill groups marked as "All single nodes here" with real node names from the subscription ----
+  // ---- 5. Populate groups marked as "all single nodes here" with the real node names from the subscription ----
   const allNodeNames = originalProxies
     .map((p) => p && p.name)
     .filter((name) => typeof name === 'string' && name.length > 0);
@@ -1413,8 +1402,8 @@ function main(config, profileName) {
     }
   });
 
-  // ---- 5.5 FCM Direct Switch: When enabled by default, the FCM hidden group contains DIRECT only;
-  //      When disabled, only 👉 Manual Select is retained (this switch does not remove the FCM group, only rewrites the nodes within the group) ----
+  // ---- 5.5 FCM Direct Switch: Enabled by default, the FCM hidden group contains DIRECT only;
+  //      When disabled, only 👉 Manual Select is retained (this switch does not remove the FCM group, only rewrites the nodes inside it) ----
   const fcmDirectEnabled = ruleOptionsEnable['FCM直连'] === true;
   result['proxy-groups'].forEach((group) => {
     if (group && group.name === 'FCM') {
@@ -1422,7 +1411,7 @@ function main(config, profileName) {
     }
   });
 
-  // ---- 6. Clean up rules pointing to disabled policy groups in rules, pointing to the fallback policy group instead ----
+  // ---- 6. Clean up rules pointing to disabled policy groups in rules, pointing them to the fallback policy group instead ----
   if (Array.isArray(result.rules)) {
     result.rules = result.rules.map(rule => {
       let updatedRule = rule;
@@ -1435,7 +1424,7 @@ function main(config, profileName) {
     });
   }
 
-  // ---- 7. Smart DNS node supplementation ----
+  // ---- 7. Smart DNS Node Supplement ----
   smartMergeDnsNode(
     config,
     result

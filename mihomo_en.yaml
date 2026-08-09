@@ -97,7 +97,7 @@ proxy-groups:
   - name: 🔄 负载均衡
     icon: "https://www.clashverge.dev/assets/icons/balance.svg"
     type: load-balance
-    proxies: # Here are all single nodes (automatically populated with all subscription nodes by the override script)
+    proxies: # Here are all single nodes (automatically populated by the override script with all subscription nodes)
     url: 'https://www.gstatic.com/generate_204'
     interval: 300
     lazy: true
@@ -105,47 +105,47 @@ proxy-groups:
   - name: 👉 手动切换
     icon: "https://github.com/DustinWin/ruleset_geodata/releases/download/icons/select.png"
     type: select
-    proxies: # Here are all single nodes (automatically populated with all subscription nodes by the override script)
+    proxies: # Here are all single nodes (automatically populated by the override script with all subscription nodes)
   - name: ♻️ 自动选择
     icon: "https://github.com/DustinWin/ruleset_geodata/releases/download/icons/auto.png"
     type: url-test
     url: https://www.gstatic.com/generate_204
     interval: 300
     tolerance: 50
-    proxies: # Here are all single nodes (automatically populated with all subscription nodes by the override script)
+    proxies: # Here are all single nodes (automatically populated by the override script with all subscription nodes)
   - name: 📲 Telegram
     icon: "https://github.com/DustinWin/ruleset_geodata/releases/download/icons/telegram.png"
     type: select
-    proxies: # Here are all single nodes (automatically populated with all subscription nodes by the override script)
+    proxies: # Here are all single nodes (automatically populated by the override script with all subscription nodes)
   - name: 🎮 Games-Global
     icon: "https://github.com/DustinWin/ruleset_geodata/releases/download/icons/games-cn.png"
     type: select
-    proxies: # Here are all single nodes (automatically populated with all subscription nodes by the override script)
+    proxies: # Here are all single nodes (automatically populated by the override script with all subscription nodes)
 
   - name: ✖️ Twitter
     icon: "https://www.clashverge.dev/assets/icons/twitter.svg"
     type: select
-    filter: "美国|住宅"
+    filter: "US|Residential"
     include-all-proxies: true
-  - name: 🤖 AI大模型
+  - name: 🤖 AI
     icon: "https://github.com/DustinWin/ruleset_geodata/releases/download/icons/ai.png"
     type: select
-    filter: "美国|住宅"
+    filter: "US|Residential"
     include-all-proxies: true
   - name: 🎵 TikTok
     icon: "https://github.com/DustinWin/ruleset_geodata/releases/download/icons/tiktok.png"
     type: select
-    filter: "美国|住宅"
+    filter: "US|Residential"
     include-all-proxies: true
-  # FCM: Google FCM domain traffic routing target (routed to this group after hitting RULE-SET,googlefcm,FCM).
+  # FCM: Google FCM domain traffic routing target (routed to this group after matching RULE-SET,googlefcm,FCM).
   # This group is not hidden in the template to show that this proxy group actually exists and is a real traffic routing target in the configuration;
-  # Setting hidden in the override script is for a cleaner UI: the script uses Bettbox custom script UI adaptation,
-  # and controls the group's proxies: field with the FCM Direct switch (On = DIRECT only, Off = 👉 Manual Select only),
-  # which is convenient for users who need it without directly modifying the configuration file.
-  # The switch icon is taken from the icon field of this group, and changing the icon only requires modifying it here.
+  # Setting hidden in the override script is for a cleaner interface: the script uses Bettbox custom script UI adaptation,
+  # and controls this group's proxies: field with the FCM Direct Connect switch (on = DIRECT only, off = 👉 Manual Select only),
+  # making it convenient for users who need it without directly modifying the configuration file.
+  # The switch icon is taken from this group's icon field, and changing the icon only requires modifying it here.
   - name: FCM
     icon: "https://fastly.jsdelivr.net/gh/MiToverG422/Qure@master/IconSet/Color/fcm.png"
-    # hidden: true  # Hide this group in the script to keep the UI clean; visible in the template to indicate the group actually exists
+    # hidden: true  # Hide this group in the script to keep the interface clean; template keeps it visible to indicate the group actually exists
     type: select
     proxies:
       - 👉 手动切换
@@ -416,7 +416,7 @@ rules:
   - DOMAIN-SUFFIX,cdngslb.com,DIRECT
   # Akamai CDN distribution domain
   - DOMAIN-SUFFIX,edgekey.net,DIRECT
-  # Amazon CloudFront distribution domain (API interface CDN)
+  # Amazon CloudFront distribution domain (API CDN)
   - DOMAIN-SUFFIX,cloudfront.net,DIRECT
 
   - PROCESS-NAME-REGEX,.*nagram.*,📲 Telegram
@@ -424,28 +424,28 @@ rules:
   - RULE-SET,telegramcidr,📲 Telegram,no-resolve
   - RULE-SET,telegram_domain,📲 Telegram
 
-  - RULE-SET,Gemini_Domain,🤖 AI大模型
-  - RULE-SET,Grok_Domain,🤖 AI大模型
- # - RULE-SET,Grok_IP,🤖 AI大模型
-  - IP-CIDR,17.253.4.0/23,🤖 AI大模型,no-resolve
+  - RULE-SET,Gemini_Domain,🤖 AI
+  - RULE-SET,Grok_Domain,🤖 AI
+ # - RULE-SET,Grok_IP,🤖 AI
+  - IP-CIDR,17.253.4.0/23,🤖 AI,no-resolve
 
   # CDN and static resources
-  - DOMAIN,anthropic.com.cdn.cloudflare.net,🤖 AI大模型
+  - DOMAIN,anthropic.com.cdn.cloudflare.net,🤖 AI
   # Authentication / Content
-  - DOMAIN,anthropic-com.ghost.io,🤖 AI大模型
+  - DOMAIN,anthropic-com.ghost.io,🤖 AI
   # Monitoring and telemetry
-  - DOMAIN-SUFFIX,sentry.io,🤖 AI大模型
-  - DOMAIN-SUFFIX,statsigapi.net,🤖 AI大模型
-  - DOMAIN,browser-intake-us5-datadoghq.com,🤖 AI大模型
-  - DOMAIN-KEYWORD,datadog,🤖 AI大模型
-  - DOMAIN-KEYWORD,sift,🤖 AI大模型
+  - DOMAIN-SUFFIX,sentry.io,🤖 AI
+  - DOMAIN-SUFFIX,statsigapi.net,🤖 AI
+  - DOMAIN,browser-intake-us5-datadoghq.com,🤖 AI
+  - DOMAIN-KEYWORD,datadog,🤖 AI
+  - DOMAIN-KEYWORD,sift,🤖 AI
   # Customer service / Third-party widget
-  - DOMAIN,cdn.usefathom.com,🤖 AI大模型
+  - DOMAIN,cdn.usefathom.com,🤖 AI
   # IP range fallback
-  - IP-CIDR,160.79.104.0/21,🤖 AI大模型,no-resolve
-  - IP-CIDR6,2607:6bc0::/32,🤖 AI大模型,no-resolve
-  - RULE-SET,ai-1,🤖 AI大模型
-  - RULE-SET,ai-2,🤖 AI大模型
+  - IP-CIDR,160.79.104.0/21,🤖 AI,no-resolve
+  - IP-CIDR6,2607:6bc0::/32,🤖 AI,no-resolve
+  - RULE-SET,ai-1,🤖 AI
+  - RULE-SET,ai-2,🤖 AI
 
   - RULE-SET,google,🌍 PROXY
   - RULE-SET,google-cn,🌍 PROXY
