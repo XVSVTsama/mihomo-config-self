@@ -44,8 +44,8 @@ const Compatible_With_Bettbox = {
  *
  *    4.【特别处理】DNS 与 hosts：
  *       - hosts 仅在 dns.use-hosts=true 且 dns.listen 与真正参与节点解析的 DNS 端点
- *         构成闭环时改写节点 server；映射前后的域名都会纳入节点 DNS policy 匹配，
- *         使私有 DNS 策略能随 hosts 的域名链路传递；
+ *         构成闭环时改写节点 server；原始域名仅用于识别并迁移私有 DNS 策略，
+ *         最终结果只保留改写后仍需 DNS 解析的节点域名 policy；
  *       - 节点 DNS 优先级：proxy-server-nameserver-policy > proxy-server-nameserver
  *         （仅私有） > nameserver-policy > nameserver（仅私有）；
  *       - 公共 DNS 只用于识别私有 DNS，避免公共 DNS 进入节点解析；
@@ -1122,9 +1122,8 @@ function smartMergeDnsNode(config, result) {
   const newHosts = result.hosts || {};
   const proxies = Array.isArray(config.proxies) ? config.proxies : [];
 
-  // 保留节点映射前的域名，并在 hosts 改写后补充实际连接时使用的域名。
-  // 映射到 IP 的节点无需 DNS policy；映射到另一域名的节点则同时保留两端，
-  // 使原域名上的私有 DNS 策略可以传递到最终连接域名。
+  // 保留节点映射前的域名以识别并迁移策略，并单独记录实际连接时仍需 DNS 的域名。
+  // 映射到 IP 的节点不生成 DNS policy；映射到另一域名时仅保留最终域名的策略。
   const originalDomains = new Set();
   const originalDomainByProxy = new Map();
   for (const proxy of proxies) {
@@ -1188,6 +1187,7 @@ function smartMergeDnsNode(config, result) {
 
   const nodeDomainPairs = [];
   const allNodeDomains = new Set(originalDomains);
+  const effectiveNodeDomains = new Set();
   for (const [proxy, original] of originalDomainByProxy) {
     const server = proxy.server;
     const effective =
@@ -1197,12 +1197,21 @@ function smartMergeDnsNode(config, result) {
     nodeDomainPairs.push({ original, effective });
     if (effective) {
       allNodeDomains.add(effective);
+      effectiveNodeDomains.add(effective);
     }
   }
 
-  // 策略既可命中订阅中的原始节点域名，也可命中 hosts 改写后的实际域名。
+  // 原始域名用于识别可迁移的订阅策略；输出 policy 仅匹配实际连接域名。
   const matchesAnyNodeDomain = (rule) => {
     for (const domain of allNodeDomains) {
+      if (matchWildcardDomain(rule, domain)) {
+        return true;
+      }
+    }
+    return false;
+  };
+  const matchesEffectiveNodeDomain = (rule) => {
+    for (const domain of effectiveNodeDomains) {
       if (matchWildcardDomain(rule, domain)) {
         return true;
       }
@@ -1232,7 +1241,8 @@ function smartMergeDnsNode(config, result) {
     Object.keys(policy).some((rule) => matchWildcardDomain(rule, domain));
 
   // 当某条策略只命中 hosts 改写前的域名、而最终域名并未被该策略覆盖时，
-  // 为最终域名补一个精确 policy。已直接匹配最终域名的原始规则保持原样并优先。
+  // 为最终域名补一个精确 policy。原始域名仅充当迁移来源，不写入最终结果；
+  // 已直接匹配最终域名的原始规则保持原样并优先。
   const copyResolvedDomainPolicy = (policy, shouldCopy) => {
     for (const { original, effective } of nodeDomainPairs) {
       if (
@@ -1255,9 +1265,12 @@ function smartMergeDnsNode(config, result) {
   //           > nameserver-policy > nameserver（仅私有）。
   const matchedProxyPolicyKeys = new Set();
   for (const rule in rules.proxyServerNameserverPolicy) {
-    if (matchesAnyNodeDomain(rule)) {
+    if (!matchesAnyNodeDomain(rule)) {
+      continue;
+    }
+    matchedProxyPolicyKeys.add(rule);
+    if (matchesEffectiveNodeDomain(rule)) {
       setPolicy(rule, rules.proxyServerNameserverPolicy[rule]);
-      matchedProxyPolicyKeys.add(rule);
     }
   }
 
@@ -1287,7 +1300,7 @@ function smartMergeDnsNode(config, result) {
   );
 
   if (privateProxyServerNameservers.length > 0) {
-    for (const domain of allNodeDomains) {
+    for (const domain of effectiveNodeDomains) {
       if (!domainCovered(domain)) {
         setPolicy(domain, privateProxyServerNameservers.slice());
       }
@@ -1310,7 +1323,9 @@ function smartMergeDnsNode(config, result) {
       if (overlapsProxy) {
         continue;
       }
-      setPolicy(rule, rules.nameserverPolicy[rule]);
+      if (matchesEffectiveNodeDomain(rule)) {
+        setPolicy(rule, rules.nameserverPolicy[rule]);
+      }
     }
 
     // nameserver-policy 同样可随 hosts 的域名映射链路传递，但不得覆盖更高优先级。
@@ -1320,7 +1335,7 @@ function smartMergeDnsNode(config, result) {
     );
 
     if (privateNameservers.length > 0) {
-      for (const domain of allNodeDomains) {
+      for (const domain of effectiveNodeDomains) {
         if (!domainCovered(domain)) {
           setPolicy(domain, privateNameservers.slice());
         }

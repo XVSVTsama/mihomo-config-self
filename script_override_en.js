@@ -42,7 +42,7 @@ const Compatible_With_Bettbox = {
  *       if the subscription also includes proxy-providers, these groups will simultaneously reference all providers via use. The remaining groups will remain exactly as they are in the template and will not be overwritten or supplemented by subscription nodes.
  *
  *    4. [Special Handling] DNS and Hosts:
- *       - hosts rewrites node servers only when dns.use-hosts=true and dns.listen forms a closed loop with the DNS endpoints actually participating in node resolution; both the pre- and post-mapping domains participate in node DNS policy matching, allowing private DNS policies to follow the hosts domain chain;
+ *       - hosts rewrites node servers only when dns.use-hosts=true and dns.listen forms a closed loop with the DNS endpoints actually participating in node resolution; the original domain is used only to identify and migrate a private DNS policy, while the final output retains policy entries only for node domains that still require DNS resolution after rewriting;
  *       - Node DNS priority: proxy-server-nameserver-policy > proxy-server-nameserver
  *         (private only) > nameserver-policy > nameserver (private only);
  *       - Public DNS is only used to identify private DNS and prevent public DNS from entering node resolution;
@@ -1119,9 +1119,8 @@ function smartMergeDnsNode(config, result) {
   const newHosts = result.hosts || {};
   const proxies = Array.isArray(config.proxies) ? config.proxies : [];
 
-  // Keep node domains before mapping, and add the domain actually used for connections after hosts rewriting.
-  // Nodes mapped to IPs need no DNS policy; for nodes mapped to another domain, keep both ends
-  // so a private DNS policy on the original domain can be passed to the final connection domain.
+  // Keep node domains before mapping to identify and migrate policies, and separately record domains that still require DNS for actual connections.
+  // Nodes mapped to IPs produce no DNS policy; for nodes mapped to another domain, retain only the final-domain policy.
   const originalDomains = new Set();
   const originalDomainByProxy = new Map();
   for (const proxy of proxies) {
@@ -1185,6 +1184,7 @@ function smartMergeDnsNode(config, result) {
 
   const nodeDomainPairs = [];
   const allNodeDomains = new Set(originalDomains);
+  const effectiveNodeDomains = new Set();
   for (const [proxy, original] of originalDomainByProxy) {
     const server = proxy.server;
     const effective =
@@ -1194,12 +1194,21 @@ function smartMergeDnsNode(config, result) {
     nodeDomainPairs.push({ original, effective });
     if (effective) {
       allNodeDomains.add(effective);
+      effectiveNodeDomains.add(effective);
     }
   }
 
-  // Policies can match both the subscription's original node domains and actual domains after hosts rewriting.
+  // Original domains identify migratable subscription policies; output policy entries match only actual connection domains.
   const matchesAnyNodeDomain = (rule) => {
     for (const domain of allNodeDomains) {
+      if (matchWildcardDomain(rule, domain)) {
+        return true;
+      }
+    }
+    return false;
+  };
+  const matchesEffectiveNodeDomain = (rule) => {
+    for (const domain of effectiveNodeDomains) {
       if (matchWildcardDomain(rule, domain)) {
         return true;
       }
@@ -1229,7 +1238,8 @@ function smartMergeDnsNode(config, result) {
     Object.keys(policy).some((rule) => matchWildcardDomain(rule, domain));
 
   // When a policy only matches the domain before hosts rewriting and the final domain is not covered,
-  // add an exact policy for the final domain. An original rule that directly matches the final domain remains unchanged and takes priority.
+  // add an exact policy for the final domain. The original domain is only the migration source and is not written to the final output;
+  // an original rule that directly matches the final domain remains unchanged and takes priority.
   const copyResolvedDomainPolicy = (policy, shouldCopy) => {
     for (const { original, effective } of nodeDomainPairs) {
       if (
@@ -1252,9 +1262,12 @@ function smartMergeDnsNode(config, result) {
   //           > nameserver-policy > nameserver (private only).
   const matchedProxyPolicyKeys = new Set();
   for (const rule in rules.proxyServerNameserverPolicy) {
-    if (matchesAnyNodeDomain(rule)) {
+    if (!matchesAnyNodeDomain(rule)) {
+      continue;
+    }
+    matchedProxyPolicyKeys.add(rule);
+    if (matchesEffectiveNodeDomain(rule)) {
       setPolicy(rule, rules.proxyServerNameserverPolicy[rule]);
-      matchedProxyPolicyKeys.add(rule);
     }
   }
 
@@ -1284,7 +1297,7 @@ function smartMergeDnsNode(config, result) {
   );
 
   if (privateProxyServerNameservers.length > 0) {
-    for (const domain of allNodeDomains) {
+    for (const domain of effectiveNodeDomains) {
       if (!domainCovered(domain)) {
         setPolicy(domain, privateProxyServerNameservers.slice());
       }
@@ -1307,7 +1320,9 @@ function smartMergeDnsNode(config, result) {
       if (overlapsProxy) {
         continue;
       }
-      setPolicy(rule, rules.nameserverPolicy[rule]);
+      if (matchesEffectiveNodeDomain(rule)) {
+        setPolicy(rule, rules.nameserverPolicy[rule]);
+      }
     }
 
     // nameserver-policy can likewise follow a hosts domain chain, but must not override a higher-priority policy.
@@ -1317,7 +1332,7 @@ function smartMergeDnsNode(config, result) {
     );
 
     if (privateNameservers.length > 0) {
-      for (const domain of allNodeDomains) {
+      for (const domain of effectiveNodeDomains) {
         if (!domainCovered(domain)) {
           setPolicy(domain, privateNameservers.slice());
         }
