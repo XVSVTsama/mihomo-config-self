@@ -424,6 +424,41 @@ rules:
   - RULE-SET,telegramcidr,📲 Telegram,no-resolve
   - RULE-SET,telegram_domain,📲 Telegram
 
+  # Claude / Anthropic: process matches take precedence and cover Claude Desktop, Claude Code, etc.
+  - PROCESS-NAME-REGEX,(?i).*claude.*,🤖 AI
+  - PROCESS-NAME-REGEX,(?i).*anthropic.*,🤖 AI
+  # Claude / Anthropic: official API, web login, OAuth, MCP, CLI updates, and plugin dependencies.
+  - DOMAIN,api.anthropic.com,🤖 AI
+  - DOMAIN,console.anthropic.com,🤖 AI
+  - DOMAIN,statsig.anthropic.com,🤖 AI
+  - DOMAIN,status.anthropic.com,🤖 AI
+  - DOMAIN,sentry.anthropic.com,🤖 AI
+  - DOMAIN,support.anthropic.com,🤖 AI
+  - DOMAIN,mcp-proxy.anthropic.com,🤖 AI
+  - DOMAIN,platform.claude.com,🤖 AI
+  - DOMAIN,code.claude.com,🤖 AI
+  - DOMAIN,downloads.claude.ai,🤖 AI
+  - DOMAIN,bridge.claudeusercontent.com,🤖 AI
+  - DOMAIN,cdn.growthbook.io,🤖 AI
+  - DOMAIN,cdn.usefathom.com,🤖 AI
+  - DOMAIN,registry.npmjs.org,🤖 AI
+  - DOMAIN,storage.googleapis.com,🤖 AI
+  - DOMAIN,raw.githubusercontent.com,🤖 AI
+  - DOMAIN,formulae.brew.sh,🤖 AI
+  - DOMAIN,http-intake.logs.us5.datadoghq.com,🤖 AI
+  - DOMAIN,browser-intake-us5-datadoghq.com,🤖 AI
+  - DOMAIN,servd-anthropic-website.b-cdn.net,🤖 AI
+  - DOMAIN,claudemcpclient.com,🤖 AI
+  - DOMAIN,claudemcpcontent.com,🤖 AI
+  - DOMAIN-SUFFIX,anthropic.com,🤖 AI
+  - DOMAIN-SUFFIX,claude.ai,🤖 AI
+  - DOMAIN-SUFFIX,claude.com,🤖 AI
+  - DOMAIN-SUFFIX,claudeusercontent.com,🤖 AI
+  - DOMAIN-SUFFIX,clau.de,🤖 AI
+  - DOMAIN-SUFFIX,frame.claudeusercontent.com,🤖 AI
+  - DOMAIN-SUFFIX,modelcontextprotocol.io,🤖 AI
+  - IP-CIDR,160.79.104.0/21,🤖 AI,no-resolve
+  - IP-CIDR6,2607:6bc0::/48,🤖 AI,no-resolve
   - RULE-SET,Gemini_Domain,🤖 AI
   - RULE-SET,Grok_Domain,🤖 AI
  # - RULE-SET,Grok_IP,🤖 AI
@@ -439,11 +474,7 @@ rules:
   - DOMAIN,browser-intake-us5-datadoghq.com,🤖 AI
   - DOMAIN-KEYWORD,datadog,🤖 AI
   - DOMAIN-KEYWORD,sift,🤖 AI
-  # Customer service / Third-party widget
-  - DOMAIN,cdn.usefathom.com,🤖 AI
-  # IP range fallback
-  - IP-CIDR,160.79.104.0/21,🤖 AI,no-resolve
-  - IP-CIDR6,2607:6bc0::/32,🤖 AI,no-resolve
+  # Legacy third-party monitoring entries retained by the existing AI rules.
   - RULE-SET,ai-1,🤖 AI
   - RULE-SET,ai-2,🤖 AI
 
