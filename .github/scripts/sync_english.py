@@ -144,6 +144,19 @@ def split_content(content, kind=None, max_chars=CHUNK_MAX_CHARS):
         return [content]
 
     lines = content.splitlines(keepends=True)
+    if kind == "yaml":
+        chunks = []
+        current = ""
+        for line in lines:
+            is_top_level = line and not line[0].isspace() and not line.lstrip().startswith("#")
+            if current and is_top_level and len(current) >= max_chars:
+                chunks.append(current)
+                current = ""
+            current += line
+        if current:
+            chunks.append(current)
+        return chunks
+
     chunks = []
     current = ""
     in_block = False
@@ -186,6 +199,10 @@ def split_content(content, kind=None, max_chars=CHUNK_MAX_CHARS):
         if piece:
             final_chunks.append(piece)
     return final_chunks
+
+
+def contains_cjk(text):
+    return any("\u4e00" <= char <= "\u9fff" for char in text)
 
 
 def build_chunk_prompt(kind, glossary, chunk_index, total):
@@ -497,6 +514,10 @@ def main():
                     "  translating chunk %d/%d (%d chars)"
                     % (chunk_index, len(chunks), len(chunk))
                 )
+                if not contains_cjk(chunk):
+                    translated_chunks.append(chunk)
+                    log("  skipped: no CJK text")
+                    continue
                 prompt = build_chunk_prompt(
                     kind,
                     glossary,
