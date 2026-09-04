@@ -38,7 +38,7 @@ PAIRS = [
 
 # Keep chunks small enough for DeepSeek's final-answer output limit. Splitting at
 # blank lines preserves comment/code structure more often than arbitrary cuts.
-CHUNK_MAX_CHARS = 8000
+CHUNK_MAX_CHARS = 4000
 
 GROUP_NAME_MAP = """Proxy group names must be translated as:
 - "🔄 负载均衡" -> "🔄 Load Balance"
