@@ -1,7 +1,8 @@
-# Translation Workflow Stability Test
-# Chunk Output Stability Test
-# Conservative Chunk Test
-# Top-Level Module Chunk Test
+# Translation workflow stability test
+# Chunked output stability test
+# Conservative chunking test
+# Top-level module chunking test
+# Translation result verification gateway test
 mode: rule
 mixed-port: 7254
 port: 7249
@@ -178,7 +179,7 @@ dns:
     - https://cloudflare-dns.com/dns-query#👉 Manual Select
   # - https://dns.adguard-dns.com/dns-query     # AdGuard Public DNS # 94.140.14.14        94.140.15.15
   # - https://dns.google/dns-query             # Google Public DNS  # 8.8.8.8             8.8.4.4
-  # - https://dns.quad9.net/dns-query           # IBM Quad9 Public DNS # 9.9.9.11          149.112.112.11
+  # - https://dns.quad9.net/dns-query           # IBM Quad9 Public DNS # 9.9.9.11            149.112.112.11
   # - https://doh.opendns.com/dns-query         # OpenDNS Public DNS # 208.67.220.220      208.67.222.222
   # - https://doh.dns.sb/dns-query              # DNS.SB Public DNS  # 185.222.222.222     45.11.45.11
   # - https://dns.twnic.tw/dns-query            # Quad101 Public DNS # 101.101.101.10      101.102.103.10
@@ -207,11 +208,11 @@ hosts                             :
   '+.mcdn.bilivideo.cn'       : [ '0.0.0.0'            ]
   'mtalk.google.com'          : [ '142.250.107.188'    , '108.177.125.188'    ]
   'dns.msftncsi.com'          : [ '131.107.255.255'    , 'fd3e:4f5a:5b81::1'  ]
-  #'dns.alidns.com'            : [ '223.5.5.5'          , '223.6.6.6'          ] # 🇨🇳 Ali DNS
-  #'pdns.dnspod.cn'            : [ '119.29.29.29'       , '119.28.28.28'       ] # 🇨🇳 Tencent DNS
-  #'dns.pub'                   : [ '119.29.29.29'       ]           # 🇨🇳 Tencent DNS  
-  #'doh.pub'                   : [ '1.12.12.12'         , '120.53.53.53'       ] # 🇨🇳 Tencent DNS
-  #'dot.pub'                   : [ '1.12.12.12'         , '120.53.53.53'       ] # 🇨🇳 Tencent DNS
+  #'dns.alidns.com'            : [ '223.5.5.5'          , '223.6.6.6'          ] # 🇨🇳 AliDNS
+  #'pdns.dnspod.cn'            : [ '119.29.29.29'       , '119.28.28.28'       ] # 🇨🇳 DNSPod
+  #'dns.pub'                   : [ '119.29.29.29'       ]           # 🇨🇳 DNSPod  
+  #'doh.pub'                   : [ '1.12.12.12'         , '120.53.53.53'       ] # 🇨🇳 DNSPod
+  #'dot.pub'                   : [ '1.12.12.12'         , '120.53.53.53'       ] # 🇨🇳 DNSPod
   #'one.one.one.one'           : [ '1.0.0.1'            , '1.1.1.1'            ] # 🇺🇸 Cloudflare Public DNS
   '*.pangolin-sdk-toutiao': 0.0.0.0
   '*.pangolin-sdk-toutiao.*': 0.0.0.0
@@ -268,17 +269,17 @@ proxy-groups:
   - name: ✖️ Twitter
     icon: "https://www.clashverge.dev/assets/icons/twitter.svg"
     type: select
-    filter: "US|Residential"
+    filter: "美国|住宅"
     include-all-proxies: true
   - name: 🤖 AI大模型
     icon: "https://github.com/DustinWin/ruleset_geodata/releases/download/icons/ai.png"
     type: select
-    filter: "US|Residential"
+    filter: "美国|住宅"
     include-all-proxies: true
   - name: 🎵 TikTok
     icon: "https://github.com/DustinWin/ruleset_geodata/releases/download/icons/tiktok.png"
     type: select
-    filter: "US|Residential"
+    filter: "美国|住宅"
     include-all-proxies: true
   # FCM: Google FCM domain traffic splitting target (routes to this group after hitting RULE-SET,googlefcm,FCM).
   # This group is not hidden in the template to indicate that this proxy group actually exists and is a real traffic splitting target in the configuration;
@@ -288,7 +289,7 @@ proxy-groups:
   # The switch icon is taken from this group's icon field, and changing the icon only requires modifying it here.
   - name: FCM
     icon: "https://fastly.jsdelivr.net/gh/MiToverG422/Qure@master/IconSet/Color/fcm.png"
-    # hidden: true  # Hide this group in the script to keep the interface clean; keep it visible in the template to indicate that the group actually exists
+    # hidden: true  # Hide this group in the script to keep the UI clean; keep it visible in the template to indicate that the group actually exists
     type: select
     proxies:
       - 👉 手动切换
@@ -409,14 +410,14 @@ rules:
 
   - DOMAIN-WILDCARD,*.deepseek.com,DIRECT
   - DOMAIN-WILDCARD,*.portal101.cn,DIRECT
-  # Huawei Cloud CDN distribution domain
+  # Huawei Cloud CDN distribution domains
   - DOMAIN-SUFFIX,cdnhwcqwg14.com,DIRECT
   - DOMAIN-SUFFIX,cdnhwcxcy07.com,DIRECT
-  # Alibaba Cloud CDN distribution domain
+  # Alibaba Cloud CDN distribution domains
   - DOMAIN-SUFFIX,cdngslb.com,DIRECT
-  # Akamai CDN distribution domain
+  # Akamai CDN distribution domains
   - DOMAIN-SUFFIX,edgekey.net,DIRECT
-  # Amazon CloudFront distribution domain (API CDN)
+  # Amazon CloudFront distribution domains (API CDN)
   - DOMAIN-SUFFIX,cloudfront.net,DIRECT
 
   - PROCESS-NAME-REGEX,.*nagram.*,📲 Telegram
@@ -464,7 +465,7 @@ rules:
  # - RULE-SET,Grok_IP,🤖 AI
   - IP-CIDR,17.253.4.0/23,🤖 AI,no-resolve
 
-  # CDN and static resources
+  # CDN and static assets
   - DOMAIN,anthropic.com.cdn.cloudflare.net,🤖 AI
   # Authentication / Content
   - DOMAIN,anthropic-com.ghost.io,🤖 AI
@@ -474,7 +475,7 @@ rules:
   - DOMAIN,browser-intake-us5-datadoghq.com,🤖 AI
   - DOMAIN-KEYWORD,datadog,🤖 AI
   - DOMAIN-KEYWORD,sift,🤖 AI
-  # Compatible with third-party monitoring entries in legacy AI rules
+  # Third-party monitoring entries for compatibility with older AI rules
   - RULE-SET,ai-1,🤖 AI
   - RULE-SET,ai-2,🤖 AI
 
