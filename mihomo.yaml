@@ -1,4 +1,5 @@
 # 翻译工作流稳定性测试
+# 分块输出稳定性测试
 mode: rule
 mixed-port: 7254
 port: 7249
