@@ -305,88 +305,6 @@ const TEMPLATE = {
     "server": "time.apple.com",
     "port": 123
   },
-  "proxies": null,
-  "proxy-groups": [
-    {
-      "name": "🌍 PROXY",
-      "icon": "https://github.com/DustinWin/ruleset_geodata/releases/download/icons/proxy.png",
-      "type": "select",
-      "proxies": [
-        "👉 手动切换",
-        "♻️ 自动选择",
-        "🔄 负载均衡",
-        "DIRECT"
-      ]
-    },
-    {
-      "name": "🔄 负载均衡",
-      "icon": "https://www.clashverge.dev/assets/icons/balance.svg",
-      "type": "load-balance",
-      "proxies": null,
-      "url": "https://www.gstatic.com/generate_204",
-      "interval": 300,
-      "lazy": true,
-      "strategy": "sticky-sessions"
-    },
-    {
-      "name": "👉 手动切换",
-      "icon": "https://github.com/DustinWin/ruleset_geodata/releases/download/icons/select.png",
-      "type": "select",
-      "proxies": null
-    },
-    {
-      "name": "♻️ 自动选择",
-      "icon": "https://github.com/DustinWin/ruleset_geodata/releases/download/icons/auto.png",
-      "type": "url-test",
-      "url": "https://www.gstatic.com/generate_204",
-      "interval": 300,
-      "tolerance": 50,
-      "proxies": null
-    },
-    {
-      "name": "📲 Telegram",
-      "icon": "https://github.com/DustinWin/ruleset_geodata/releases/download/icons/telegram.png",
-      "type": "select",
-      "proxies": null
-    },
-    {
-      "name": "🎮 Games-Global",
-      "icon": "https://github.com/DustinWin/ruleset_geodata/releases/download/icons/games-cn.png",
-      "type": "select",
-      "proxies": null
-    },
-    {
-      "name": "✖️ Twitter",
-      "icon": "https://www.clashverge.dev/assets/icons/twitter.svg",
-      "type": "select",
-      "filter": "美国|住宅",
-      "include-all-proxies": true
-    },
-    {
-      "name": "🤖 AI大模型",
-      "icon": "https://github.com/DustinWin/ruleset_geodata/releases/download/icons/ai.png",
-      "type": "select",
-      "filter": "美国|住宅",
-      "include-all-proxies": true
-    },
-    {
-      "name": "🎵 TikTok",
-      "icon": "https://github.com/DustinWin/ruleset_geodata/releases/download/icons/tiktok.png",
-      "type": "select",
-      "filter": "美国|住宅",
-      "include-all-proxies": true
-    },
-    {
-      "hidden": true,
-      "icon": "https://fastly.jsdelivr.net/gh/MiToverG422/Qure@master/IconSet/Color/fcm.png",
-      "name": "FCM",
-      "proxies": [
-        "👉 手动切换",
-        "DIRECT"
-      ],
-      "type": "select"
-    }
-  ],
   "sniffer": {
     "enable": true,
     "force-dns-mapping": true,
@@ -549,6 +467,88 @@ const TEMPLATE = {
     "gurd.snssdk.com.*": "0.0.0.0",
     "*default.ixigua.com": "0.0.0.0"
   },
+  "proxies": null,
+  "proxy-groups": [
+    {
+      "name": "🌍 PROXY",
+      "icon": "https://github.com/DustinWin/ruleset_geodata/releases/download/icons/proxy.png",
+      "type": "select",
+      "proxies": [
+        "👉 手动切换",
+        "♻️ 自动选择",
+        "🔄 负载均衡",
+        "DIRECT"
+      ]
+    },
+    {
+      "name": "🔄 负载均衡",
+      "icon": "https://www.clashverge.dev/assets/icons/balance.svg",
+      "type": "load-balance",
+      "proxies": null,
+      "url": "https://www.gstatic.com/generate_204",
+      "interval": 300,
+      "lazy": true,
+      "strategy": "sticky-sessions"
+    },
+    {
+      "name": "👉 手动切换",
+      "icon": "https://github.com/DustinWin/ruleset_geodata/releases/download/icons/select.png",
+      "type": "select",
+      "proxies": null
+    },
+    {
+      "name": "♻️ 自动选择",
+      "icon": "https://github.com/DustinWin/ruleset_geodata/releases/download/icons/auto.png",
+      "type": "url-test",
+      "url": "https://www.gstatic.com/generate_204",
+      "interval": 300,
+      "tolerance": 50,
+      "proxies": null
+    },
+    {
+      "name": "📲 Telegram",
+      "icon": "https://github.com/DustinWin/ruleset_geodata/releases/download/icons/telegram.png",
+      "type": "select",
+      "proxies": null
+    },
+    {
+      "name": "🎮 Games-Global",
+      "icon": "https://github.com/DustinWin/ruleset_geodata/releases/download/icons/games-cn.png",
+      "type": "select",
+      "proxies": null
+    },
+    {
+      "name": "✖️ Twitter",
+      "icon": "https://www.clashverge.dev/assets/icons/twitter.svg",
+      "type": "select",
+      "filter": "美国|住宅",
+      "include-all-proxies": true
+    },
+    {
+      "name": "🤖 AI大模型",
+      "icon": "https://github.com/DustinWin/ruleset_geodata/releases/download/icons/ai.png",
+      "type": "select",
+      "filter": "美国|住宅",
+      "include-all-proxies": true
+    },
+    {
+      "name": "🎵 TikTok",
+      "icon": "https://github.com/DustinWin/ruleset_geodata/releases/download/icons/tiktok.png",
+      "type": "select",
+      "filter": "美国|住宅",
+      "include-all-proxies": true
+    },
+    {
+      "hidden": true,
+      "icon": "https://fastly.jsdelivr.net/gh/MiToverG422/Qure@master/IconSet/Color/fcm.png",
+      "name": "FCM",
+      "proxies": [
+        "👉 手动切换",
+        "DIRECT"
+      ],
+      "type": "select"
+    }
+  ],
   "rule-providers": {
     "Gemini_Domain": {
       "type": "http",
