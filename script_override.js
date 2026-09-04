@@ -87,10 +87,6 @@ const ruleOptionsEnable = {
   'TGDC实验分流': false,     // 开启 Telegram DC/地区实验分流；关闭时不改变原 Telegram 规则、策略组和规则集。
 };
 
-// 出现同一个域名规则 key 时，订阅原始配置(true) 还是模板(false) 优先（模板目前未配置
-// proxy-server-nameserver-policy，因此该开关当前实际只影响订阅来源之间的合并）
-const NAMESERVER_POLICY_PREFER_ORIGINAL = true;
-
 // ============================================================================
 // Telegram DC/地区实验分流（仅在 ruleOptionsEnable['TGDC实验分流'] 为 true 时注入）
 // 参考：telegram-dc-region-rules-v2.yaml；地区 filter 的表达式风格参考 MyClash，
@@ -215,166 +211,174 @@ const TGDC_RULES = [
   'RULE-SET,telegram_domain,📲 Telegram(兜底)',
 ];
 
+// 出现同一个域名规则 key 时，订阅原始配置(true) 还是模板(false) 优先（模板目前未配置
+// proxy-server-nameserver-policy，因此该开关当前实际只影响订阅来源之间的合并）
+const NAMESERVER_POLICY_PREFER_ORIGINAL = true;
+
 // ============================================================================
 // 标准模板配置（与仓库 mihomo.yaml 保持同步，等价于该 yaml 文件的 JSON 表示）
 // ============================================================================
-
 const TEMPLATE = {
-  "mode": "rule",
-  "mixed-port": 7254,
-  "port": 7249,
-  "socks-port": 7346,
+  "dns": {
+    "default-nameserver": [
+      "tls://223.5.5.5#DIRECT",
+      "tls://223.6.6.6#DIRECT"
+    ],
+    "direct-nameserver": [
+      "https://dns.alidns.com/dns-query#DIRECT",
+      "https://doh.pub/dns-query#DIRECT"
+    ],
+    "direct-nameserver-follow-policy": true,
+    "enable": true,
+    "enhanced-mode": "fake-ip",
+    "fake-ip-filter": [
+      "rule-set:fakeip-filter_domain",
+      "rule-set:private",
+      "rule-set:direct",
+      "rule-set:cn",
+      "rule-set:echs_cn",
+      "rule-set:echs_direct",
+      "rule-set:applications",
+      "rule-set:pixiv",
+      "pixshaft.com"
+    ],
+    "fake-ip-filter-mode": "blacklist",
+    "fake-ip-range": "198.18.0.1/16",
+    "fake-ip-range6": "fdfe:dcba:9876::1/64",
+    "ipv6": true,
+    "listen": "0.0.0.0:1053",
+    "nameserver": [
+      "https://cloudflare-dns.com/dns-query#👉 手动切换"
+    ],
+    "nameserver-policy": {
+      "rule-set:private,direct,proxy@direct,cn,echs_cn,echs_direct": "https://dns.alidns.com/dns-query#DIRECT"
+    },
+    "prefer-h3": false,
+    "proxy-server-nameserver": [
+      "https://hrbgyitz34.cloudflare-gateway.com/dns-query#DIRECT"
+    ],
+    "respect-rules": false,
+    "use-hosts": true,
+    "use-system-hosts": false
+  },
   "etag-support": true,
-  "global-ua": "clash.meta",
-  "ipv6": true,
-  "log-level": "info",
   "external-controller": "127.0.0.1:9090",
   "external-ui": "dashboard",
-  "unified-delay": true,
-  "tcp-concurrent": true,
-  "keep-alive-idle": 600,
-  "keep-alive-interval": 15,
-  "store-selected": true,
-  "store-fake-ip": true,
-  "tun": {
-    "enable": true,
-    "device": "XVSVT",
-    "auto-detect-interface": true,
-    "auto-route": true,
-    "auto-redirect": true,
-    "strict-route": true,
-    "stack": "gvisor",
-    "dns-hijack": [
-      "any:53",
-      "udp://any:53",
-      "tcp://any:53"
+  "global-ua": "clash.meta",
+  "hosts": {
+    "*.pangolin-sdk-toutiao": "0.0.0.0",
+    "*.pangolin-sdk-toutiao.*": "0.0.0.0",
+    "*.pglstatp-toutiao.com": "0.0.0.0",
+    "*.pglstatp-toutiao.com.*": "0.0.0.0",
+    "*.pstatp.com": "0.0.0.0",
+    "*.pstatp.com.*": "0.0.0.0",
+    "*default.ixigua.com": "0.0.0.0",
+    "+.clash.dev": [
+      "127.0.0.1"
     ],
-    "route-address": [
-      "198.51.100.0/30",
-      "1.0.0.0/8",
-      "2.0.0.0/7",
-      "4.0.0.0/6",
-      "8.0.0.0/7",
-      "11.0.0.0/8",
-      "12.0.0.0/6",
-      "16.0.0.0/4",
-      "32.0.0.0/3",
-      "64.0.0.0/3",
-      "96.0.0.0/4",
-      "112.0.0.0/5",
-      "120.0.0.0/6",
-      "124.0.0.0/7",
-      "126.0.0.0/8",
-      "128.0.0.0/3",
-      "160.0.0.0/5",
-      "168.0.0.0/8",
-      "169.0.0.0/9",
-      "169.128.0.0/10",
-      "169.192.0.0/11",
-      "169.224.0.0/12",
-      "169.240.0.0/13",
-      "169.248.0.0/14",
-      "169.252.0.0/15",
-      "169.255.0.0/16",
-      "170.0.0.0/7",
-      "172.0.0.0/12",
-      "172.32.0.0/11",
-      "172.64.0.0/10",
-      "172.128.0.0/9",
-      "173.0.0.0/8",
-      "174.0.0.0/7",
-      "176.0.0.0/4",
-      "192.0.0.0/9",
-      "192.128.0.0/11",
-      "192.160.0.0/13",
-      "192.169.0.0/16",
-      "192.170.0.0/15",
-      "192.172.0.0/14",
-      "192.176.0.0/12",
-      "192.192.0.0/10",
-      "193.0.0.0/8",
-      "194.0.0.0/7",
-      "196.0.0.0/6",
-      "200.0.0.0/5",
-      "208.0.0.0/4"
+    "+.mcdn.bilivideo.cn": [
+      "0.0.0.0"
+    ],
+    "+.mcdn.bilivideo.com": [
+      "0.0.0.0"
+    ],
+    "dns.msftncsi.com": [
+      "131.107.255.255",
+      "fd3e:4f5a:5b81::1"
+    ],
+    "gurd.snssdk.com": "0.0.0.0",
+    "gurd.snssdk.com.*": "0.0.0.0",
+    "mtalk.google.com": [
+      "142.250.107.188",
+      "108.177.125.188"
+    ],
+    "services.googleapis.cn": [
+      "services.googleapis.com"
     ]
   },
+  "ipv6": true,
+  "keep-alive-idle": 600,
+  "keep-alive-interval": 15,
+  "log-level": "info",
+  "mixed-port": 7254,
+  "mode": "rule",
   "ntp": {
     "enable": true,
-    "write-to-system": false,
+    "port": 123,
     "server": "time.apple.com",
-    "port": 123
+    "write-to-system": false
   },
+  "port": 7249,
   "proxies": null,
   "proxy-groups": [
     {
-      "name": "🌍 PROXY",
       "icon": "https://github.com/DustinWin/ruleset_geodata/releases/download/icons/proxy.png",
-      "type": "select",
+      "name": "🌍 PROXY",
       "proxies": [
         "👉 手动切换",
         "♻️ 自动选择",
         "🔄 负载均衡",
         "DIRECT"
-      ]
+      ],
+      "type": "select"
     },
     {
-      "name": "🔄 负载均衡",
       "icon": "https://www.clashverge.dev/assets/icons/balance.svg",
-      "type": "load-balance",
-      "proxies": null,
-      "url": "https://www.gstatic.com/generate_204",
       "interval": 300,
       "lazy": true,
-      "strategy": "sticky-sessions"
+      "name": "🔄 负载均衡",
+      "proxies": null,
+      "strategy": "sticky-sessions",
+      "type": "load-balance",
+      "url": "https://www.gstatic.com/generate_204"
     },
     {
-      "name": "👉 手动切换",
       "icon": "https://github.com/DustinWin/ruleset_geodata/releases/download/icons/select.png",
-      "type": "select",
-      "proxies": null
+      "name": "👉 手动切换",
+      "proxies": null,
+      "type": "select"
     },
     {
-      "name": "♻️ 自动选择",
       "icon": "https://github.com/DustinWin/ruleset_geodata/releases/download/icons/auto.png",
-      "type": "url-test",
-      "url": "https://www.gstatic.com/generate_204",
       "interval": 300,
+      "name": "♻️ 自动选择",
+      "proxies": null,
       "tolerance": 50,
-      "proxies": null
+      "type": "url-test",
+      "url": "https://www.gstatic.com/generate_204"
     },
     {
-      "name": "📲 Telegram",
       "icon": "https://github.com/DustinWin/ruleset_geodata/releases/download/icons/telegram.png",
-      "type": "select",
-      "proxies": null
+      "name": "📲 Telegram",
+      "proxies": null,
+      "type": "select"
     },
     {
-      "name": "🎮 Games-Global",
       "icon": "https://github.com/DustinWin/ruleset_geodata/releases/download/icons/games-cn.png",
-      "type": "select",
-      "proxies": null
+      "name": "🎮 Games-Global",
+      "proxies": null,
+      "type": "select"
     },
     {
-      "name": "✖️ Twitter",
+      "filter": "美国|住宅",
       "icon": "https://www.clashverge.dev/assets/icons/twitter.svg",
-      "type": "select",
-      "filter": "美国|住宅",
-      "include-all-proxies": true
+      "include-all-proxies": true,
+      "name": "✖️ Twitter",
+      "type": "select"
     },
     {
-      "name": "🤖 AI大模型",
+      "filter": "美国|住宅",
       "icon": "https://github.com/DustinWin/ruleset_geodata/releases/download/icons/ai.png",
-      "type": "select",
-      "filter": "美国|住宅",
-      "include-all-proxies": true
+      "include-all-proxies": true,
+      "name": "🤖 AI大模型",
+      "type": "select"
     },
     {
-      "name": "🎵 TikTok",
-      "icon": "https://github.com/DustinWin/ruleset_geodata/releases/download/icons/tiktok.png",
-      "type": "select",
       "filter": "美国|住宅",
-      "include-all-proxies": true
+      "icon": "https://github.com/DustinWin/ruleset_geodata/releases/download/icons/tiktok.png",
+      "include-all-proxies": true,
+      "name": "🎵 TikTok",
+      "type": "select"
     },
     {
       "hidden": true,
@@ -387,468 +391,261 @@ const TEMPLATE = {
       "type": "select"
     }
   ],
-  "sniffer": {
-    "enable": true,
-    "force-dns-mapping": true,
-    "parse-pure-ip": true,
-    "override-destination": true,
-    "sniff": {
-      "HTTP": {
-        "ports": [
-          80,
-          "8080-8880"
-        ]
-      },
-      "TLS": {
-        "ports": [
-          443,
-          8443
-        ]
-      },
-      "QUIC": {
-        "ports": [
-          443,
-          8443
-        ]
-      }
-    },
-    "force-domain": [
-      "+.v2ex.com"
-    ],
-    "skip-domain": [
-      "Mijia Cloud",
-      "dlg.io.mi.com",
-      "+.apple.com",
-      "+.icloud.com",
-      "+.wechat.com",
-      "+.qpic.cn",
-      "+.qq.com",
-      "+.wechatapp.com",
-      "+.vivox.com",
-      "+.oray.com",
-      "+.sunlogin.net"
-    ],
-    "skip-dst-address": [
-      "rule-set:telegramcidr",
-      "rule-set:twitter-x-ip",
-      "rule-set:lancidr",
-      "rule-set:cncidr",
-      "8.8.8.8/32",
-      "8.8.4.4/32",
-      "2001:4860:4860::8888/128",
-      "2001:4860:4860::8844/128",
-      "1.1.1.1/32",
-      "1.0.0.1/32",
-      "2606:4700:4700::1111/128",
-      "2606:4700:4700::1001/128",
-      "9.9.9.9/32",
-      "149.112.112.112/32",
-      "2620:fe::fe/128",
-      "208.67.222.222/32",
-      "208.67.220.220/32",
-      "2620:119:35::35/128",
-      "94.140.14.14/32",
-      "94.140.15.15/32",
-      "2a10:50c0::ad1:ff/128",
-      "2a10:50c0::ad2:ff/128",
-      "185.228.168.9/32",
-      "185.228.169.9/32",
-      "64.6.64.6/32",
-      "64.6.65.6/32",
-      "77.88.8.8/32",
-      "77.88.8.1/32",
-      "185.222.222.222/32",
-      "45.11.45.11/32",
-      "223.5.5.5/32",
-      "223.6.6.6/32",
-      "2400:3200::1/128",
-      "2400:3200:baba::1/128",
-      "119.29.29.29/32",
-      "182.254.116.116/32",
-      "180.76.76.76/32",
-      "114.114.114.114/32",
-      "114.114.115.115/32",
-      "114.114.114.119/32",
-      "114.114.115.119/32",
-      "1.2.4.8/32",
-      "210.2.4.8/32",
-      "101.226.4.6/32",
-      "218.30.118.6/32"
-    ]
-  },
-  "dns": {
-    "enable": true,
-    "ipv6": true,
-    "listen": "0.0.0.0:1053",
-    "use-hosts": true,
-    "use-system-hosts": false,
-    "default-nameserver": [
-      "tls://223.5.5.5#DIRECT",
-      "tls://223.6.6.6#DIRECT"
-    ],
-    "proxy-server-nameserver": [
-      "https://hrbgyitz34.cloudflare-gateway.com/dns-query#DIRECT"
-    ],
-    "direct-nameserver": [
-      "https://dns.alidns.com/dns-query#DIRECT",
-      "https://doh.pub/dns-query#DIRECT"
-    ],
-    "direct-nameserver-follow-policy": true,
-    "nameserver": [
-      "https://cloudflare-dns.com/dns-query#👉 手动切换"
-    ],
-    "prefer-h3": false,
-    "respect-rules": false,
-    "enhanced-mode": "fake-ip",
-    "fake-ip-range": "198.18.0.1/16",
-    "fake-ip-range6": "fdfe:dcba:9876::1/64",
-    "fake-ip-filter-mode": "blacklist",
-    "fake-ip-filter": [
-      "rule-set:fakeip-filter_domain",
-      "rule-set:private",
-      "rule-set:direct",
-      "rule-set:cn",
-      "rule-set:echs_cn",
-      "rule-set:echs_direct",
-      "rule-set:applications",
-      "rule-set:pixiv",
-      "pixshaft.com"
-    ],
-    "nameserver-policy": {
-      "rule-set:private,direct,proxy@direct,cn,echs_cn,echs_direct": "https://dns.alidns.com/dns-query#DIRECT"
-    }
-  },
-  "hosts": {
-    "+.clash.dev": [
-      "127.0.0.1"
-    ],
-    "services.googleapis.cn": [
-      "services.googleapis.com"
-    ],
-    "+.mcdn.bilivideo.com": [
-      "0.0.0.0"
-    ],
-    "+.mcdn.bilivideo.cn": [
-      "0.0.0.0"
-    ],
-    "mtalk.google.com": [
-      "142.250.107.188",
-      "108.177.125.188"
-    ],
-    "dns.msftncsi.com": [
-      "131.107.255.255",
-      "fd3e:4f5a:5b81::1"
-    ],
-    "*.pangolin-sdk-toutiao": "0.0.0.0",
-    "*.pangolin-sdk-toutiao.*": "0.0.0.0",
-    "*.pstatp.com": "0.0.0.0",
-    "*.pstatp.com.*": "0.0.0.0",
-    "*.pglstatp-toutiao.com": "0.0.0.0",
-    "*.pglstatp-toutiao.com.*": "0.0.0.0",
-    "gurd.snssdk.com": "0.0.0.0",
-    "gurd.snssdk.com.*": "0.0.0.0",
-    "*default.ixigua.com": "0.0.0.0"
-  },
   "rule-providers": {
     "Gemini_Domain": {
-      "type": "http",
-      "interval": 86400,
       "behavior": "domain",
-      "url": "https://cdn.jsdelivr.net/gh/Accademia/Additional_Rule_For_Clash@master/Gemini/Gemini_Domain.yaml",
-      "path": "./ruleset/Gemini_Domain.yaml"
+      "interval": 86400,
+      "path": "./ruleset/Gemini_Domain.yaml",
+      "type": "http",
+      "url": "https://cdn.jsdelivr.net/gh/Accademia/Additional_Rule_For_Clash@master/Gemini/Gemini_Domain.yaml"
     },
     "Grok_Domain": {
-      "type": "http",
-      "interval": 86400,
       "behavior": "domain",
-      "url": "https://raw.githubusercontent.com/Accademia/Additional_Rule_For_Clash/refs/heads/main/Grok/Grok_Domain.yaml",
-      "path": "./ruleset/Grok_Domain.yaml"
+      "interval": 86400,
+      "path": "./ruleset/Grok_Domain.yaml",
+      "type": "http",
+      "url": "https://raw.githubusercontent.com/Accademia/Additional_Rule_For_Clash/refs/heads/main/Grok/Grok_Domain.yaml"
     },
     "HijackingPlus": {
-      "type": "http",
-      "interval": 86400,
       "behavior": "classical",
-      "url": "https://raw.githubusercontent.com/Accademia/Additional_Rule_For_Clash/refs/heads/main/HijackingPlus/HijackingPlus_No_Resolve.yaml",
-      "path": "./ruleset/HijackingPlus.yaml"
+      "interval": 86400,
+      "path": "./ruleset/HijackingPlus.yaml",
+      "type": "http",
+      "url": "https://raw.githubusercontent.com/Accademia/Additional_Rule_For_Clash/refs/heads/main/HijackingPlus/HijackingPlus_No_Resolve.yaml"
     },
     "TikTok": {
-      "type": "http",
-      "interval": 86400,
       "behavior": "domain",
       "format": "mrs",
-      "url": "https://github.com/DustinWin/ruleset_geodata/releases/download/mihomo-ruleset/tiktok.mrs",
-      "path": "./ruleset/tiktok.mrs"
+      "interval": 86400,
+      "path": "./ruleset/tiktok.mrs",
+      "type": "http",
+      "url": "https://github.com/DustinWin/ruleset_geodata/releases/download/mihomo-ruleset/tiktok.mrs"
     },
     "ai-1": {
-      "type": "http",
-      "interval": 86400,
       "behavior": "domain",
       "format": "mrs",
-      "url": "https://github.com/DustinWin/ruleset_geodata/releases/download/mihomo-ruleset/ai.mrs",
-      "path": "./ruleset/ai-1.mrs"
+      "interval": 86400,
+      "path": "./ruleset/ai-1.mrs",
+      "type": "http",
+      "url": "https://github.com/DustinWin/ruleset_geodata/releases/download/mihomo-ruleset/ai.mrs"
     },
     "ai-2": {
-      "type": "http",
-      "interval": 86400,
       "behavior": "domain",
       "format": "mrs",
-      "url": "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/category-ai-!cn.mrs",
-      "path": "./ruleset/ai-2.mrs"
+      "interval": 86400,
+      "path": "./ruleset/ai-2.mrs",
+      "type": "http",
+      "url": "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/category-ai-!cn.mrs"
     },
     "apple": {
-      "type": "http",
-      "interval": 86400,
       "behavior": "domain",
-      "url": "https://cdn.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/apple.txt",
-      "path": "./ruleset/apple.yaml"
+      "interval": 86400,
+      "path": "./ruleset/apple.yaml",
+      "type": "http",
+      "url": "https://cdn.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/apple.txt"
     },
     "applications": {
-      "type": "http",
-      "interval": 86400,
       "behavior": "domain",
-      "url": "https://cdn.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/applications.txt",
-      "path": "./ruleset/applications.yaml"
+      "interval": 86400,
+      "path": "./ruleset/applications.yaml",
+      "type": "http",
+      "url": "https://cdn.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/applications.txt"
     },
     "cn": {
-      "type": "http",
-      "interval": 86400,
       "behavior": "domain",
       "format": "mrs",
-      "url": "https://github.com/DustinWin/ruleset_geodata/releases/download/mihomo-ruleset/cn.mrs",
-      "path": "./ruleset/cn.mrs"
+      "interval": 86400,
+      "path": "./ruleset/cn.mrs",
+      "type": "http",
+      "url": "https://github.com/DustinWin/ruleset_geodata/releases/download/mihomo-ruleset/cn.mrs"
     },
     "cncidr": {
-      "type": "http",
-      "interval": 86400,
       "behavior": "ipcidr",
       "format": "mrs",
-      "url": "https://github.com/DustinWin/ruleset_geodata/releases/download/mihomo-ruleset/cnip.mrs",
-      "path": "./ruleset/cncidr.mrs"
+      "interval": 86400,
+      "path": "./ruleset/cncidr.mrs",
+      "type": "http",
+      "url": "https://github.com/DustinWin/ruleset_geodata/releases/download/mihomo-ruleset/cnip.mrs"
     },
     "direct": {
-      "type": "http",
-      "interval": 86400,
       "behavior": "domain",
-      "url": "https://cdn.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/direct.txt",
-      "path": "./ruleset/direct.yaml"
+      "interval": 86400,
+      "path": "./ruleset/direct.yaml",
+      "type": "http",
+      "url": "https://cdn.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/direct.txt"
     },
     "echs_cn": {
-      "type": "http",
-      "interval": 86400,
       "behavior": "domain",
       "format": "mrs",
-      "url": "https://raw.githubusercontent.com/echs-top/proxy/main/mrs/domain/cn.mrs",
-      "path": "./ruleset/echs_cn.mrs"
+      "interval": 86400,
+      "path": "./ruleset/echs_cn.mrs",
+      "type": "http",
+      "url": "https://raw.githubusercontent.com/echs-top/proxy/main/mrs/domain/cn.mrs"
     },
     "echs_cn_ip": {
-      "type": "http",
-      "interval": 86400,
       "behavior": "ipcidr",
       "format": "mrs",
-      "url": "https://raw.githubusercontent.com/echs-top/proxy/main/mrs/ip/cn.mrs",
-      "path": "./ruleset/echs_cn_ip.mrs"
+      "interval": 86400,
+      "path": "./ruleset/echs_cn_ip.mrs",
+      "type": "http",
+      "url": "https://raw.githubusercontent.com/echs-top/proxy/main/mrs/ip/cn.mrs"
     },
     "echs_direct": {
-      "type": "http",
-      "interval": 86400,
       "behavior": "domain",
       "format": "mrs",
-      "url": "https://raw.githubusercontent.com/echs-top/proxy/main/mrs/domain/direct.mrs",
-      "path": "./ruleset/echs_direct.mrs"
+      "interval": 86400,
+      "path": "./ruleset/echs_direct.mrs",
+      "type": "http",
+      "url": "https://raw.githubusercontent.com/echs-top/proxy/main/mrs/domain/direct.mrs"
     },
     "echs_direct_ip": {
-      "type": "http",
-      "interval": 86400,
       "behavior": "ipcidr",
       "format": "mrs",
-      "url": "https://raw.githubusercontent.com/echs-top/proxy/main/mrs/ip/direct.mrs",
-      "path": "./ruleset/echs_direct_ip.mrs"
+      "interval": 86400,
+      "path": "./ruleset/echs_direct_ip.mrs",
+      "type": "http",
+      "url": "https://raw.githubusercontent.com/echs-top/proxy/main/mrs/ip/direct.mrs"
     },
     "fakeip-filter_domain": {
-      "type": "http",
-      "interval": 86400,
       "behavior": "domain",
       "format": "mrs",
-      "url": "https://github.com/DustinWin/ruleset_geodata/releases/download/mihomo-ruleset/fakeip-filter.mrs",
-      "path": "./ruleset/fakeip-filter_domain.mrs"
+      "interval": 86400,
+      "path": "./ruleset/fakeip-filter_domain.mrs",
+      "type": "http",
+      "url": "https://github.com/DustinWin/ruleset_geodata/releases/download/mihomo-ruleset/fakeip-filter.mrs"
     },
     "games": {
-      "type": "http",
-      "interval": 86400,
       "behavior": "domain",
       "format": "mrs",
-      "url": "https://github.com/DustinWin/ruleset_geodata/releases/download/mihomo-ruleset/games.mrs",
-      "path": "./ruleset/games.mrs"
+      "interval": 86400,
+      "path": "./ruleset/games.mrs",
+      "type": "http",
+      "url": "https://github.com/DustinWin/ruleset_geodata/releases/download/mihomo-ruleset/games.mrs"
     },
     "games-cn": {
-      "type": "http",
-      "interval": 86400,
       "behavior": "domain",
       "format": "mrs",
-      "url": "https://github.com/DustinWin/ruleset_geodata/releases/download/mihomo-ruleset/games-cn.mrs",
-      "path": "./ruleset/games-cn.mrs"
+      "interval": 86400,
+      "path": "./ruleset/games-cn.mrs",
+      "type": "http",
+      "url": "https://github.com/DustinWin/ruleset_geodata/releases/download/mihomo-ruleset/games-cn.mrs"
     },
     "gfw": {
-      "type": "http",
-      "interval": 86400,
       "behavior": "domain",
       "format": "mrs",
-      "url": "https://github.com/DustinWin/ruleset_geodata/releases/download/mihomo-ruleset/gfw.mrs",
-      "path": "./ruleset/gfw.mrs"
+      "interval": 86400,
+      "path": "./ruleset/gfw.mrs",
+      "type": "http",
+      "url": "https://github.com/DustinWin/ruleset_geodata/releases/download/mihomo-ruleset/gfw.mrs"
     },
     "google": {
-      "type": "http",
-      "interval": 86400,
       "behavior": "domain",
-      "url": "https://cdn.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/google.txt",
-      "path": "./ruleset/google.yaml"
+      "interval": 86400,
+      "path": "./ruleset/google.yaml",
+      "type": "http",
+      "url": "https://cdn.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/google.txt"
     },
     "google-cn": {
-      "type": "http",
-      "interval": 86400,
       "behavior": "domain",
       "format": "mrs",
-      "url": "https://github.com/DustinWin/ruleset_geodata/releases/download/mihomo-ruleset/google-cn.mrs",
-      "path": "./ruleset/google-cn.mrs"
+      "interval": 86400,
+      "path": "./ruleset/google-cn.mrs",
+      "type": "http",
+      "url": "https://github.com/DustinWin/ruleset_geodata/releases/download/mihomo-ruleset/google-cn.mrs"
     },
     "googlefcm": {
-      "type": "http",
-      "interval": 86400,
       "behavior": "domain",
       "format": "mrs",
-      "url": "https://fastly.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/googlefcm.mrs",
-      "path": "./ruleset/googlefcm.mrs"
+      "interval": 86400,
+      "path": "./ruleset/googlefcm.mrs",
+      "type": "http",
+      "url": "https://fastly.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/googlefcm.mrs"
     },
     "icloud": {
-      "type": "http",
-      "interval": 86400,
       "behavior": "domain",
-      "url": "https://cdn.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/icloud.txt",
-      "path": "./ruleset/icloud.yaml"
+      "interval": 86400,
+      "path": "./ruleset/icloud.yaml",
+      "type": "http",
+      "url": "https://cdn.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/icloud.txt"
     },
     "lancidr": {
-      "type": "http",
-      "interval": 86400,
       "behavior": "ipcidr",
-      "url": "https://cdn.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/lancidr.txt",
-      "path": "./ruleset/lancidr.yaml"
+      "interval": 86400,
+      "path": "./ruleset/lancidr.yaml",
+      "type": "http",
+      "url": "https://cdn.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/lancidr.txt"
     },
     "pixiv": {
-      "type": "http",
-      "interval": 86400,
       "behavior": "domain",
       "format": "mrs",
-      "url": "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/pixiv.mrs",
-      "path": "./ruleset/pixiv.mrs"
+      "interval": 86400,
+      "path": "./ruleset/pixiv.mrs",
+      "type": "http",
+      "url": "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/pixiv.mrs"
     },
     "private": {
-      "type": "http",
-      "interval": 86400,
       "behavior": "domain",
-      "url": "https://cdn.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/private.txt",
-      "path": "./ruleset/private.yaml"
+      "interval": 86400,
+      "path": "./ruleset/private.yaml",
+      "type": "http",
+      "url": "https://cdn.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/private.txt"
     },
     "proxy": {
-      "type": "http",
-      "interval": 86400,
       "behavior": "domain",
       "format": "mrs",
-      "url": "https://github.com/DustinWin/ruleset_geodata/releases/download/mihomo-ruleset/proxy.mrs",
-      "path": "./ruleset/proxy.mrs"
+      "interval": 86400,
+      "path": "./ruleset/proxy.mrs",
+      "type": "http",
+      "url": "https://github.com/DustinWin/ruleset_geodata/releases/download/mihomo-ruleset/proxy.mrs"
     },
     "proxy@direct": {
-      "type": "http",
-      "interval": 86400,
       "behavior": "domain",
       "format": "mrs",
-      "url": "https://raw.githubusercontent.com/echs-top/proxy/main/mrs/domain/proxy@direct.mrs",
-      "path": "./rules/proxy@direct.mrs"
+      "interval": 86400,
+      "path": "./rules/proxy@direct.mrs",
+      "type": "http",
+      "url": "https://raw.githubusercontent.com/echs-top/proxy/main/mrs/domain/proxy@direct.mrs"
     },
     "telegram_domain": {
-      "type": "http",
-      "interval": 86400,
       "behavior": "domain",
       "format": "mrs",
-      "url": "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/telegram.mrs",
-      "path": "./rules/telegram_domain.mrs"
+      "interval": 86400,
+      "path": "./rules/telegram_domain.mrs",
+      "type": "http",
+      "url": "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/telegram.mrs"
     },
     "telegramcidr": {
-      "type": "http",
-      "interval": 86400,
       "behavior": "ipcidr",
       "format": "mrs",
-      "url": "https://raw.githubusercontent.com/reddishJade/private_proxy/main/Mihomo/Provider/telegram%40ip.mrs",
-      "path": "./ruleset/telegramcidr.mrs"
+      "interval": 86400,
+      "path": "./ruleset/telegramcidr.mrs",
+      "type": "http",
+      "url": "https://raw.githubusercontent.com/reddishJade/private_proxy/main/Mihomo/Provider/telegram%40ip.mrs"
     },
     "twitter-x-blackmatrix7-No_Resolve": {
-      "type": "http",
-      "interval": 86400,
       "behavior": "classical",
       "format": "yaml",
-      "url": "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/refs/heads/master/rule/Clash/Twitter/Twitter_No_Resolve.yaml",
-      "path": "./ruleset/twitter-x-blackmartix7-noreslove.mrs"
+      "interval": 86400,
+      "path": "./ruleset/twitter-x-blackmartix7-noreslove.mrs",
+      "type": "http",
+      "url": "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/refs/heads/master/rule/Clash/Twitter/Twitter_No_Resolve.yaml"
     },
     "twitter-x-domain": {
-      "type": "http",
-      "interval": 86400,
       "behavior": "domain",
       "format": "mrs",
-      "url": "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/twitter.mrs",
-      "path": "./ruleset/twitter/x-domain.mrs"
+      "interval": 86400,
+      "path": "./ruleset/twitter/x-domain.mrs",
+      "type": "http",
+      "url": "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/twitter.mrs"
     },
     "twitter-x-ip": {
-      "type": "http",
-      "interval": 86400,
       "behavior": "ipcidr",
       "format": "mrs",
-      "url": "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geoip/twitter.mrs",
-      "path": "./ruleset/twitter/x-ip.mrs"
+      "interval": 86400,
+      "path": "./ruleset/twitter/x-ip.mrs",
+      "type": "http",
+      "url": "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geoip/twitter.mrs"
     }
-  },
-  "sub-rules": {
-    "fanqie": [
-      "DOMAIN,p6-ad-sign.byteimg.com,REJECT",
-      "DOMAIN,p9-ad-sign.byteimg.com,REJECT",
-      "DOMAIN,i.snssdk.com,REJECT",
-      "DOMAIN,i-lq.snssdk.com,REJECT",
-      "DOMAIN,dig.bdurl.net,REJECT",
-      "DOMAIN-KEYWORD,zijieapi,REJECT",
-      "DOMAIN,activity-ag.awemeughun.com,REJECT",
-      "DOMAIN,mcs.snssdk.com,REJECT",
-      "DOMAIN,tnc3-alisc1.snssdk.com,REJECT",
-      "DOMAIN,security-lq.snssdk.com,REJECT",
-      "DOMAIN,tnc3-aliec2.snssdk.com,REJECT",
-      "DOMAIN,is.snssdk.com,REJECT",
-      "DOMAIN,v6-novelapp.ixigua.com,REJECT",
-      "DOMAIN-WILDCARD,*novelapp.ixigua.com,REJECT",
-      "DOMAIN-WILDCARD,*default.ixigua.com,REJECT",
-      "DOMAIN,msync-im1-vip6-std.easemob.com,REJECT",
-      "DOMAIN,apd-pcdnwxlogin.teg.tencent-cloud.net,REJECT",
-      "DOMAIN,api.iegadp.qq.com,REJECT",
-      "DOMAIN,sf3-ttcdn-tos.pstatp.com,REJECT",
-      "DOMAIN-SUFFIX,pglstatp-toutiao.com,REJECT",
-      "DOMAIN-SUFFIX,byteorge.com,REJECT",
-      "DOMAIN-SUFFIX,bytegoofy.com,REJECT",
-      "DOMAIN-SUFFIX,bytedance.com,REJECT",
-      "IP-CIDR,49.71.37.101/32,REJECT,no-resolve",
-      "IP-CIDR,117.71.105.23/32,REJECT,no-resolve",
-      "IP-CIDR,218.94.207.205/32,REJECT,no-resolve",
-      "IP-CIDR,117.92.229.188/32,REJECT,no-resolve",
-      "IP-CIDR,101.36.166.16/32,REJECT,no-resolve",
-      "IP-CIDR,180.96.2.114/32,REJECT,no-resolve",
-      "DOMAIN-WILDCARD,*.pangolin-sdk-toutiao.com,REJECT",
-      "DOMAIN-WILDCARD,*.pglstatp-toutiao.com,REJECT",
-      "DOMAIN-WILDCARD,*.pstatp.com,REJECT",
-      "DOMAIN,gurd.snssdk.com,REJECT",
-      "DOMAIN-WILDCARD,*.byteimg.com,REJECT",
-      "DOMAIN-WILDCARD,*.snssdk.com,REJECT",
-      "DOMAIN-WILDCARD,*.pangolin-sdk-toutiao,REJECT",
-      "DOMAIN-WILDCARD,*.pangolin-sdk-toutiao.*,REJECT",
-      "DOMAIN-WILDCARD,*.pstatp.com.*,REJECT",
-      "DOMAIN-WILDCARD,*.pglstatp-toutiao.com.*,REJECT",
-      "DOMAIN-WILDCARD,gurd.snssdk.com.*,REJECT",
-      "MATCH,DIRECT"
-    ]
   },
   "rules": [
     "AND,((NETWORK,UDP),(DST-PORT,3478-3479/5349-5350/19302-19309),(NOT,((RULE-SET,direct))),(NOT,((RULE-SET,cncidr))),(NOT,((RULE-SET,cn))),(NOT,((RULE-SET,applications))),(NOT,((RULE-SET,games))),(NOT,((RULE-SET,games-cn)))),REJECT",
@@ -879,8 +676,10 @@ const TEMPLATE = {
     "PROCESS-NAME-REGEX,.*telegram.*,📲 Telegram",
     "RULE-SET,telegramcidr,📲 Telegram,no-resolve",
     "RULE-SET,telegram_domain,📲 Telegram",
+    // Claude / Anthropic：进程命中优先于域名规则，覆盖 Claude Desktop、Claude Code 等客户端。
     "PROCESS-NAME-REGEX,(?i).*claude.*,🤖 AI大模型",
     "PROCESS-NAME-REGEX,(?i).*anthropic.*,🤖 AI大模型",
+    // Claude / Anthropic：官方 API、网页登录、OAuth、MCP、CLI 更新和插件依赖。
     "DOMAIN,api.anthropic.com,🤖 AI大模型",
     "DOMAIN,console.anthropic.com,🤖 AI大模型",
     "DOMAIN,statsig.anthropic.com,🤖 AI大模型",
@@ -940,7 +739,238 @@ const TEMPLATE = {
     "RULE-SET,proxy,🌍 PROXY",
     "RULE-SET,gfw,🌍 PROXY",
     "MATCH,🌍 PROXY"
-  ]
+  ],
+  "sniffer": {
+    "enable": true,
+    "force-dns-mapping": true,
+    "force-domain": [
+      "+.v2ex.com"
+    ],
+    "override-destination": true,
+    "parse-pure-ip": true,
+    "skip-domain": [
+      "Mijia Cloud",
+      "dlg.io.mi.com",
+      "+.apple.com",
+      "+.icloud.com",
+      "+.wechat.com",
+      "+.qpic.cn",
+      "+.qq.com",
+      "+.wechatapp.com",
+      "+.vivox.com",
+      "+.oray.com",
+      "+.sunlogin.net"
+    ],
+    "skip-dst-address": [
+      "rule-set:telegramcidr",
+      "rule-set:twitter-x-ip",
+      "rule-set:lancidr",
+      "rule-set:cncidr",
+  // --- 1. Google 公共 DNS ---
+      "8.8.8.8/32",
+      "8.8.4.4/32",
+      "2001:4860:4860::8888/128",
+      "2001:4860:4860::8844/128",
+
+  // --- 2. Cloudflare 公共 DNS ---
+      "1.1.1.1/32",
+      "1.0.0.1/32",
+      "2606:4700:4700::1111/128",
+      "2606:4700:4700::1001/128",
+
+  // --- 3. Quad9 公共 DNS（安全过滤） ---
+      "9.9.9.9/32",
+      "149.112.112.112/32",
+      "2620:fe::fe/128",
+
+  // --- 4. OpenDNS（思科） ---
+      "208.67.222.222/32",
+      "208.67.220.220/32",
+      "2620:119:35::35/128",
+
+  // --- 5. AdGuard DNS（去广告） ---
+      "94.140.14.14/32",
+      "94.140.15.15/32",
+      "2a10:50c0::ad1:ff/128",
+      "2a10:50c0::ad2:ff/128",
+
+  // --- 6. CleanBrowsing（安全/成人内容拦截） ---
+      "185.228.168.9/32",
+      "185.228.169.9/32",
+
+  // --- 7. Verisign 公共 DNS ---
+      "64.6.64.6/32",
+      "64.6.65.6/32",
+
+  // --- 8. Yandex 公共 DNS ---
+      "77.88.8.8/32",
+      "77.88.8.1/32",
+
+  // --- 9. DNS.SB 公共 DNS ---
+      "185.222.222.222/32",
+      "45.11.45.11/32",
+
+  // --- 10. 阿里 DNS (AliDNS) ---
+      "223.5.5.5/32",
+      "223.6.6.6/32",
+      "2400:3200::1/128",
+      "2400:3200:baba::1/128",
+
+  // --- 11. 腾讯 DNS (DNSPod) ---
+      "119.29.29.29/32",
+      "182.254.116.116/32",
+
+  // --- 12. 百度 DNS ---
+      "180.76.76.76/32",
+
+  // --- 13. 114DNS (常规与安全版) ---
+      "114.114.114.114/32",
+      "114.114.115.115/32",
+      "114.114.114.119/32",
+      "114.114.115.119/32",
+
+  // --- 14. CNNIC 公共 DNS ---
+      "1.2.4.8/32",
+      "210.2.4.8/32",
+
+  // --- 15. 360 安全 DNS (DNS派) ---
+       "101.226.4.6/32",
+      "218.30.118.6/32"
+    ],
+    "sniff": {
+      "HTTP": {
+        "ports": [
+          80,
+          "8080-8880"
+        ]
+      },
+      "QUIC": {
+        "ports": [
+          443,
+          8443
+        ]
+      },
+      "TLS": {
+        "ports": [
+          443,
+          8443
+        ]
+      }
+    }
+  },
+  "socks-port": 7346,
+  "store-fake-ip": true,
+  "store-selected": true,
+  "sub-rules": {
+    "fanqie": [
+      "DOMAIN,p6-ad-sign.byteimg.com,REJECT",
+      "DOMAIN,p9-ad-sign.byteimg.com,REJECT",
+      "DOMAIN,i.snssdk.com,REJECT",
+      "DOMAIN,i-lq.snssdk.com,REJECT",
+      "DOMAIN,dig.bdurl.net,REJECT",
+      "DOMAIN-KEYWORD,zijieapi,REJECT",
+      "DOMAIN,activity-ag.awemeughun.com,REJECT",
+      "DOMAIN,mcs.snssdk.com,REJECT",
+      "DOMAIN,tnc3-alisc1.snssdk.com,REJECT",
+      "DOMAIN,security-lq.snssdk.com,REJECT",
+      "DOMAIN,tnc3-aliec2.snssdk.com,REJECT",
+      "DOMAIN,is.snssdk.com,REJECT",
+      "DOMAIN,v6-novelapp.ixigua.com,REJECT",
+      "DOMAIN-WILDCARD,*novelapp.ixigua.com,REJECT",
+      "DOMAIN-WILDCARD,*default.ixigua.com,REJECT",
+      "DOMAIN,msync-im1-vip6-std.easemob.com,REJECT",
+      "DOMAIN,apd-pcdnwxlogin.teg.tencent-cloud.net,REJECT",
+      "DOMAIN,api.iegadp.qq.com,REJECT",
+      "DOMAIN,sf3-ttcdn-tos.pstatp.com,REJECT",
+      "DOMAIN-SUFFIX,pglstatp-toutiao.com,REJECT",
+      "DOMAIN-SUFFIX,byteorge.com,REJECT",
+      "DOMAIN-SUFFIX,bytegoofy.com,REJECT",
+      "DOMAIN-SUFFIX,bytedance.com,REJECT",
+      "IP-CIDR,49.71.37.101/32,REJECT,no-resolve",
+      "IP-CIDR,117.71.105.23/32,REJECT,no-resolve",
+      "IP-CIDR,218.94.207.205/32,REJECT,no-resolve",
+      "IP-CIDR,117.92.229.188/32,REJECT,no-resolve",
+      "IP-CIDR,101.36.166.16/32,REJECT,no-resolve",
+      "IP-CIDR,180.96.2.114/32,REJECT,no-resolve",
+      "DOMAIN-WILDCARD,*.pangolin-sdk-toutiao.com,REJECT",
+      "DOMAIN-WILDCARD,*.pglstatp-toutiao.com,REJECT",
+      "DOMAIN-WILDCARD,*.pstatp.com,REJECT",
+      "DOMAIN,gurd.snssdk.com,REJECT",
+      "DOMAIN-WILDCARD,*.byteimg.com,REJECT",
+      "DOMAIN-WILDCARD,*.snssdk.com,REJECT",
+      "DOMAIN-WILDCARD,*.pangolin-sdk-toutiao,REJECT",
+      "DOMAIN-WILDCARD,*.pangolin-sdk-toutiao.*,REJECT",
+      "DOMAIN-WILDCARD,*.pstatp.com.*,REJECT",
+      "DOMAIN-WILDCARD,*.pglstatp-toutiao.com.*,REJECT",
+      "DOMAIN-WILDCARD,gurd.snssdk.com.*,REJECT",
+      "MATCH,DIRECT"
+    ]
+  },
+  "tcp-concurrent": true,
+  "tun": {
+    "auto-detect-interface": true,
+    "auto-redirect": true,
+    "auto-route": true,
+    "device": "XVSVT",
+    "dns-hijack": [
+      "any:53",
+      "udp://any:53",
+      "tcp://any:53"
+    ],
+    "enable": true,
+    "route-address": [
+      "198.51.100.0/30",
+      "1.0.0.0/8",
+      "2.0.0.0/7",
+      "4.0.0.0/6",
+      "8.0.0.0/7",
+      "11.0.0.0/8",
+      "12.0.0.0/6",
+      "16.0.0.0/4",
+      "32.0.0.0/3",
+      "64.0.0.0/3",
+      "96.0.0.0/4",
+      "112.0.0.0/5",
+      "120.0.0.0/6",
+      "124.0.0.0/7",
+      "126.0.0.0/8",
+      "128.0.0.0/3",
+      "160.0.0.0/5",
+      "168.0.0.0/8",
+      "169.0.0.0/9",
+      "169.128.0.0/10",
+      "169.192.0.0/11",
+      "169.224.0.0/12",
+      "169.240.0.0/13",
+      "169.248.0.0/14",
+      "169.252.0.0/15",
+      "169.255.0.0/16",
+      "170.0.0.0/7",
+      "172.0.0.0/12",
+      "172.32.0.0/11",
+      "172.64.0.0/10",
+      "172.128.0.0/9",
+      "173.0.0.0/8",
+      "174.0.0.0/7",
+      "176.0.0.0/4",
+      "192.0.0.0/9",
+      "192.128.0.0/11",
+      "192.160.0.0/13",
+      "192.169.0.0/16",
+      "192.170.0.0/15",
+      "192.172.0.0/14",
+      "192.176.0.0/12",
+      "192.192.0.0/10",
+      "193.0.0.0/8",
+      "194.0.0.0/7",
+      "196.0.0.0/6",
+      "200.0.0.0/5",
+      "208.0.0.0/4"
+    ],
+    "stack": "gvisor",
+    "strict-route": true
+  },
+  "unified-delay": true
 };
 
 // Bettbox 的可视化开关图标：客户端会读取全局 serviceConfigs（name 对应 ruleOptionsEnable 的 key，
@@ -976,6 +1006,7 @@ const serviceConfigs = TEMPLATE['proxy-groups']
       icon: 'https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Telegram.png'
     }
   ]);
+
 
 // ============================================================================
 // 工具函数
@@ -1630,7 +1661,7 @@ function main(config, profileName) {
   // ---- 2. 以模板为主体，深拷贝一份出来当作最终结果 ----
   const result = deepClone(TEMPLATE);
 
-  // ---- 2.5 TGDC 实验分流（默认关闭；由 UI 开关控制） ----
+  // ---- 2.5 TGDC 实验分流（默认关闭；开启后才重命名/注入 Telegram 规则与策略组） ----
   applyTelegramDcExperiment(result, originalProxies);
 
   // ---- 3. 节点列表换成订阅里的真实节点 ----

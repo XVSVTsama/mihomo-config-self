@@ -36,6 +36,10 @@ PAIRS = [
     ("README.md", "README_en.md", "readme"),
 ]
 
+# Keep chunks small enough for DeepSeek's final-answer output limit. Splitting at
+# blank lines preserves comment/code structure more often than arbitrary cuts.
+CHUNK_MAX_CHARS = 8000
+
 GROUP_NAME_MAP = """Proxy group names must be translated as:
 - "🔄 负载均衡" -> "🔄 Load Balance"
 - "👉 手动切换" -> "👉 Manual Select"
@@ -106,6 +110,88 @@ def strip_fences(text):
     return text
 
 
+def update_js_block_state(line, in_block):
+    """Track JS block comments across lines without parsing strings exactly."""
+    index = 0
+    while index < len(line):
+        if in_block:
+            if line[index:index + 2] == "*/":
+                in_block = False
+                index += 2
+            else:
+                index += 1
+        else:
+            if line[index:index + 2] == "//":
+                break
+            if line[index:index + 2] == "/*":
+                in_block = True
+                index += 2
+            else:
+                index += 1
+    return in_block
+
+
+def split_content(content, kind=None, max_chars=CHUNK_MAX_CHARS):
+    """Split source content into safely-sized chunks for one-file translation."""
+    if len(content) <= max_chars:
+        return [content]
+
+    lines = content.splitlines(keepends=True)
+    chunks = []
+    current = ""
+    in_block = False
+
+    for line in lines:
+        if (
+            current
+            and len(current) + len(line) > max_chars
+            and not line.strip()
+            and not in_block
+        ):
+            chunks.append(current)
+            current = ""
+        current += line
+        if kind == "js":
+            in_block = update_js_block_state(line, in_block)
+
+    if current:
+        chunks.append(current)
+
+    # Very long sections without a blank line still need a hard split.
+    final_chunks = []
+    for chunk in chunks:
+        if len(chunk) <= max_chars:
+            final_chunks.append(chunk)
+            continue
+        piece = ""
+        in_block = False
+        for line in chunk.splitlines(keepends=True):
+            if (
+                piece
+                and len(piece) + len(line) > max_chars
+                and not in_block
+            ):
+                final_chunks.append(piece)
+                piece = ""
+            piece += line
+            if kind == "js":
+                in_block = update_js_block_state(line, in_block)
+        if piece:
+            final_chunks.append(piece)
+    return final_chunks
+
+
+def build_chunk_prompt(kind, glossary, chunk_index, total):
+    prompt = build_prompt(kind, glossary)
+    if total > 1:
+        prompt += (
+            "\n\nThis is chunk %d of %d. Translate only this chunk and return "
+            "only the translated chunk, without code fences or explanations."
+            % (chunk_index, total)
+        )
+    return prompt
+
+
 def provider_label(provider):
     return "Gemini" if provider == "gemini" else "DeepSeek"
 
@@ -137,7 +223,10 @@ def call_gemini(prompt, api_key, model, timeout):
     )
     payload = {
         "contents": [{"parts": [{"text": prompt}]}],
-        "generationConfig": {"temperature": 0.2},
+        "generationConfig": {
+            "temperature": 0.2,
+            "maxOutputTokens": 8192,
+        },
     }
     request = urllib.request.Request(
         url,
@@ -147,7 +236,14 @@ def call_gemini(prompt, api_key, model, timeout):
     with urllib.request.urlopen(request, timeout=timeout) as response:
         body = json.loads(response.read().decode("utf-8"))
     try:
-        return body["candidates"][0]["content"]["parts"][0]["text"].strip()
+        candidate = body["candidates"][0]
+        finish_reason = candidate.get("finishReason", "")
+        if finish_reason and finish_reason != "STOP":
+            raise ProviderError(
+                "gemini",
+                "output finished with finishReason=%s" % finish_reason,
+            )
+        return candidate["content"]["parts"][0]["text"].strip()
     except (KeyError, IndexError, TypeError) as exc:
         raise ProviderError(
             "gemini",
@@ -161,6 +257,7 @@ def call_deepseek(prompt, api_key, model, timeout):
         "model": model,
         "messages": [{"role": "user", "content": prompt}],
         "temperature": 0.2,
+        "max_tokens": 8192,
     }
     request = urllib.request.Request(
         url,
@@ -173,7 +270,14 @@ def call_deepseek(prompt, api_key, model, timeout):
     with urllib.request.urlopen(request, timeout=timeout) as response:
         body = json.loads(response.read().decode("utf-8"))
     try:
-        return body["choices"][0]["message"]["content"].strip()
+        choice = body["choices"][0]
+        finish_reason = choice.get("finish_reason", "")
+        if finish_reason == "length":
+            raise ProviderError(
+                "deepseek",
+                "output truncated because finish_reason=length",
+            )
+        return choice["message"]["content"].strip()
     except (KeyError, IndexError, TypeError) as exc:
         raise ProviderError(
             "deepseek",
@@ -326,10 +430,11 @@ def main():
             sys.exit(1)
 
         file_start = time.time()
-        prompt = build_prompt(kind, glossary)
         content = src_path.read_text(encoding="utf-8")
+        chunks = split_content(content, kind)
         text = None
         used_provider = None
+        invalid_attempts = 0
 
         while True:
             if time.time() - file_start > file_timeout:
@@ -349,31 +454,51 @@ def main():
                 % (label, provider_model(provider, gemini_model, deepseek_model))
             )
 
-            try:
-                text = call_provider(
-                    provider,
-                    prompt + "\n\n" + content,
-                    provider_key(provider, gemini_key, deepseek_key),
-                    provider_model(provider, gemini_model, deepseek_model),
-                    request_timeout,
-                    max_attempts,
+            translated_chunks = []
+            failed = False
+            for chunk_index, chunk in enumerate(chunks, start=1):
+                log(
+                    "  translating chunk %d/%d (%d chars)"
+                    % (chunk_index, len(chunks), len(chunk))
                 )
-                used_provider = provider
-            except ProviderError as exc:
-                log("  status: FAIL")
-                log("  error: %s" % exc.message)
-                if provider == "gemini" and deepseek_key:
-                    log("  action: switching to DeepSeek")
-                    print(
-                        "::warning::Gemini failed for %s; switching to DeepSeek"
-                        % src_name
+                prompt = build_chunk_prompt(
+                    kind,
+                    glossary,
+                    chunk_index,
+                    len(chunks),
+                )
+                try:
+                    raw = call_provider(
+                        provider,
+                        prompt + "\n\n" + chunk,
+                        provider_key(provider, gemini_key, deepseek_key),
+                        provider_model(provider, gemini_model, deepseek_model),
+                        request_timeout,
+                        max_attempts,
                     )
-                    provider = "deepseek"
-                    switched = True
-                    continue
-                log("  action: STOP")
-                stop(idx, total, src_name, dst_name, written, untouched)
-                sys.exit(1)
+                    translated_chunks.append(strip_fences(raw))
+                    used_provider = provider
+                except ProviderError as exc:
+                    log("  status: FAIL")
+                    log("  error: %s" % exc.message)
+                    if provider == "gemini" and deepseek_key:
+                        log("  action: switching to DeepSeek")
+                        print(
+                            "::warning::Gemini failed for %s; switching to DeepSeek"
+                            % src_name
+                        )
+                        provider = "deepseek"
+                        switched = True
+                        failed = True
+                        break
+                    log("  action: STOP")
+                    stop(idx, total, src_name, dst_name, written, untouched)
+                    sys.exit(1)
+
+            if failed:
+                continue
+
+            text = "".join(translated_chunks)
 
             error = validate(text, kind)
             if error:
@@ -387,6 +512,13 @@ def main():
                     )
                     provider = "deepseek"
                     switched = True
+                    continue
+                invalid_attempts += 1
+                if invalid_attempts < max_attempts:
+                    log(
+                        "  action: retrying same provider (%d/%d)"
+                        % (invalid_attempts, max_attempts)
+                    )
                     continue
                 log("  action: STOP")
                 stop(idx, total, src_name, dst_name, written, untouched)

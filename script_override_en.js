@@ -81,7 +81,121 @@ const ruleOptionsEnable = {
   '强制证书验证': false,   // When enabled, uniformly sets subscription nodes skip-cert-verify to false (forcing certificate verification); when disabled, does not interfere and retains the subscription nodes' original settings. Applies equally to all nodes
   '启用 Reality 增强': true, // Whether to enable support-x25519mlkem768 (X25519MLKEM768 post-quantum key agreement) for Reality nodes with non-empty public-key/short-id
   'FCM直连': true,          // Default ON: The hidden FCM group contains only DIRECT; when disabled, only 👉 Manual Select is retained (FCM group is not removed). The switch icon is taken from the icon field of the FCM proxy group.
+  'TGDC实验分流': false,     // Enables the Telegram DC/regional experiment; when disabled, the original Telegram rules, policy groups, and rule providers are left unchanged.
 };
+
+// ============================================================================
+// Telegram DC/regional experiment (injected only when the switch is true).
+// Region filters follow the organizational style in MyClash without copying its implementation.
+// DC1/DC3: Miami; DC2/DC4: Amsterdam; DC5: Singapore.
+// Static CIDRs cannot reliably split same-city DCs, so groups use DC pairs.
+// ============================================================================
+const TGDC_RULE_PROVIDERS = {
+  telegram_dc1_dc3_miami: {
+    type: 'inline',
+    behavior: 'classical',
+    payload: [
+      'IP-CIDR,91.108.12.0/22,no-resolve',
+      'IP-CIDR,149.154.172.0/22,no-resolve',
+      'IP-CIDR6,2001:b28:f23d::/48,no-resolve',
+    ],
+  },
+  telegram_dc2_dc4_amsterdam: {
+    type: 'inline',
+    behavior: 'classical',
+    payload: [
+      'IP-CIDR,91.108.58.0/23,no-resolve',
+      'IP-CIDR,91.108.4.0/22,no-resolve',
+      'IP-CIDR,91.108.8.0/22,no-resolve',
+      'IP-CIDR,149.154.160.0/21,no-resolve',
+      'IP-CIDR,95.161.64.0/20,no-resolve',
+      'IP-CIDR,91.105.192.0/23,no-resolve',
+      'IP-CIDR,185.76.151.0/24,no-resolve',
+      'IP-CIDR,5.28.192.0/18,no-resolve',
+      'IP-CIDR,109.239.140.0/24,no-resolve',
+      'IP-CIDR6,2001:67c:4e8::/48,no-resolve',
+      'IP-CIDR6,2a0a:f280:203::/48,no-resolve',
+    ],
+  },
+  telegram_dc5_sg: {
+    type: 'inline',
+    behavior: 'classical',
+    payload: [
+      'IP-CIDR,91.108.16.0/22,no-resolve',
+      'IP-CIDR,91.108.56.0/23,no-resolve',
+      'IP-CIDR,149.154.168.0/22,no-resolve',
+      'IP-CIDR6,2001:b28:f23c::/48,no-resolve',
+      'IP-CIDR6,2001:b28:f23f::/48,no-resolve',
+    ],
+  },
+};
+
+// Fallback selection follows MyClash's low_filter idea: exclude built-ins, rejects,
+// rematches, and non-real nodes; otherwise use the first usable subscription node.
+const TGDC_FALLBACK_EXCLUDE_FILTER =
+  /群|返利|循环|官网|客服|网站|网址|获取|订阅|流量|到期|机场|下次|版本|官址|备用|过期|已用|联系|邮箱|工单|贩卖|通知|倒卖|防止|国内|地址|频道|电报|无法|说明|使用|提示|访问|支持|教程|关注|更新|作者|加入|超时|收藏|优惠|福利|邀请|好友|失联|选择|剩余|公益|发布|DIZTNA|通路|登录|禁止|定时|渠道|牢记|永久|余额|阁下|本站|刷新|导航|建议|重置|以下|⚠️|@|t\.me\/\+|\bexpire\b|\bhttps?:\/\/|\.com|\btraffic\b/iu;
+const TGDC_FALLBACK_LOW_RATE_FILTER =
+  /^(?!.*(?:剩|期)).*(?:(?<!\d)0\.[0-5]|(?<=[ |｜丨∣┃\-‐–—−－﹣])0[*×✕✖⨯⨉x倍])|(?:(?<=[ |｜丨∣┃\-‐–—−－﹣])[*×✕✖⨯⨉x]0(?= |倍|$))|^(?!.*(?:客户端|软件)).*下载|低倍|免费|(?<![A-Za-z])free(?![A-Za-z])/i;
+const TGDC_FALLBACK_HIGH_RATE_FILTER =
+  /(?<=[ |｜丨∣┃\-‐–—−－﹣])((?:[*×✕✖⨯⨉x]\s*(?:[2-9]\d*|[1-9]\d+)(?:\.\d+)?)|(?:(?<![\d.])(?:[2-9]\d*|[1-9]\d+)(?:\.\d+)?\s*(?:倍|[*×✕✖⨯⨉x])))/i;
+
+function selectTelegramDcFallbackNode(originalProxies) {
+  const proxies = Array.isArray(originalProxies) ? originalProxies : [];
+  const fallbackProxy = proxies.find((proxy) => {
+    if (!proxy || typeof proxy !== 'object' || typeof proxy.name !== 'string' || proxy.name.length === 0) {
+      return false;
+    }
+    const type = String(proxy.type || '').toLowerCase();
+    if (type === 'direct' || type === 'reject' || type === 'rematch') {
+      return false;
+    }
+    const name = proxy.name;
+    if (TGDC_FALLBACK_EXCLUDE_FILTER.test(name)) return false;
+    if (TGDC_FALLBACK_LOW_RATE_FILTER.test(name)) return false;
+    if (TGDC_FALLBACK_HIGH_RATE_FILTER.test(name)) return false;
+    return true;
+  });
+  return fallbackProxy?.name || 'COMPATIBLE';
+}
+
+const TGDC_PROXY_GROUP_DEFINITIONS = [
+  {
+    name: '📲 Telegram-DC1-DC3-Miami',
+    filter: '(?i)🇺🇸|美国|迈阿密|miami|\\bMIA\\b|\\bUSA\\b|united\\s*states',
+    icon: 'https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/United_States.png',
+  },
+  {
+    name: '📲 Telegram-DC2-DC4-Amsterdam',
+    filter: '(?i)🇳🇱|荷兰|阿姆斯特丹|amsterdam|\\bAMS\\b|\\bNL\\b|netherlands',
+    icon: 'https://flagcdn.com/w160/nl.png',
+  },
+  {
+    name: '📲 Telegram-DC5-SG',
+    filter: '(?i)🇸🇬|🇭🇰|新加坡|狮城|香港|singapore|hong\\s*kong|\\bSG\\b|\\bSGP\\b|\\bHK\\b|\\bHKG\\b',
+    icon: 'https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Singapore.png',
+  },
+];
+
+function buildTelegramDcProxyGroups(fallbackNodeName) {
+  return TGDC_PROXY_GROUP_DEFINITIONS.map((definition) => ({
+    name: definition.name,
+    type: 'select',
+    filter: definition.filter,
+    'include-all-proxies': true,
+    'empty-fallback': fallbackNodeName,
+    icon: definition.icon,
+  }));
+}
+
+const TGDC_RULES = [
+  'RULE-SET,telegram_dc1_dc3_miami,📲 Telegram-DC1-DC3-Miami,no-resolve',
+  'RULE-SET,telegram_dc2_dc4_amsterdam,📲 Telegram-DC2-DC4-Amsterdam,no-resolve',
+  'RULE-SET,telegram_dc5_sg,📲 Telegram-DC5-SG,no-resolve',
+  'PROCESS-NAME-REGEX,.*nagram.*,📲 Telegram(兜底)',
+  'PROCESS-NAME-REGEX,.*telegram.*,📲 Telegram(兜底)',
+  'RULE-SET,telegramcidr,📲 Telegram(兜底),no-resolve',
+  'RULE-SET,telegram_domain,📲 Telegram(兜底)',
+];
 
 // When the same domain rule key appears, whether the subscription's original configuration (true) or template (false) takes priority (the template currently does not configure
 // proxy-server-nameserver-policy, so this switch currently only affects merging between subscription sources)
@@ -872,6 +986,10 @@ const serviceConfigs = TEMPLATE['proxy-groups']
     {
       name: '启用 Reality 增强',
       icon: 'https://fastly.jsdelivr.net/gh/MiToverG422/Qure@master/IconSet/Color/Spark.png'
+    },
+    {
+      name: 'TGDC实验分流',
+      icon: 'https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Telegram.png'
     }
   ]);
 
@@ -1404,6 +1522,70 @@ function smartMergeDnsNode(config, result) {
 }
 
 // ============================================================================
+// Telegram DC experiment: only modifies result when the switch is enabled.
+// ============================================================================
+function applyTelegramDcExperiment(result, originalProxies) {
+  if (ruleOptionsEnable['TGDC实验分流'] !== true) {
+    return;
+  }
+
+  const originalProviders = result['rule-providers'] || {};
+  const providersWithTelegramDc = {};
+  let inserted = false;
+  Object.keys(originalProviders).forEach((name) => {
+    if (!inserted && name === 'telegram_domain') {
+      Object.assign(providersWithTelegramDc, deepClone(TGDC_RULE_PROVIDERS));
+      inserted = true;
+    }
+    providersWithTelegramDc[name] = originalProviders[name];
+  });
+  if (!inserted) {
+    Object.assign(providersWithTelegramDc, deepClone(TGDC_RULE_PROVIDERS));
+  }
+  result['rule-providers'] = providersWithTelegramDc;
+
+  const telegramFallback = (result['proxy-groups'] || []).find(
+    (group) => group && group.name === '📲 Telegram'
+  );
+  if (telegramFallback) {
+    telegramFallback.name = '📲 Telegram(兜底)';
+  }
+
+  const proxyGroups = result['proxy-groups'] || [];
+  const autoSelectIndex = proxyGroups.findIndex(
+    (group) => group && group.name === '♻️ 自动选择'
+  );
+  const fallbackIndex = proxyGroups.findIndex(
+    (group) => group && group.name === '📲 Telegram(兜底)'
+  );
+  const insertIndex = autoSelectIndex >= 0
+    ? autoSelectIndex + 1
+    : (fallbackIndex >= 0 ? fallbackIndex : proxyGroups.length);
+  proxyGroups.splice(
+    insertIndex,
+    0,
+    ...deepClone(buildTelegramDcProxyGroups(selectTelegramDcFallbackNode(originalProxies)))
+  );
+  result['proxy-groups'] = proxyGroups;
+
+  if (!Array.isArray(result.rules)) {
+    result.rules = [];
+  }
+  const telegramRulePattern = (rule) =>
+    typeof rule === 'string' &&
+    (rule.includes(',📲 Telegram') || rule.includes('RULE-SET,telegramcidr') || rule.includes('RULE-SET,telegram_domain'));
+  let firstTelegramRuleIndex = result.rules.findIndex(telegramRulePattern);
+  const retainedRules = result.rules.filter((rule) => !telegramRulePattern(rule));
+  if (firstTelegramRuleIndex < 0) {
+    firstTelegramRuleIndex = retainedRules.length;
+  } else {
+    firstTelegramRuleIndex = Math.min(firstTelegramRuleIndex, retainedRules.length);
+  }
+  retainedRules.splice(firstTelegramRuleIndex, 0, ...TGDC_RULES);
+  result.rules = retainedRules;
+}
+
+// ============================================================================
 // Entry Function: Bettbox / FlClash-based clients will call main(config) and use its return value
 // ============================================================================
 function main(config, profileName) {
@@ -1462,6 +1644,9 @@ function main(config, profileName) {
   // ---- 2. Use the template as the main body, and deep clone a copy to act as the final result ----
   const result = deepClone(TEMPLATE);
 
+  // ---- 2.5 Telegram DC experiment (default off; injects after being enabled) ----
+  applyTelegramDcExperiment(result, originalProxies);
+
   // ---- 3. Replace the node list with the real nodes from the subscription ----
   result.proxies = originalProxies;
   if (originalProxyProviders) {
@@ -1475,8 +1660,10 @@ function main(config, profileName) {
 
   (result['proxy-groups'] || []).forEach(group => {
     if (group && group.name) {
+      // After enabling TGDC, 📲 Telegram(兜底) continues to use the original 📲 Telegram switch.
+      const optionName = group.name === '📲 Telegram(兜底)' ? '📲 Telegram' : group.name;
       // By default, keep enabled if this name is not written in rule options
-      if (ruleOptionsEnable[group.name] === false) {
+      if (ruleOptionsEnable[optionName] === false) {
         disabledGroupNames.add(group.name);
       } else {
         activeGroupNames.add(group.name);
