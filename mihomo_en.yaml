@@ -1,3 +1,7 @@
+# Translation Workflow Stability Test
+# Chunk Output Stability Test
+# Conservative Chunk Test
+# Top-Level Module Chunk Test
 mode: rule
 mixed-port: 7254
 port: 7249
@@ -84,73 +88,6 @@ ntp:
   port: 123
 
 
-proxies: ~
-proxy-groups:
-  - name: 🌍 PROXY
-    icon: "https://github.com/DustinWin/ruleset_geodata/releases/download/icons/proxy.png"
-    type: select
-    proxies:
-        - 👉 手动切换
-        - ♻️ 自动选择
-        - 🔄 负载均衡
-        - DIRECT
-  - name: 🔄 负载均衡
-    icon: "https://www.clashverge.dev/assets/icons/balance.svg"
-    type: load-balance
-    proxies: # Here are all single nodes (automatically populated by the override script with all subscription nodes)
-    url: 'https://www.gstatic.com/generate_204'
-    interval: 300
-    lazy: true
-    strategy: sticky-sessions
-  - name: 👉 手动切换
-    icon: "https://github.com/DustinWin/ruleset_geodata/releases/download/icons/select.png"
-    type: select
-    proxies: # Here are all single nodes (automatically populated by the override script with all subscription nodes)
-  - name: ♻️ 自动选择
-    icon: "https://github.com/DustinWin/ruleset_geodata/releases/download/icons/auto.png"
-    type: url-test
-    url: https://www.gstatic.com/generate_204
-    interval: 300
-    tolerance: 50
-    proxies: # Here are all single nodes (automatically populated by the override script with all subscription nodes)
-  - name: 📲 Telegram
-    icon: "https://github.com/DustinWin/ruleset_geodata/releases/download/icons/telegram.png"
-    type: select
-    proxies: # Here are all single nodes (automatically populated by the override script with all subscription nodes)
-  - name: 🎮 Games-Global
-    icon: "https://github.com/DustinWin/ruleset_geodata/releases/download/icons/games-cn.png"
-    type: select
-    proxies: # Here are all single nodes (automatically populated by the override script with all subscription nodes)
-
-  - name: ✖️ Twitter
-    icon: "https://www.clashverge.dev/assets/icons/twitter.svg"
-    type: select
-    filter: "US|Residential"
-    include-all-proxies: true
-  - name: 🤖 AI大模型
-    icon: "https://github.com/DustinWin/ruleset_geodata/releases/download/icons/ai.png"
-    type: select
-    filter: "US|Residential"
-    include-all-proxies: true
-  - name: 🎵 TikTok
-    icon: "https://github.com/DustinWin/ruleset_geodata/releases/download/icons/tiktok.png"
-    type: select
-    filter: "US|Residential"
-    include-all-proxies: true
-  # FCM: Google FCM domain traffic splitting target (routes to this group after hitting RULE-SET,googlefcm,FCM).
-  # This group is not hidden in the template to indicate that this proxy group actually exists and is a real traffic splitting target in the configuration;
-  # Hiding it in the override script is for a cleaner UI: the script leverages the Bettbox custom script UI adaptation,
-  # using the FCM Direct switch to control this group's proxies: field (on = DIRECT only, off = 👉 Manual Select only),
-  # making it convenient for users who need it without directly modifying the configuration file.
-  # The switch icon is taken from this group's icon field, and changing the icon only requires modifying it here.
-  - name: FCM
-    icon: "https://fastly.jsdelivr.net/gh/MiToverG422/Qure@master/IconSet/Color/fcm.png"
-    # hidden: true  # Hide this group in the script to keep the UI clean; kept visible in the template to indicate the group actually exists
-    type: select
-    proxies:
-      - 👉 手动切换
-      - DIRECT
-
 sniffer:
   enable: true
   force-dns-mapping: true
@@ -220,7 +157,6 @@ sniffer:
     - 210.2.4.8/32
     - 101.226.4.6/32
     - 218.30.118.6/32
-
 dns:
   enable: true                                             
  #prefer-h3: true                                             
@@ -239,13 +175,13 @@ dns:
     - https://doh.pub/dns-query#DIRECT
   direct-nameserver-follow-policy: true
   nameserver:
-    - https://cloudflare-dns.com/dns-query#👉 手动切换
-  # - https://dns.adguard-dns.com/dns-query     # AdGuard Public DNS  # 94.140.14.14        94.140.15.15
-  # - https://dns.google/dns-query             # Google Public DNS   # 8.8.8.8             8.8.4.4
-  # - https://dns.quad9.net/dns-query           # IBM Quad9 Public DNS # 9.9.9.11            149.112.112.11
-  # - https://doh.opendns.com/dns-query         # OpenDNS Public DNS  # 208.67.220.220      208.67.222.222
-  # - https://doh.dns.sb/dns-query              # DNS.SB Public DNS   # 185.222.222.222     45.11.45.11
-  # - https://dns.twnic.tw/dns-query            # Quad101 Public DNS  # 101.101.101.10      101.102.103.10
+    - https://cloudflare-dns.com/dns-query#👉 Manual Select
+  # - https://dns.adguard-dns.com/dns-query     # AdGuard Public DNS # 94.140.14.14        94.140.15.15
+  # - https://dns.google/dns-query             # Google Public DNS  # 8.8.8.8             8.8.4.4
+  # - https://dns.quad9.net/dns-query           # IBM Quad9 Public DNS # 9.9.9.11          149.112.112.11
+  # - https://doh.opendns.com/dns-query         # OpenDNS Public DNS # 208.67.220.220      208.67.222.222
+  # - https://doh.dns.sb/dns-query              # DNS.SB Public DNS  # 185.222.222.222     45.11.45.11
+  # - https://dns.twnic.tw/dns-query            # Quad101 Public DNS # 101.101.101.10      101.102.103.10
   prefer-h3: false
   respect-rules: false                                            
   enhanced-mode: fake-ip                  
@@ -264,7 +200,6 @@ dns:
     - pixshaft.com
   nameserver-policy: 
     'rule-set:private,direct,proxy@direct,cn,echs_cn,echs_direct': https://dns.alidns.com/dns-query#DIRECT
-
 hosts                             :                                            
   '+.clash.dev'               : [ '127.0.0.1'          ]                
   'services.googleapis.cn'    : [ 'services.googleapis.com' ]
@@ -272,7 +207,7 @@ hosts                             :
   '+.mcdn.bilivideo.cn'       : [ '0.0.0.0'            ]
   'mtalk.google.com'          : [ '142.250.107.188'    , '108.177.125.188'    ]
   'dns.msftncsi.com'          : [ '131.107.255.255'    , 'fd3e:4f5a:5b81::1'  ]
-  #'dns.alidns.com'            : [ '223.5.5.5'          , '223.6.6.6'          ] # 🇨🇳 Alibaba DNS
+  #'dns.alidns.com'            : [ '223.5.5.5'          , '223.6.6.6'          ] # 🇨🇳 Ali DNS
   #'pdns.dnspod.cn'            : [ '119.29.29.29'       , '119.28.28.28'       ] # 🇨🇳 Tencent DNS
   #'dns.pub'                   : [ '119.29.29.29'       ]           # 🇨🇳 Tencent DNS  
   #'doh.pub'                   : [ '1.12.12.12'         , '120.53.53.53'       ] # 🇨🇳 Tencent DNS
@@ -292,6 +227,72 @@ hosts                             :
 
 
 # Public template configuration (anchor definitions)
+proxies: ~
+proxy-groups:
+  - name: 🌍 PROXY
+    icon: "https://github.com/DustinWin/ruleset_geodata/releases/download/icons/proxy.png"
+    type: select
+    proxies:
+        - 👉 手动切换
+        - ♻️ 自动选择
+        - 🔄 负载均衡
+        - DIRECT
+  - name: 🔄 负载均衡
+    icon: "https://www.clashverge.dev/assets/icons/balance.svg"
+    type: load-balance
+    proxies: # Here are all single nodes (automatically populated by the override script with all subscription nodes)
+    url: 'https://www.gstatic.com/generate_204'
+    interval: 300
+    lazy: true
+    strategy: sticky-sessions
+  - name: 👉 手动切换
+    icon: "https://github.com/DustinWin/ruleset_geodata/releases/download/icons/select.png"
+    type: select
+    proxies: # Here are all single nodes (automatically populated by the override script with all subscription nodes)
+  - name: ♻️ 自动选择
+    icon: "https://github.com/DustinWin/ruleset_geodata/releases/download/icons/auto.png"
+    type: url-test
+    url: https://www.gstatic.com/generate_204
+    interval: 300
+    tolerance: 50
+    proxies: # Here are all single nodes (automatically populated by the override script with all subscription nodes)
+  - name: 📲 Telegram
+    icon: "https://github.com/DustinWin/ruleset_geodata/releases/download/icons/telegram.png"
+    type: select
+    proxies: # Here are all single nodes (automatically populated by the override script with all subscription nodes)
+  - name: 🎮 Games-Global
+    icon: "https://github.com/DustinWin/ruleset_geodata/releases/download/icons/games-cn.png"
+    type: select
+    proxies: # Here are all single nodes (automatically populated by the override script with all subscription nodes)
+
+  - name: ✖️ Twitter
+    icon: "https://www.clashverge.dev/assets/icons/twitter.svg"
+    type: select
+    filter: "US|Residential"
+    include-all-proxies: true
+  - name: 🤖 AI大模型
+    icon: "https://github.com/DustinWin/ruleset_geodata/releases/download/icons/ai.png"
+    type: select
+    filter: "US|Residential"
+    include-all-proxies: true
+  - name: 🎵 TikTok
+    icon: "https://github.com/DustinWin/ruleset_geodata/releases/download/icons/tiktok.png"
+    type: select
+    filter: "US|Residential"
+    include-all-proxies: true
+  # FCM: Google FCM domain traffic splitting target (routes to this group after hitting RULE-SET,googlefcm,FCM).
+  # This group is not hidden in the template to indicate that this proxy group actually exists and is a real traffic splitting target in the configuration;
+  # Hiding it in the override script is for a cleaner UI: the script leverages the Bettbox custom script UI adaptation,
+  # using the FCM Direct switch to control this group's proxies: field (on = DIRECT only, off = 👉 Manual Select only),
+  # making it convenient for users who need it without directly modifying the configuration file.
+  # The switch icon is taken from this group's icon field, and changing the icon only requires modifying it here.
+  - name: FCM
+    icon: "https://fastly.jsdelivr.net/gh/MiToverG422/Qure@master/IconSet/Color/fcm.png"
+    # hidden: true  # Hide this group in the script to keep the interface clean; keep it visible in the template to indicate that the group actually exists
+    type: select
+    proxies:
+      - 👉 手动切换
+      - DIRECT
 .templates:
   domain_mrs: &domain_mrs { type: http, interval: 86400, behavior: domain, format: mrs }
   ipcidr_mrs: &ipcidr_mrs { type: http, interval: 86400, behavior: ipcidr, format: mrs }
@@ -299,7 +300,7 @@ hosts                             :
   ipcidr_yaml: &ipcidr_yaml { type: http, interval: 86400, behavior: ipcidr }
   classical_yaml: &classical_yaml { type: http, interval: 86400, behavior: classical }
 
-# Rule set configuration
+# Rule Provider Configuration
 rule-providers:
   Gemini_Domain: { <<: *domain_yaml, url: 'https://cdn.jsdelivr.net/gh/Accademia/Additional_Rule_For_Clash@master/Gemini/Gemini_Domain.yaml', path: ./ruleset/Gemini_Domain.yaml }
   Grok_Domain: { <<: *domain_yaml, url: 'https://raw.githubusercontent.com/Accademia/Additional_Rule_For_Clash/refs/heads/main/Grok/Grok_Domain.yaml', path: ./ruleset/Grok_Domain.yaml }
@@ -334,7 +335,6 @@ rule-providers:
   twitter-x-blackmatrix7-No_Resolve: { <<: *classical_yaml, format: yaml, url: 'https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/refs/heads/master/rule/Clash/Twitter/Twitter_No_Resolve.yaml', path: ./ruleset/twitter-x-blackmartix7-noreslove.mrs }
   twitter-x-domain: { <<: *domain_mrs, url: 'https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/twitter.mrs', path: ./ruleset/twitter/x-domain.mrs }
   twitter-x-ip: { <<: *ipcidr_mrs, url: 'https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geoip/twitter.mrs', path: ./ruleset/twitter/x-ip.mrs }
-
 sub-rules:
   fanqie:
     - DOMAIN,p6-ad-sign.byteimg.com,REJECT
@@ -379,7 +379,7 @@ sub-rules:
     - DOMAIN-WILDCARD,*.byteimg.com,REJECT
     - DOMAIN-WILDCARD,*.snssdk.com,REJECT
 
-  # MITM Host
+  # MITM Hosts
     - DOMAIN-WILDCARD,*.pangolin-sdk-toutiao,REJECT
     - DOMAIN-WILDCARD,*.pangolin-sdk-toutiao.*,REJECT
     - DOMAIN-WILDCARD,*.pstatp.com.*,REJECT
@@ -416,18 +416,17 @@ rules:
   - DOMAIN-SUFFIX,cdngslb.com,DIRECT
   # Akamai CDN distribution domain
   - DOMAIN-SUFFIX,edgekey.net,DIRECT
-  # Amazon CloudFront distribution domain (API interface CDN)
+  # Amazon CloudFront distribution domain (API CDN)
   - DOMAIN-SUFFIX,cloudfront.net,DIRECT
 
   - PROCESS-NAME-REGEX,.*nagram.*,📲 Telegram
   - "PROCESS-NAME-REGEX,.*telegram.*,📲 Telegram"
   - RULE-SET,telegramcidr,📲 Telegram,no-resolve
   - RULE-SET,telegram_domain,📲 Telegram
-
-  # Claude / Anthropic: process matches take precedence and cover Claude Desktop, Claude Code, etc.
+  # // Claude / Anthropic: process matches take precedence and cover Claude Desktop, Claude Code, etc.
   - PROCESS-NAME-REGEX,(?i).*claude.*,🤖 AI
   - PROCESS-NAME-REGEX,(?i).*anthropic.*,🤖 AI
-  # Claude / Anthropic: official API, web login, OAuth, MCP, CLI updates, and plugin dependencies.
+  # // Claude / Anthropic: official API, web login, OAuth, MCP, CLI updates, and plugin dependencies.
   - DOMAIN,api.anthropic.com,🤖 AI
   - DOMAIN,console.anthropic.com,🤖 AI
   - DOMAIN,statsig.anthropic.com,🤖 AI
@@ -460,11 +459,12 @@ rules:
   - IP-CIDR,160.79.104.0/21,🤖 AI,no-resolve
   - IP-CIDR6,2607:6bc0::/48,🤖 AI,no-resolve
   - RULE-SET,Gemini_Domain,🤖 AI
+
   - RULE-SET,Grok_Domain,🤖 AI
  # - RULE-SET,Grok_IP,🤖 AI
   - IP-CIDR,17.253.4.0/23,🤖 AI,no-resolve
 
-  # CDN and static assets
+  # CDN and static resources
   - DOMAIN,anthropic.com.cdn.cloudflare.net,🤖 AI
   # Authentication / Content
   - DOMAIN,anthropic-com.ghost.io,🤖 AI
@@ -474,7 +474,7 @@ rules:
   - DOMAIN,browser-intake-us5-datadoghq.com,🤖 AI
   - DOMAIN-KEYWORD,datadog,🤖 AI
   - DOMAIN-KEYWORD,sift,🤖 AI
-  # Legacy third-party monitoring entries retained by the existing AI rules.
+  # Compatible with third-party monitoring entries in legacy AI rules
   - RULE-SET,ai-1,🤖 AI
   - RULE-SET,ai-2,🤖 AI
 
