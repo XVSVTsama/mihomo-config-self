@@ -66,17 +66,23 @@ jobs:
       - name: Download mihomo binary
         env:
           MIHOMO_TAG: ${{ steps.version.outputs.version }}
+          GH_TOKEN: ${{ github.token }}
         run: |
+          API_HEADERS=(-H "Accept: application/vnd.github+json" -H "Authorization: Bearer ${GH_TOKEN}")
           TAG="$MIHOMO_TAG"
           case "$TAG" in
             stable)
-              TAG="$(curl -fsSL https://api.github.com/repos/MetaCubeX/mihomo/releases/latest | jq -r .tag_name)"
+              TAG="$(curl -fsSL "${API_HEADERS[@]}" https://api.github.com/repos/MetaCubeX/mihomo/releases/latest | jq -r .tag_name)"
               ;;
             alpha)
-              TAG="$(curl -fsSL "https://api.github.com/repos/MetaCubeX/mihomo/releases?per_page=20" | jq -r '[.[] | select(.prerelease == true)][0].tag_name')"
+              TAG="$(curl -fsSL "${API_HEADERS[@]}" "https://api.github.com/repos/MetaCubeX/mihomo/releases?per_page=20" | jq -r '[.[] | select(.prerelease == true)][0].tag_name')"
               ;;
           esac
-          ASSET="$(curl -fsSL "https://api.github.com/repos/MetaCubeX/mihomo/releases/tags/${TAG}" | jq -r '[.assets[].name | select(test("^mihomo-linux-amd64-.*\\.gz$") and (test("-v[0-9]+-") | not) and (test("-compatible-") | not))][0]')"
+          if [ -z "$TAG" ] || [ "$TAG" = "null" ]; then
+            echo "::error::Unable to resolve mihomo release tag for ${MIHOMO_TAG}"
+            exit 1
+          fi
+          ASSET="$(curl -fsSL "${API_HEADERS[@]}" "https://api.github.com/repos/MetaCubeX/mihomo/releases/tags/${TAG}" | jq -r '[.assets[].name | select(test("^mihomo-linux-amd64-.*\\.gz$") and (test("-v[0-9]+-") | not) and (test("-compatible-") | not))][0]')"
           if [ -z "$ASSET" ]; then
             echo "::error::No compatible mihomo-linux-amd64 asset found for tag ${TAG}"
             exit 1
