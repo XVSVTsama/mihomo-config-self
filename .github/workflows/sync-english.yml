@@ -61,7 +61,7 @@ jobs:
           DEEPSEEK_MODEL: ${{ vars.DEEPSEEK_MODEL || 'deepseek-v4-flash' }}
           SYNC_REQUEST_TIMEOUT: ${{ vars.SYNC_REQUEST_TIMEOUT || '60' }}
           SYNC_MAX_ATTEMPTS: ${{ vars.SYNC_MAX_ATTEMPTS || '3' }}
-          SYNC_FILE_TIMEOUT: ${{ vars.SYNC_FILE_TIMEOUT || '300' }}
+          SYNC_FILE_TIMEOUT: ${{ vars.SYNC_FILE_TIMEOUT || '600' }}
           SYNC_TARGETS: ${{ steps.changes.outputs.targets }}
         run: python .github/scripts/sync_english.py
       - name: Commit generated English files
