@@ -84,7 +84,7 @@ const ruleOptionsEnable = {
   '强制证书验证': false,   // 开启时统一把订阅节点 skip-cert-verify 置为 false（强制校验证书）；关闭时不干预，保留订阅节点原有设置。对全部节点一视同仁
   '启用 Reality 增强': true, // 是否为带非空 public-key/short-id 的 Reality 节点启用 support-x25519mlkem768（X25519MLKEM768 后量子密钥协商）
   'FCM直连': true,          // 默认打开：隐藏组 FCM 仅含 DIRECT；关闭后仅保留 👉 手动切换（不移除 FCM 组）。开关图标取自 FCM 代理组的 icon 字段。
-  'TGDC实验分流': false,     // 开启 Telegram DC/地区实验分流；关闭时清理 YAML 中的实验规则、规则集和策略组。
+  'TGDC实验分流': false,     // 开启 Telegram DC/地区实验分流；关闭时不改变原 Telegram 规则、策略组和规则集。
 };
 
 // 出现同一个域名规则 key 时，订阅原始配置(true) 还是模板(false) 优先（模板目前未配置
@@ -92,24 +92,28 @@ const ruleOptionsEnable = {
 const NAMESERVER_POLICY_PREFER_ORIGINAL = true;
 
 // ============================================================================
-// 标准模板配置（与仓库 mihomo.yaml 保持同步，等价于该 yaml 文件的 JSON 表示）
-// ============================================================================
-// ============================================================================
-// Telegram DC/地区实验分流：由 UI 开关控制。
-// YAML 模板中保留可审阅的规则集、策略组和规则；main() 在 false 时清理它们。
+// Telegram DC/地区实验分流（仅在 ruleOptionsEnable['TGDC实验分流'] 为 true 时注入）
+// 参考：telegram-dc-region-rules-v2.yaml；地区 filter 的表达式风格参考 MyClash，
+// 仅借用 filter 组织方式，不复制其余实现。
+// DC1/DC3：Miami；DC2/DC4：Amsterdam；DC5：Singapore。
+// 静态 CIDR 无法可靠拆分同城 DC，因此策略组使用 DC 对命名。
 // ============================================================================
 const TGDC_RULE_PROVIDERS = {
   telegram_dc1_dc3_miami: {
-    type: 'inline', behavior: 'classical',
+    type: 'inline',
+    behavior: 'classical',
     payload: [
+      // DC1 Pluto / DC3 Aurora — Miami, USA
       'IP-CIDR,91.108.12.0/22,no-resolve',
       'IP-CIDR,149.154.172.0/22,no-resolve',
       'IP-CIDR6,2001:b28:f23d::/48,no-resolve',
     ],
   },
   telegram_dc2_dc4_amsterdam: {
-    type: 'inline', behavior: 'classical',
+    type: 'inline',
+    behavior: 'classical',
     payload: [
+      // DC2 Venus / DC4 Vesta — Amsterdam, Netherlands
       'IP-CIDR,91.108.58.0/23,no-resolve',
       'IP-CIDR,91.108.4.0/22,no-resolve',
       'IP-CIDR,91.108.8.0/22,no-resolve',
@@ -117,6 +121,7 @@ const TGDC_RULE_PROVIDERS = {
       'IP-CIDR,95.161.64.0/20,no-resolve',
       'IP-CIDR,91.105.192.0/23,no-resolve',
       'IP-CIDR,185.76.151.0/24,no-resolve',
+      // Akiker / entire6548 / RClogs 的 EU 补充候选。
       'IP-CIDR,5.28.192.0/18,no-resolve',
       'IP-CIDR,109.239.140.0/24,no-resolve',
       'IP-CIDR6,2001:67c:4e8::/48,no-resolve',
@@ -124,8 +129,10 @@ const TGDC_RULE_PROVIDERS = {
     ],
   },
   telegram_dc5_sg: {
-    type: 'inline', behavior: 'classical',
+    type: 'inline',
+    behavior: 'classical',
     payload: [
+      // DC5 Flora — Singapore
       'IP-CIDR,91.108.16.0/22,no-resolve',
       'IP-CIDR,91.108.56.0/23,no-resolve',
       'IP-CIDR,149.154.168.0/22,no-resolve',
@@ -134,26 +141,83 @@ const TGDC_RULE_PROVIDERS = {
     ],
   },
 };
-const TGDC_PROXY_GROUP_DEFINITIONS = [
-  { name: '📲 Telegram-DC1-DC3-Miami', filter: '(?i)🇺🇸|美国|迈阿密|miami|\\bMIA\\b|\\bUSA\\b|united\\s*states', icon: 'https://github.com/DustinWin/ruleset_geodata/releases/download/icons/usa.png' },
-  { name: '📲 Telegram-DC2-DC4-Amsterdam', filter: '(?i)🇳🇱|荷兰|阿姆斯特丹|amsterdam|\\bAMS\\b|\\bNL\\b|netherlands', icon: 'https://flagcdn.com/w160/nl.png' },
-  { name: '📲 Telegram-DC5-SG', filter: '(?i)🇸🇬|🇭🇰|新加坡|狮城|香港|singapore|hong\\s*kong|\\bSG\\b|\\bSGP\\b|\\bHK\\b|\\bHKG\\b', icon: 'https://github.com/DustinWin/ruleset_geodata/releases/download/icons/singapore.png' },
-];
-const TGDC_FALLBACK_EXCLUDE_FILTER = /群|返利|循环|官网|客服|网站|网址|获取|订阅|流量|到期|机场|下次|版本|官址|备用|过期|已用|联系|邮箱|工单|贩卖|通知|倒卖|防止|国内|地址|频道|电报|无法|说明|使用|提示|访问|支持|教程|关注|更新|作者|加入|超时|收藏|优惠|福利|邀请|好友|失联|选择|剩余|公益|发布|DIZTNA|通路|登录|禁止|定时|渠道|牢记|永久|余额|阁下|本站|刷新|导航|建议|重置|以下|⚠️|@|t\.me\/\+|\bexpire\b|\bhttps?:\/\/|\.com|\btraffic\b/iu;
-const TGDC_FALLBACK_LOW_RATE_FILTER = /^(?!.*(?:剩|期)).*(?:(?<!\d)0\.[0-5]|(?<=[ |｜丨∣┃\-‐–—−－﹣])0[*×✕✖⨯⨉x倍])|(?:(?<=[ |｜丨∣┃\-‐–—−－﹣])[*×✕✖⨯⨉x]0(?= |倍|$))|^(?!.*(?:客户端|软件)).*下载|低倍|免费|(?<![A-Za-z])free(?![A-Za-z])/i;
-const TGDC_FALLBACK_HIGH_RATE_FILTER = /(?<=[ |｜丨∣┃\-‐–—−－﹣])((?:[*×✕✖⨯⨉x]\s*(?:[2-9]\d*|[1-9]\d+)(?:\.\d+)?)|(?:(?<![\d.])(?:[2-9]\d*|[1-9]\d+)(?:\.\d+)?\s*(?:倍|[*×✕✖⨯⨉x])))/i;
-function selectTelegramDcFallbackNode(proxies) {
-  const candidate = (Array.isArray(proxies) ? proxies : []).find((proxy) => {
-    if (!proxy || typeof proxy.name !== 'string' || !proxy.name) return false;
+
+// 参考 MyClash 的地区策略组 filter 组织方式：filter 负责筛选全部订阅节点。
+// empty-fallback 必须是实际存在的出站节点名称，不能填写 proxy-group。
+// fallback 使用 low_filter 思路：排除内置/拒绝/重匹配/倍率/策略组等非真实节点，
+// 再按覆写后订阅节点的原始顺序取第一个节点；若没有结果，则使用 COMPATIBLE。
+// MyClash low_filter 参考：排除内置节点、倍率/信息节点及其 excludeFilter 命中的非真实节点。
+// 来源：AIsouler/MyClash Script/Script.js 中 excludeFilter、低倍率与高倍率正则。
+const TGDC_FALLBACK_EXCLUDE_FILTER =
+  /群|返利|循环|官网|客服|网站|网址|获取|订阅|流量|到期|机场|下次|版本|官址|备用|过期|已用|联系|邮箱|工单|贩卖|通知|倒卖|防止|国内|地址|频道|电报|无法|说明|使用|提示|访问|支持|教程|关注|更新|作者|加入|超时|收藏|优惠|福利|邀请|好友|失联|选择|剩余|公益|发布|DIZTNA|通路|登录|禁止|定时|渠道|牢记|永久|余额|阁下|本站|刷新|导航|建议|重置|以下|⚠️|@|t\.me\/\+|\bexpire\b|\bhttps?:\/\/|\.com|\btraffic\b/iu;
+const TGDC_FALLBACK_LOW_RATE_FILTER =
+  /^(?!.*(?:剩|期)).*(?:(?<!\d)0\.[0-5]|(?<=[ |｜丨∣┃\-‐–—−－﹣])0[*×✕✖⨯⨉x倍])|(?:(?<=[ |｜丨∣┃\-‐–—−－﹣])[*×✕✖⨯⨉x]0(?= |倍|$))|^(?!.*(?:客户端|软件)).*下载|低倍|免费|(?<![A-Za-z])free(?![A-Za-z])/i;
+const TGDC_FALLBACK_HIGH_RATE_FILTER =
+  /(?<=[ |｜丨∣┃\-‐–—−－﹣])((?:[*×✕✖⨯⨉x]\s*(?:[2-9]\d*|[1-9]\d+)(?:\.\d+)?)|(?:(?<![\d.])(?:[2-9]\d*|[1-9]\d+)(?:\.\d+)?\s*(?:倍|[*×✕✖⨯⨉x])))/i;
+
+function selectTelegramDcFallbackNode(originalProxies) {
+  const proxies = Array.isArray(originalProxies) ? originalProxies : [];
+  const fallbackProxy = proxies.find((proxy) => {
+    if (!proxy || typeof proxy !== 'object' || typeof proxy.name !== 'string' || proxy.name.length === 0) {
+      return false;
+    }
     const type = String(proxy.type || '').toLowerCase();
-    if (type === 'direct' || type === 'reject' || type === 'rematch') return false;
-    return !TGDC_FALLBACK_EXCLUDE_FILTER.test(proxy.name) && !TGDC_FALLBACK_LOW_RATE_FILTER.test(proxy.name) && !TGDC_FALLBACK_HIGH_RATE_FILTER.test(proxy.name);
+    if (type === 'direct' || type === 'reject' || type === 'rematch') {
+      return false;
+    }
+    const name = proxy.name;
+    if (TGDC_FALLBACK_EXCLUDE_FILTER.test(name)) return false;
+    if (TGDC_FALLBACK_LOW_RATE_FILTER.test(name)) return false;
+    if (TGDC_FALLBACK_HIGH_RATE_FILTER.test(name)) return false;
+    return true;
   });
-  return candidate?.name || 'COMPATIBLE';
+  return fallbackProxy?.name || 'COMPATIBLE';
 }
+
+const TGDC_PROXY_GROUP_DEFINITIONS = [
+  {
+    name: '📲 Telegram-DC1-DC3-Miami',
+    filter: '(?i)🇺🇸|美国|迈阿密|miami|\\bMIA\\b|\\bUSA\\b|united\\s*states',
+    icon: 'https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/United_States.png',
+  },
+  {
+    name: '📲 Telegram-DC2-DC4-Amsterdam',
+    filter: '(?i)🇳🇱|荷兰|阿姆斯特丹|amsterdam|\\bAMS\\b|\\bNL\\b|netherlands',
+    // 使用 FlagCDN 的国家旗帜资源，替代可能失效的 Qure Netherlands 图标。
+    icon: 'https://flagcdn.com/w160/nl.png',
+  },
+  {
+    name: '📲 Telegram-DC5-SG',
+    // 根据实际互联情况，DC5 组同时纳入香港与新加坡节点。
+    filter: '(?i)🇸🇬|🇭🇰|新加坡|狮城|香港|singapore|hong\\s*kong|\\bSG\\b|\\bSGP\\b|\\bHK\\b|\\bHKG\\b',
+    icon: 'https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Singapore.png',
+  },
+];
+
 function buildTelegramDcProxyGroups(fallbackNodeName) {
-  return TGDC_PROXY_GROUP_DEFINITIONS.map((definition) => ({ name: definition.name, type: 'select', filter: definition.filter, 'include-all-proxies': true, 'empty-fallback': fallbackNodeName, icon: definition.icon }));
+  return TGDC_PROXY_GROUP_DEFINITIONS.map((definition) => ({
+    name: definition.name,
+    type: 'select',
+    filter: definition.filter,
+    'include-all-proxies': true,
+    'empty-fallback': fallbackNodeName,
+    icon: definition.icon,
+  }));
 }
+
+const TGDC_RULES = [
+  'RULE-SET,telegram_dc1_dc3_miami,📲 Telegram-DC1-DC3-Miami,no-resolve',
+  'RULE-SET,telegram_dc2_dc4_amsterdam,📲 Telegram-DC2-DC4-Amsterdam,no-resolve',
+  'RULE-SET,telegram_dc5_sg,📲 Telegram-DC5-SG,no-resolve',
+  'PROCESS-NAME-REGEX,.*nagram.*,📲 Telegram(兜底)',
+  'PROCESS-NAME-REGEX,.*telegram.*,📲 Telegram(兜底)',
+  'RULE-SET,telegramcidr,📲 Telegram(兜底),no-resolve',
+  'RULE-SET,telegram_domain,📲 Telegram(兜底)',
+];
+
+// ============================================================================
+// 标准模板配置（与仓库 mihomo.yaml 保持同步，等价于该 yaml 文件的 JSON 表示）
+// ============================================================================
 
 const TEMPLATE = {
   "mode": "rule",
@@ -278,30 +342,6 @@ const TEMPLATE = {
       "interval": 300,
       "tolerance": 50,
       "proxies": null
-    },
-    {
-      "name": "📲 Telegram-DC1-DC3-Miami",
-      "icon": "https://github.com/DustinWin/ruleset_geodata/releases/download/icons/usa.png",
-      "type": "select",
-      "filter": "(?i)🇺🇸|美国|迈阿密|miami|\\bMIA\\b|\\bUSA\\b|united\\s*states",
-      "include-all-proxies": true,
-      "empty-fallback": "COMPATIBLE"
-    },
-    {
-      "name": "📲 Telegram-DC2-DC4-Amsterdam",
-      "icon": "https://flagcdn.com/w160/nl.png",
-      "type": "select",
-      "filter": "(?i)🇳🇱|荷兰|阿姆斯特丹|amsterdam|\\bAMS\\b|\\bNL\\b|netherlands",
-      "include-all-proxies": true,
-      "empty-fallback": "COMPATIBLE"
-    },
-    {
-      "name": "📲 Telegram-DC5-SG",
-      "icon": "https://github.com/DustinWin/ruleset_geodata/releases/download/icons/singapore.png",
-      "type": "select",
-      "filter": "(?i)🇸🇬|🇭🇰|新加坡|狮城|香港|singapore|hong\\s*kong|\\bSG\\b|\\bSGP\\b|\\bHK\\b|\\bHKG\\b",
-      "include-all-proxies": true,
-      "empty-fallback": "COMPATIBLE"
     },
     {
       "name": "📲 Telegram",
@@ -724,43 +764,6 @@ const TEMPLATE = {
       "url": "https://raw.githubusercontent.com/echs-top/proxy/main/mrs/domain/proxy@direct.mrs",
       "path": "./rules/proxy@direct.mrs"
     },
-    "telegram_dc1_dc3_miami": {
-      "type": "inline",
-      "behavior": "classical",
-      "payload": [
-        "IP-CIDR,91.108.12.0/22,no-resolve",
-        "IP-CIDR,149.154.172.0/22,no-resolve",
-        "IP-CIDR6,2001:b28:f23d::/48,no-resolve"
-      ]
-    },
-    "telegram_dc2_dc4_amsterdam": {
-      "type": "inline",
-      "behavior": "classical",
-      "payload": [
-        "IP-CIDR,91.108.58.0/23,no-resolve",
-        "IP-CIDR,91.108.4.0/22,no-resolve",
-        "IP-CIDR,91.108.8.0/22,no-resolve",
-        "IP-CIDR,149.154.160.0/21,no-resolve",
-        "IP-CIDR,95.161.64.0/20,no-resolve",
-        "IP-CIDR,91.105.192.0/23,no-resolve",
-        "IP-CIDR,185.76.151.0/24,no-resolve",
-        "IP-CIDR,5.28.192.0/18,no-resolve",
-        "IP-CIDR,109.239.140.0/24,no-resolve",
-        "IP-CIDR6,2001:67c:4e8::/48,no-resolve",
-        "IP-CIDR6,2a0a:f280:203::/48,no-resolve"
-      ]
-    },
-    "telegram_dc5_sg": {
-      "type": "inline",
-      "behavior": "classical",
-      "payload": [
-        "IP-CIDR,91.108.16.0/22,no-resolve",
-        "IP-CIDR,91.108.56.0/23,no-resolve",
-        "IP-CIDR,149.154.168.0/22,no-resolve",
-        "IP-CIDR6,2001:b28:f23c::/48,no-resolve",
-        "IP-CIDR6,2001:b28:f23f::/48,no-resolve"
-      ]
-    },
     "telegram_domain": {
       "type": "http",
       "interval": 86400,
@@ -872,9 +875,6 @@ const TEMPLATE = {
     "DOMAIN-SUFFIX,cdngslb.com,DIRECT",
     "DOMAIN-SUFFIX,edgekey.net,DIRECT",
     "DOMAIN-SUFFIX,cloudfront.net,DIRECT",
-    "RULE-SET,telegram_dc1_dc3_miami,📲 Telegram-DC1-DC3-Miami,no-resolve",
-    "RULE-SET,telegram_dc2_dc4_amsterdam,📲 Telegram-DC2-DC4-Amsterdam,no-resolve",
-    "RULE-SET,telegram_dc5_sg,📲 Telegram-DC5-SG,no-resolve",
     "PROCESS-NAME-REGEX,.*nagram.*,📲 Telegram",
     "PROCESS-NAME-REGEX,.*telegram.*,📲 Telegram",
     "RULE-SET,telegramcidr,📲 Telegram,no-resolve",
@@ -942,6 +942,40 @@ const TEMPLATE = {
     "MATCH,🌍 PROXY"
   ]
 };
+
+// Bettbox 的可视化开关图标：客户端会读取全局 serviceConfigs（name 对应 ruleOptionsEnable 的 key，
+// icon 为该开关行显示的图标）。上面只覆盖代理组；功能开关的图标来源：
+// FCM直连 从 FCM 代理组的 icon 字段派生（改代理组 icon 一处即可同步）；
+// 其余功能开关（强制证书验证、启用 Reality 增强）在此直接指定固定图标。
+const serviceConfigs = TEMPLATE['proxy-groups']
+  .filter(
+    (group) =>
+      group &&
+      typeof group.name === 'string' &&
+      Object.prototype.hasOwnProperty.call(ruleOptionsEnable, group.name)
+  )
+  .map((group) => ({
+    name: group.name,
+    icon: group.icon
+  }))
+  .concat([
+    {
+      name: 'FCM直连',
+      icon: (TEMPLATE['proxy-groups'].find((group) => group && group.name === 'FCM') || {}).icon
+    },
+    {
+      name: '强制证书验证',
+      icon: 'https://fastly.jsdelivr.net/gh/MiToverG422/Qure@master/IconSet/Color/SSL.png'
+    },
+    {
+      name: '启用 Reality 增强',
+      icon: 'https://fastly.jsdelivr.net/gh/MiToverG422/Qure@master/IconSet/Color/Spark.png'
+    },
+    {
+      name: 'TGDC实验分流',
+      icon: 'https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Telegram.png'
+    }
+  ]);
 
 // ============================================================================
 // 工具函数
@@ -1471,54 +1505,70 @@ function smartMergeDnsNode(config, result) {
 }
 
 // ============================================================================
-// TGDC 开关应用：YAML 模板预置内容仅在开关 true 时保留。
+// TGDC 实验分流：只在开关为 true 时修改 result。
 // ============================================================================
-const TGDC_PROVIDER_NAMES = new Set(Object.keys(TGDC_RULE_PROVIDERS));
-const TGDC_GROUP_NAMES = new Set(TGDC_PROXY_GROUP_DEFINITIONS.map((item) => item.name));
-const TGDC_RULE_PATTERN = /RULE-SET,(telegram_dc1_dc3_miami|telegram_dc2_dc4_amsterdam|telegram_dc5_sg),/;
-function removeTelegramDcTemplateContent(result) {
-  if (result['rule-providers'] && typeof result['rule-providers'] === 'object') TGDC_PROVIDER_NAMES.forEach((name) => delete result['rule-providers'][name]);
-  if (Array.isArray(result['proxy-groups'])) result['proxy-groups'] = result['proxy-groups'].filter((group) => !group || !TGDC_GROUP_NAMES.has(group.name));
-  if (Array.isArray(result.rules)) result.rules = result.rules.filter((rule) => typeof rule !== 'string' || !TGDC_RULE_PATTERN.test(rule));
-}
 function applyTelegramDcExperiment(result, originalProxies) {
-  removeTelegramDcTemplateContent(result);
-  if (ruleOptionsEnable['TGDC实验分流'] !== true) return;
+  if (ruleOptionsEnable['TGDC实验分流'] !== true) {
+    return;
+  }
+
+  // 将 Telegram 规则集插入原 Telegram 规则集之前；保持其他 provider 的原顺序。
   const originalProviders = result['rule-providers'] || {};
   const providersWithTelegramDc = {};
   let inserted = false;
   Object.keys(originalProviders).forEach((name) => {
-    if (!inserted && name === 'telegram_domain') { Object.assign(providersWithTelegramDc, deepClone(TGDC_RULE_PROVIDERS)); inserted = true; }
+    if (!inserted && name === 'telegram_domain') {
+      Object.assign(providersWithTelegramDc, deepClone(TGDC_RULE_PROVIDERS));
+      inserted = true;
+    }
     providersWithTelegramDc[name] = originalProviders[name];
   });
-  if (!inserted) Object.assign(providersWithTelegramDc, deepClone(TGDC_RULE_PROVIDERS));
+  if (!inserted) {
+    Object.assign(providersWithTelegramDc, deepClone(TGDC_RULE_PROVIDERS));
+  }
   result['rule-providers'] = providersWithTelegramDc;
 
-  const telegramFallback = (result['proxy-groups'] || []).find((group) => group && group.name === '📲 Telegram');
-  if (telegramFallback) telegramFallback.name = '📲 Telegram(兜底)';
-  const groups = result['proxy-groups'] || [];
-  const autoIndex = groups.findIndex((group) => group && group.name === '♻️ 自动选择');
-  const fallbackIndex = groups.findIndex((group) => group && group.name === '📲 Telegram(兜底)');
-  const insertIndex = autoIndex >= 0 ? autoIndex + 1 : (fallbackIndex >= 0 ? fallbackIndex : groups.length);
-  groups.splice(insertIndex, 0, ...deepClone(buildTelegramDcProxyGroups(selectTelegramDcFallbackNode(originalProxies))));
-  result['proxy-groups'] = groups;
-
-  if (!Array.isArray(result.rules)) result.rules = [];
-  const telegramRulePattern = (rule) => typeof rule === 'string' && (rule.includes(',📲 Telegram') || rule.includes('RULE-SET,telegramcidr') || rule.includes('RULE-SET,telegram_domain'));
-  const firstIndex = result.rules.findIndex(telegramRulePattern);
-  const retained = result.rules.filter((rule) => !telegramRulePattern(rule));
-  retained.splice(
-    firstIndex < 0 ? retained.length : Math.min(firstIndex, retained.length),
-    0,
-    'RULE-SET,telegram_dc1_dc3_miami,📲 Telegram-DC1-DC3-Miami,no-resolve',
-    'RULE-SET,telegram_dc2_dc4_amsterdam,📲 Telegram-DC2-DC4-Amsterdam,no-resolve',
-    'RULE-SET,telegram_dc5_sg,📲 Telegram-DC5-SG,no-resolve',
-    'PROCESS-NAME-REGEX,.*nagram.*,📲 Telegram(兜底)',
-    'PROCESS-NAME-REGEX,.*telegram.*,📲 Telegram(兜底)',
-    'RULE-SET,telegramcidr,📲 Telegram(兜底),no-resolve',
-    'RULE-SET,telegram_domain,📲 Telegram(兜底)'
+  // 原 📲 Telegram 组改为兜底组，并在“♻️ 自动选择”之后插入三个 DC/地区组；节点由 filter 自动筛选。空组由 Mihomo 原生回退。
+  const telegramFallback = (result['proxy-groups'] || []).find(
+    (group) => group && group.name === '📲 Telegram'
   );
-  result.rules = retained;
+  if (telegramFallback) {
+    telegramFallback.name = '📲 Telegram(兜底)';
+  }
+
+  const proxyGroups = result['proxy-groups'] || [];
+  const autoSelectIndex = proxyGroups.findIndex(
+    (group) => group && group.name === '♻️ 自动选择'
+  );
+  const fallbackIndex = proxyGroups.findIndex(
+    (group) => group && group.name === '📲 Telegram(兜底)'
+  );
+  const insertIndex = autoSelectIndex >= 0
+    ? autoSelectIndex + 1
+    : (fallbackIndex >= 0 ? fallbackIndex : proxyGroups.length);
+  proxyGroups.splice(
+    insertIndex,
+    0,
+    ...deepClone(buildTelegramDcProxyGroups(selectTelegramDcFallbackNode(originalProxies)))
+  );
+  result['proxy-groups'] = proxyGroups;
+
+  // 把具体 DC/地区规则放在 Telegram 全量规则之前；原 Telegram 规则改指向兜底组。
+  if (!Array.isArray(result.rules)) {
+    result.rules = [];
+  }
+  const telegramRulePattern = (rule) =>
+    typeof rule === 'string' &&
+    (rule.includes(',📲 Telegram') || rule.includes('RULE-SET,telegramcidr') || rule.includes('RULE-SET,telegram_domain'));
+  let firstTelegramRuleIndex = result.rules.findIndex(telegramRulePattern);
+  const retainedRules = result.rules.filter((rule) => !telegramRulePattern(rule));
+  if (firstTelegramRuleIndex < 0) {
+    firstTelegramRuleIndex = retainedRules.length;
+  } else {
+    firstTelegramRuleIndex = Math.min(firstTelegramRuleIndex, retainedRules.length);
+  }
+  retainedRules.splice(firstTelegramRuleIndex, 0, ...TGDC_RULES);
+  result.rules = retainedRules;
 }
 
 // ============================================================================
@@ -1596,8 +1646,10 @@ function main(config, profileName) {
 
   (result['proxy-groups'] || []).forEach(group => {
     if (group && group.name) {
+      // TGDC 开启后，📲 Telegram(兜底) 仍沿用原 📲 Telegram 开关。
+      const optionName = group.name === '📲 Telegram(兜底)' ? '📲 Telegram' : group.name;
       // 默认如果规则选项里没写这个名字，就保持启用状态
-      if (ruleOptionsEnable[group.name] === false) {
+      if (ruleOptionsEnable[optionName] === false) {
         disabledGroupNames.add(group.name);
       } else {
         activeGroupNames.add(group.name);
