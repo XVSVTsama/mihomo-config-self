@@ -64,6 +64,18 @@ jobs:
           SYNC_FILE_TIMEOUT: ${{ vars.SYNC_FILE_TIMEOUT || '600' }}
           SYNC_TARGETS: ${{ steps.changes.outputs.targets }}
         run: python .github/scripts/sync_english.py
+      - name: Validate generated English files
+        if: steps.changes.outputs.run == 'true'
+        env:
+          TARGETS: ${{ steps.changes.outputs.targets }}
+        run: |
+          set -e
+          if echo ",$TARGETS," | grep -q ',mihomo.yaml,'; then
+            python .github/scripts/check_code_sync.py yaml mihomo.yaml mihomo_en.yaml
+          fi
+          if echo ",$TARGETS," | grep -q ',script_override.js,'; then
+            python .github/scripts/check_code_sync.py js script_override.js script_override_en.js
+          fi
       - name: Commit generated English files
         if: steps.changes.outputs.run == 'true'
         uses: stefanzweifel/git-auto-commit-action@v5
