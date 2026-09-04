@@ -3,7 +3,12 @@ name: Code Sync Check (YAML)
 on:
   push:
     branches: [main]
+    paths:
+      - mihomo_en.yaml
   pull_request:
+    paths:
+      - mihomo.yaml
+      - mihomo_en.yaml
   workflow_dispatch:
     inputs:
       enforce:

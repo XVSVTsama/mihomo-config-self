@@ -3,6 +3,11 @@ name: Sync English Translations
 on:
   push:
     branches: [main]
+    paths:
+      - mihomo.yaml
+      - script_override.js
+      - README.md
+      - .github/translation_glossary.json
   workflow_dispatch:
 
 permissions:
@@ -53,7 +58,7 @@ jobs:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
           GEMINI_MODEL: ${{ vars.GEMINI_MODEL || 'gemini-2.0-flash' }}
-          DEEPSEEK_MODEL: ${{ vars.DEEPSEEK_MODEL || 'deepseek-chat' }}
+          DEEPSEEK_MODEL: ${{ vars.DEEPSEEK_MODEL || 'deepseek-v4-flash' }}
           SYNC_REQUEST_TIMEOUT: ${{ vars.SYNC_REQUEST_TIMEOUT || '60' }}
           SYNC_MAX_ATTEMPTS: ${{ vars.SYNC_MAX_ATTEMPTS || '3' }}
           SYNC_FILE_TIMEOUT: ${{ vars.SYNC_FILE_TIMEOUT || '300' }}

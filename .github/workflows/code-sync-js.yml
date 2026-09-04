@@ -3,7 +3,12 @@ name: Code Sync Check (JS)
 on:
   push:
     branches: [main]
+    paths:
+      - script_override_en.js
   pull_request:
+    paths:
+      - script_override.js
+      - script_override_en.js
   workflow_dispatch:
     inputs:
       enforce:

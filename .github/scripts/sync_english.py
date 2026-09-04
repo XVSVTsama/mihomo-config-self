@@ -110,6 +110,13 @@ def strip_fences(text):
     return text
 
 
+def join_translated_chunks(chunks):
+    """Join line-based translation chunks without merging adjacent lines."""
+    if not chunks:
+        return ""
+    return "\n".join(chunk.rstrip("\r\n") for chunk in chunks) + "\n"
+
+
 def update_js_block_state(line, in_block):
     """Track JS block comments across lines without parsing strings exactly."""
     index = 0
@@ -353,6 +360,29 @@ def validate(text, kind):
                 return "translated JS failed node --check: %s" % proc.stderr[:500]
         finally:
             os.unlink(tmp)
+    if kind in ("yaml", "js"):
+        suffix = ".yaml" if kind == "yaml" else ".js"
+        fd, tmp = tempfile.mkstemp(suffix=suffix)
+        try:
+            with os.fdopen(fd, "w", encoding="utf-8") as fh:
+                fh.write(text)
+            source_name = "mihomo.yaml" if kind == "yaml" else "script_override.js"
+            checker = ROOT / ".github" / "scripts" / "check_code_sync.py"
+            proc = subprocess.run(
+                [sys.executable, str(checker), kind, str(ROOT / source_name), tmp],
+                capture_output=True,
+                text=True,
+                encoding="utf-8",
+                check=False,
+            )
+            if proc.returncode != 0:
+                detail = (proc.stdout + proc.stderr).strip().splitlines()
+                return "translated %s failed structural sync: %s" % (
+                    kind,
+                    detail[-1] if detail else "unknown difference",
+                )
+        finally:
+            os.unlink(tmp)
     return None
 
 
@@ -392,7 +422,13 @@ def main():
         print("::warning::GEMINI_API_KEY is not set; starting with DeepSeek")
 
     gemini_model = os.environ.get("GEMINI_MODEL", "gemini-2.0-flash")
-    deepseek_model = os.environ.get("DEEPSEEK_MODEL", "deepseek-chat")
+    deepseek_model = os.environ.get("DEEPSEEK_MODEL", "deepseek-v4-flash").strip()
+    if not deepseek_model.startswith("deepseek-"):
+        print(
+            "::warning::Invalid DEEPSEEK_MODEL=%s; using deepseek-v4-flash"
+            % deepseek_model
+        )
+        deepseek_model = "deepseek-v4-flash"
     request_timeout = int(os.environ.get("SYNC_REQUEST_TIMEOUT", "60"))
     max_attempts = int(os.environ.get("SYNC_MAX_ATTEMPTS", "3"))
     file_timeout = int(os.environ.get("SYNC_FILE_TIMEOUT", "300"))
@@ -498,7 +534,7 @@ def main():
             if failed:
                 continue
 
-            text = "".join(translated_chunks)
+            text = join_translated_chunks(translated_chunks)
 
             error = validate(text, kind)
             if error:
