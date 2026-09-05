@@ -96,41 +96,52 @@ const ruleOptionsEnable = {
 const NAMESERVER_POLICY_PREFER_ORIGINAL = true;
 
 // ============================================================================
-// 国内入口解析：只影响最终节点解析链路 proxy-server-nameserver 与
-// proxy-server-nameserver-policy。节点仅作为 DNS 策略目标，不进入分流组。
+// 国内入口解析节点维护区
+// 仅维护下面的 type / server / port 及其他可选字段。
+// name 不要写在这里，由 ENTRY_RESOLUTION_OPTIONS 固定为国内入口解析-运营商。
+// 可修改、删除或添加任意 Mihomo 节点字段。
 // ============================================================================
+const DOMESTIC_ENTRY_PROXIES = {
+  // 中国电信
+  telecom: {
+    type: 'http',
+    server: '36.111.33.167',
+    port: 13128
+  },
+
+  // 中国联通
+  unicom: {
+    type: 'http',
+    server: '119.188.131.55',
+    port: 17981
+  },
+
+  // 中国移动
+  mobile: {
+    type: 'http',
+    server: '116.196.150.180',
+    port: 17981
+  }
+};
+
+// 开关优先级：电信 > 联通 > 移动。节点名固定在这里，不应修改。
 const ENTRY_RESOLUTION_OPTIONS = [
   {
     key: '电信入口解析',
     proxyName: '国内入口解析-电信',
-    proxy: {
-      name: '国内入口解析-电信',
-      type: 'http',
-      server: '36.111.33.167',
-      port: 13128
-    },
+    proxy: DOMESTIC_ENTRY_PROXIES.telecom,
     icon: 'https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/China.png'
   },
   {
     key: '联通入口解析',
     proxyName: '国内入口解析-联通',
-    proxy: {
-      name: '国内入口解析-联通',
-      type: 'http',
-      server: '119.188.131.55',
-      port: 17981
-    },
+    proxy: DOMESTIC_ENTRY_PROXIES.unicom,
     icon: 'https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/China_Map.png'
   },
   {
     key: '移动入口解析',
     proxyName: '国内入口解析-移动',
-    proxy: {
-      name: '国内入口解析-移动',
-      type: 'http',
-      server: '116.196.150.180',
-      port: 17981
-    },
+    proxy: DOMESTIC_ENTRY_PROXIES.mobile,
     icon: 'https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Server.png'
   }
 ];
@@ -1156,7 +1167,9 @@ function applyEntryResolution(result) {
     Array.isArray(result.proxies) &&
     !result.proxies.some((proxy) => proxy && proxy.name === option.proxyName)
   ) {
-    result.proxies.push(deepClone(option.proxy));
+    const injectedProxy = deepClone(option.proxy);
+    injectedProxy.name = option.proxyName;
+    result.proxies.push(injectedProxy);
   }
 
   const displayGroup = {

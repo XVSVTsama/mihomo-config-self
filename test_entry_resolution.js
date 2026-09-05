@@ -178,6 +178,47 @@ assertEntryResolution(scenario({
   '联通入口解析': false,
   '移动入口解析': true
 }), '移动', 1);
+
+DOMESTIC_ENTRY_PROXIES.telecom.type = 'ss';
+DOMESTIC_ENTRY_PROXIES.telecom.cipher = 'aes-256-gcm';
+DOMESTIC_ENTRY_PROXIES.telecom.password = 'example-password';
+DOMESTIC_ENTRY_PROXIES.telecom.udp = true;
+DOMESTIC_ENTRY_PROXIES.telecom.name = 'should-not-win';
+
+const mutatedOutput = scenario({
+  '入口解析': true,
+  '电信入口解析': true,
+  '联通入口解析': false,
+  '移动入口解析': false
+});
+const mutatedProxy = mutatedOutput.proxies.find(
+  (proxy) => proxy && proxy.name === '国内入口解析-电信'
+);
+
+if (!mutatedProxy) {
+  throw new Error('mutated entry proxy was not injected');
+}
+if (mutatedProxy.name !== '国内入口解析-电信') {
+  throw new Error('entry proxy name was not kept fixed: ' + mutatedProxy.name);
+}
+if (mutatedProxy.type !== 'ss') {
+  throw new Error('entry proxy type was not preserved: ' + mutatedProxy.type);
+}
+if (mutatedProxy.cipher !== 'aes-256-gcm') {
+  throw new Error('entry proxy cipher was not preserved');
+}
+if (mutatedProxy.password !== 'example-password') {
+  throw new Error('entry proxy password was not preserved');
+}
+if (mutatedProxy.udp !== true) {
+  throw new Error('entry proxy udp was not preserved');
+}
+
+DOMESTIC_ENTRY_PROXIES.telecom.type = 'http';
+delete DOMESTIC_ENTRY_PROXIES.telecom.cipher;
+delete DOMESTIC_ENTRY_PROXIES.telecom.password;
+delete DOMESTIC_ENTRY_PROXIES.telecom.udp;
+delete DOMESTIC_ENTRY_PROXIES.telecom.name;
 `;
 
 function runTarget(targetName) {

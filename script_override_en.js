@@ -205,42 +205,52 @@ const TGDC_RULES = [
 const NAMESERVER_POLICY_PREFER_ORIGINAL = true;
 
 // ============================================================================
-// Domestic entry resolution: affects only the final node resolution chain
-// proxy-server-nameserver and proxy-server-nameserver-policy. Nodes are DNS
-// policy targets only and do not enter proxy groups.
+// Domestic Entry Resolution Node Maintenance Area
+// Only maintain type / server / port and other optional fields below.
+// Do not put name here; ENTRY_RESOLUTION_OPTIONS fixes it as 国内入口解析-运营商.
+// You may change, remove, or add any Mihomo node field.
 // ============================================================================
+const DOMESTIC_ENTRY_PROXIES = {
+  // China Telecom
+  telecom: {
+    type: 'http',
+    server: '36.111.33.167',
+    port: 13128
+  },
+
+  // China Unicom
+  unicom: {
+    type: 'http',
+    server: '119.188.131.55',
+    port: 17981
+  },
+
+  // China Mobile
+  mobile: {
+    type: 'http',
+    server: '116.196.150.180',
+    port: 17981
+  }
+};
+
+// Switch priority: Telecom > Unicom > Mobile. Node names are fixed here and should not be changed.
 const ENTRY_RESOLUTION_OPTIONS = [
   {
     key: '电信入口解析',
     proxyName: '国内入口解析-电信',
-    proxy: {
-      name: '国内入口解析-电信',
-      type: 'http',
-      server: '36.111.33.167',
-      port: 13128
-    },
+    proxy: DOMESTIC_ENTRY_PROXIES.telecom,
     icon: 'https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/China.png'
   },
   {
     key: '联通入口解析',
     proxyName: '国内入口解析-联通',
-    proxy: {
-      name: '国内入口解析-联通',
-      type: 'http',
-      server: '119.188.131.55',
-      port: 17981
-    },
+    proxy: DOMESTIC_ENTRY_PROXIES.unicom,
     icon: 'https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/China_Map.png'
   },
   {
     key: '移动入口解析',
     proxyName: '国内入口解析-移动',
-    proxy: {
-      name: '国内入口解析-移动',
-      type: 'http',
-      server: '116.196.150.180',
-      port: 17981
-    },
+    proxy: DOMESTIC_ENTRY_PROXIES.mobile,
     icon: 'https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Server.png'
   }
 ];
@@ -1178,7 +1188,9 @@ function applyEntryResolution(result) {
     Array.isArray(result.proxies) &&
     !result.proxies.some((proxy) => proxy && proxy.name === option.proxyName)
   ) {
-    result.proxies.push(deepClone(option.proxy));
+    const injectedProxy = deepClone(option.proxy);
+    injectedProxy.name = option.proxyName;
+    result.proxies.push(injectedProxy);
   }
 
   const displayGroup = {
