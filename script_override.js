@@ -1159,6 +1159,30 @@ function applyEntryResolution(result) {
     result.proxies.push(deepClone(option.proxy));
   }
 
+  const displayGroup = {
+    name: '国内入口解析',
+    type: 'select',
+    proxies: [option.proxyName],
+    icon: 'https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Domestic.png'
+  };
+  const existingDisplayGroup = (result['proxy-groups'] || []).find(
+    (group) => group && group.name === displayGroup.name
+  );
+  if (existingDisplayGroup) {
+    existingDisplayGroup.type = displayGroup.type;
+    existingDisplayGroup.proxies = displayGroup.proxies.slice();
+    existingDisplayGroup.icon = displayGroup.icon;
+  } else {
+    const autoSelectIndex = (result['proxy-groups'] || []).findIndex(
+      (group) => group && group.name === '♻️ 自动选择'
+    );
+    if (autoSelectIndex >= 0) {
+      result['proxy-groups'].splice(autoSelectIndex + 1, 0, displayGroup);
+    } else {
+      result['proxy-groups'].push(displayGroup);
+    }
+  }
+
   result.dns['proxy-server-nameserver'] = asNameserverList(
     result.dns['proxy-server-nameserver']
   ).map((value) => withDnsPolicySuffix(value, suffix));

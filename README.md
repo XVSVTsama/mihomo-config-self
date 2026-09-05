@@ -78,7 +78,7 @@ https://raw.githubusercontent.com/XVSVTsama/mihomo-config-self/refs/heads/main/s
    - 可通过脚本顶部 `ruleOptionsEnable` 开关单独禁用策略组，并自动清理相关引用。
    - `FCM直连` 功能开关：默认开启，隐藏组 FCM 仅含 `DIRECT`；关闭后仅保留 `👉 手动切换`（开关只改 FCM 组内节点，不会移除该组）。
    - `TGDC实验分流` 功能开关：默认关闭；开启后把 Telegram 拆成 DC1/DC3-Miami、DC2/DC4-Amsterdam、DC5-Singapore 三组并插入对应规则，原 `📲 Telegram` 组作为兜底。关闭时保持原 Telegram 规则、策略组和规则集不变。
-   - `入口解析` 功能开关：默认关闭；开启后可在电信、联通、移动中选择，优先级为电信 > 联通 > 移动，只取第一个已开启项，并为最终节点解析 DNS 添加对应的国内入口节点。该功能会引入有时效性的国内公共节点，属于实验性能力，仅供应测试使用。
+   - `入口解析` 功能开关：默认关闭；开启后可在电信、联通、移动中选择，优先级为电信 > 联通 > 移动，只取第一个已开启项，并为最终节点解析 DNS 添加对应的国内入口节点，同时在 `国内入口解析` 展示组中显示当前选中节点。该功能会引入有时效性的国内公共节点，属于实验性能力，仅供应测试使用。
    - 脚本首行为 Bettbox 兼容声明（`Compatible_With_Bettbox`）：Bettbox 客户端约定在脚本开头识别该声明（并非全量读取），脚本需遵循此约定，声明必须保持置顶，否则"自定义规则开关"入口不显示。
 
    脚本内嵌的标准模板与仓库 [mihomo.yaml](https://raw.githubusercontent.com/XVSVTsama/mihomo-config-self/refs/heads/main/mihomo.yaml) 保持同步。
