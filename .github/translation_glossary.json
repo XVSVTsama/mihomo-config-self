@@ -13,5 +13,6 @@
   "入口解析": "Master switch: when enabled, only the first enabled operator in Telecom > Unicom > Mobile order takes effect.",
   "电信入口解析": "When enabled, use the China Telecom domestic entry resolution node.",
   "联通入口解析": "When enabled, use the China Unicom domestic entry resolution node.",
-  "移动入口解析": "When enabled, use the China Mobile domestic entry resolution node."
+  "移动入口解析": "When enabled, use the China Mobile domestic entry resolution node.",
+  "`TGDC Experiment Split` 功能开关：默认关闭，开启后将 Telegram 拆分为 DC1/DC3-Miami、DC2/DC4-Amsterdam、DC5-Singapore 组并插入对应规则，原 `📲 Telegram` 组作为兜底；关闭时保持原 Telegram 规则、策略组与规则集不变": "`TGDC Experiment Split` feature toggle: Disabled by default; when enabled, Telegram is split into DC1/DC3-Miami, DC2/DC4-Amsterdam, and DC5-Singapore groups with corresponding rules inserted, while the original `📲 Telegram` group acts as fallback. When disabled, the original Telegram rules, policy groups, and rule providers remain unchanged."
 }
