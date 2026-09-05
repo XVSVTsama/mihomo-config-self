@@ -9,5 +9,9 @@
   "// Claude / Anthropic: process matches take precedence and cover Claude Desktop, Claude Code, etc.": "// Claude / Anthropic: process matches take precedence and cover Claude Desktop, Claude Code, etc.",
   "// Claude / Anthropic: official API, web login, OAuth, MCP, CLI updates, and plugin dependencies.": "// Claude / Anthropic: official API, web login, OAuth, MCP, CLI updates, and plugin dependencies.",
   "TGDC实验分流": "Enables the Telegram DC/regional experiment; when disabled, the original Telegram rules, policy groups, and rule providers are left unchanged.",
-  "开启 Telegram DC/地区实验分流；关闭时不改变原 Telegram 规则、策略组和规则集。": "Enables the Telegram DC/regional experiment; when disabled, the original Telegram rules, policy groups, and rule providers are left unchanged."
+  "开启 Telegram DC/地区实验分流；关闭时不改变原 Telegram 规则、策略组和规则集。": "Enables the Telegram DC/regional experiment; when disabled, the original Telegram rules, policy groups, and rule providers are left unchanged.",
+  "入口解析": "Master switch: when enabled, only the first enabled operator in Telecom > Unicom > Mobile order takes effect.",
+  "电信入口解析": "When enabled, use the China Telecom domestic entry resolution node.",
+  "联通入口解析": "When enabled, use the China Unicom domestic entry resolution node.",
+  "移动入口解析": "When enabled, use the China Mobile domestic entry resolution node."
 }
