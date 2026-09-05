@@ -90,7 +90,6 @@ const ruleOptionsEnable = {
 
 // ============================================================================
 // Telegram DC/regional experiment (injected only when the switch is true).
-// Region filters follow the organizational style in MyClash without copying its implementation.
 // DC1/DC3: Miami; DC2/DC4: Amsterdam; DC5: Singapore.
 // Static CIDRs cannot reliably split same-city DCs, so groups use DC pairs.
 // ============================================================================
@@ -134,8 +133,8 @@ const TGDC_RULE_PROVIDERS = {
   },
 };
 
-// Fallback selection follows MyClash's low_filter idea: exclude built-ins, rejects,
-// rematches, and non-real nodes; otherwise use the first usable subscription node.
+// Fallback selection excludes built-ins, rejects, rematches, and non-real nodes;
+// otherwise use the first usable subscription node.
 const TGDC_FALLBACK_EXCLUDE_FILTER =
   /群|返利|循环|官网|客服|网站|网址|获取|订阅|流量|到期|机场|下次|版本|官址|备用|过期|已用|联系|邮箱|工单|贩卖|通知|倒卖|防止|国内|地址|频道|电报|无法|说明|使用|提示|访问|支持|教程|关注|更新|作者|加入|超时|收藏|优惠|福利|邀请|好友|失联|选择|剩余|公益|发布|DIZTNA|通路|登录|禁止|定时|渠道|牢记|永久|余额|阁下|本站|刷新|导航|建议|重置|以下|⚠️|@|t\.me\/\+|\bexpire\b|\bhttps?:\/\/|\.com|\btraffic\b/iu;
 const TGDC_FALLBACK_LOW_RATE_FILTER =

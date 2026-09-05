@@ -137,8 +137,6 @@ const ENTRY_RESOLUTION_OPTIONS = [
 
 // ============================================================================
 // Telegram DC/地区实验分流（仅在 ruleOptionsEnable['TGDC实验分流'] 为 true 时注入）
-// 参考：telegram-dc-region-rules-v2.yaml；地区 filter 的表达式风格参考 MyClash，
-// 仅借用 filter 组织方式，不复制其余实现。
 // DC1/DC3：Miami；DC2/DC4：Amsterdam；DC5：Singapore。
 // 静态 CIDR 无法可靠拆分同城 DC，因此策略组使用 DC 对命名。
 // ============================================================================
@@ -186,12 +184,9 @@ const TGDC_RULE_PROVIDERS = {
   },
 };
 
-// 参考 MyClash 的地区策略组 filter 组织方式：filter 负责筛选全部订阅节点。
 // empty-fallback 必须是实际存在的出站节点名称，不能填写 proxy-group。
 // fallback 使用 low_filter 思路：排除内置/拒绝/重匹配/倍率/策略组等非真实节点，
 // 再按覆写后订阅节点的原始顺序取第一个节点；若没有结果，则使用 COMPATIBLE。
-// MyClash low_filter 参考：排除内置节点、倍率/信息节点及其 excludeFilter 命中的非真实节点。
-// 来源：AIsouler/MyClash Script/Script.js 中 excludeFilter、低倍率与高倍率正则。
 const TGDC_FALLBACK_EXCLUDE_FILTER =
   /群|返利|循环|官网|客服|网站|网址|获取|订阅|流量|到期|机场|下次|版本|官址|备用|过期|已用|联系|邮箱|工单|贩卖|通知|倒卖|防止|国内|地址|频道|电报|无法|说明|使用|提示|访问|支持|教程|关注|更新|作者|加入|超时|收藏|优惠|福利|邀请|好友|失联|选择|剩余|公益|发布|DIZTNA|通路|登录|禁止|定时|渠道|牢记|永久|余额|阁下|本站|刷新|导航|建议|重置|以下|⚠️|@|t\.me\/\+|\bexpire\b|\bhttps?:\/\/|\.com|\btraffic\b/iu;
 const TGDC_FALLBACK_LOW_RATE_FILTER =
