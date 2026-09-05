@@ -14,5 +14,10 @@
   "电信入口解析": "When enabled, use the China Telecom domestic entry resolution node.",
   "联通入口解析": "When enabled, use the China Unicom domestic entry resolution node.",
   "移动入口解析": "When enabled, use the China Mobile domestic entry resolution node.",
-  "`TGDC Experiment Split` 功能开关：默认关闭，开启后将 Telegram 拆分为 DC1/DC3-Miami、DC2/DC4-Amsterdam、DC5-Singapore 组并插入对应规则，原 `📲 Telegram` 组作为兜底；关闭时保持原 Telegram 规则、策略组与规则集不变": "`TGDC Experiment Split` feature toggle: Disabled by default; when enabled, Telegram is split into DC1/DC3-Miami, DC2/DC4-Amsterdam, and DC5-Singapore groups with corresponding rules inserted, while the original `📲 Telegram` group acts as fallback. When disabled, the original Telegram rules, policy groups, and rule providers remain unchanged."
+  "`TGDC Experiment Split` 功能开关：默认关闭，开启后将 Telegram 拆分为 DC1/DC3-Miami、DC2/DC4-Amsterdam、DC5-Singapore 组并插入对应规则，原 `📲 Telegram` 组作为兜底；关闭时保持原 Telegram 规则、策略组与规则集不变": "`TGDC Experiment Split` feature toggle: Disabled by default; when enabled, Telegram is split into DC1/DC3-Miami, DC2/DC4-Amsterdam, and DC5-Singapore groups with corresponding rules inserted, while the original `📲 Telegram` group acts as fallback. When disabled, the original Telegram rules, policy groups, and rule providers remain unchanged.",
+  "国内入口解析节点维护区\n仅维护下面的 type / server / port 及其他可选字段。\nname 不要写在这里，由 ENTRY_RESOLUTION_OPTIONS 固定为国内入口解析-运营商。\n可修改、删除或添加任意 Mihomo 节点字段。": "Domestic Entry Resolution Node Maintenance Area\nOnly maintain type / server / port and other optional fields below.\nDo not put name here; ENTRY_RESOLUTION_OPTIONS fixes it as 国内入口解析-运营商.\nYou may change, remove, or add any Mihomo node field.",
+  "中国电信": "China Telecom",
+  "中国联通": "China Unicom",
+  "中国移动": "China Mobile",
+  "开关优先级：电信 > 联通 > 移动。节点名固定在这里，不应修改。": "Switch priority: Telecom > Unicom > Mobile. Node names are fixed here and should not be changed."
 }
