@@ -85,11 +85,55 @@ const ruleOptionsEnable = {
   '启用 Reality 增强': true, // 是否为带非空 public-key/short-id 的 Reality 节点启用 support-x25519mlkem768（X25519MLKEM768 后量子密钥协商）
   'FCM直连': true,          // 默认打开：隐藏组 FCM 仅含 DIRECT；关闭后仅保留 👉 手动切换（不移除 FCM 组）。开关图标取自 FCM 代理组的 icon 字段。
   'TGDC实验分流': false,     // 开启 Telegram DC/地区实验分流；关闭时不改变原 Telegram 规则、策略组和规则集。
+  '入口解析': false,         // 主开关：开启后，按电信 > 联通 > 移动的顺序，只取第一个已开启的国内入口解析。
+  '电信入口解析': false,     // 开启后，使用电信国内入口解析节点。
+  '联通入口解析': false,     // 开启后，使用联通国内入口解析节点。
+  '移动入口解析': false,     // 开启后，使用移动国内入口解析节点。
 };
 
 // 出现同一个域名规则 key 时，订阅原始配置(true) 还是模板(false) 优先（模板目前未配置
 // proxy-server-nameserver-policy，因此该开关当前实际只影响订阅来源之间的合并）
 const NAMESERVER_POLICY_PREFER_ORIGINAL = true;
+
+// ============================================================================
+// 国内入口解析：只影响最终节点解析链路 proxy-server-nameserver 与
+// proxy-server-nameserver-policy。节点仅作为 DNS 策略目标，不进入分流组。
+// ============================================================================
+const ENTRY_RESOLUTION_OPTIONS = [
+  {
+    key: '电信入口解析',
+    proxyName: '国内入口解析-电信',
+    proxy: {
+      name: '国内入口解析-电信',
+      type: 'http',
+      server: '36.111.33.167',
+      port: 13128
+    },
+    icon: 'https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/China.png'
+  },
+  {
+    key: '联通入口解析',
+    proxyName: '国内入口解析-联通',
+    proxy: {
+      name: '国内入口解析-联通',
+      type: 'http',
+      server: '119.188.131.55',
+      port: 17981
+    },
+    icon: 'https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/China_Map.png'
+  },
+  {
+    key: '移动入口解析',
+    proxyName: '国内入口解析-移动',
+    proxy: {
+      name: '国内入口解析-移动',
+      type: 'http',
+      server: '116.196.150.180',
+      port: 17981
+    },
+    icon: 'https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Server.png'
+  }
+];
 
 // ============================================================================
 // Telegram DC/地区实验分流（仅在 ruleOptionsEnable['TGDC实验分流'] 为 true 时注入）
@@ -974,8 +1018,17 @@ const serviceConfigs = TEMPLATE['proxy-groups']
     {
       name: 'TGDC实验分流',
       icon: 'https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Telegram.png'
+    },
+    {
+      name: '入口解析',
+      icon: 'https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Domestic.png'
     }
-  ]);
+  ].concat(
+    ENTRY_RESOLUTION_OPTIONS.map((option) => ({
+      name: option.key,
+      icon: option.icon
+    }))
+  ));
 
 // ============================================================================
 // 工具函数
@@ -1078,6 +1131,56 @@ function sameNameserverSet(a, b) {
   const sa = new Set(a);
   const sb = new Set(b);
   return sa.size === sb.size && Array.from(sa).every((value) => sb.has(value));
+}
+
+function selectedEntryResolutionOption() {
+  if (ruleOptionsEnable['入口解析'] !== true) {
+    return null;
+  }
+
+  return ENTRY_RESOLUTION_OPTIONS.find(
+    (option) => ruleOptionsEnable[option.key] === true
+  ) || null;
+}
+
+function withDnsPolicySuffix(value, suffix) {
+  const str = String(value);
+  const hashIndex = str.indexOf('#');
+  return (hashIndex === -1 ? str : str.slice(0, hashIndex)) + suffix;
+}
+
+function applyEntryResolution(result) {
+  const option = selectedEntryResolutionOption();
+  if (!option) {
+    return;
+  }
+
+  const suffix = '#' + option.proxyName;
+
+  if (
+    Array.isArray(result.proxies) &&
+    !result.proxies.some((proxy) => proxy && proxy.name === option.proxyName)
+  ) {
+    result.proxies.push(deepClone(option.proxy));
+  }
+
+  result.dns['proxy-server-nameserver'] = asNameserverList(
+    result.dns['proxy-server-nameserver']
+  ).map((value) => withDnsPolicySuffix(value, suffix));
+
+  const policy = result.dns['proxy-server-nameserver-policy'];
+  if (!policy || typeof policy !== 'object') {
+    return;
+  }
+
+  for (const rule of Object.keys(policy)) {
+    const value = policy[rule];
+    if (Array.isArray(value)) {
+      policy[rule] = value.map((item) => withDnsPolicySuffix(item, suffix));
+    } else if (typeof value === 'string') {
+      policy[rule] = withDnsPolicySuffix(value, suffix);
+    }
+  }
 }
 
 // 公共 DNS 识别表：用于区分“公共可直连 DNS”和“机场/用户的私有 DNS”。
@@ -1716,6 +1819,9 @@ function main(config, profileName) {
     config,
     result
   );
+
+  // ---- 8. 国内入口解析：在最终节点 DNS 结果上追加运营商策略。 ----
+  applyEntryResolution(result);
 
   return result;
 }

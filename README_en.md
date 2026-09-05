@@ -77,6 +77,7 @@ https://raw.githubusercontent.com/XVSVTsama/mihomo-config-self/refs/heads/main/s
    - Dynamically merges DNS `proxy-server-nameserver-policy` (based on the script; the template does not preset this key);
    - Policy groups can be individually disabled via the `ruleOptionsEnable` switch at the top of the script, which automatically cleans up related references.
    - `FCM Direct` feature toggle: Enabled by default, hiding the FCM group to contain only `DIRECT`. When disabled, only `👉 Manual` is retained (the switch only modifies nodes within the FCM group and will not remove the group itself).
+   - `Entry Resolution` feature toggle: Disabled by default; when enabled, you can choose among Telecom, Unicom, and Mobile. The priority is Telecom > Unicom > Mobile, only the first enabled option takes effect, and the corresponding domestic entry node is appended to the final node resolution DNS.
    - The first line of the script contains the Bettbox compatibility declaration (`Compatible_With_Bettbox`): Bettbox clients are configured to recognize this declaration at the beginning of the script (rather than reading the entire file). The script must follow this convention, and the declaration must remain at the very top, otherwise the "Custom Rule Switch" entry will not appear.
 
    The standard template embedded in the script stays synchronized with the repository [mihomo.yaml](https://raw.githubusercontent.com/XVSVTsama/mihomo-config-self/refs/heads/main/mihomo.yaml).

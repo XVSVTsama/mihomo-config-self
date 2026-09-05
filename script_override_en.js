@@ -82,6 +82,10 @@ const ruleOptionsEnable = {
   '启用 Reality 增强': true, // Whether to enable support-x25519mlkem768 (X25519MLKEM768 post-quantum key agreement) for Reality nodes with non-empty public-key/short-id
   'FCM直连': true,          // Default ON: The hidden FCM group contains only DIRECT; when disabled, only 👉 Manual Select is retained (FCM group is not removed). The switch icon is taken from the icon field of the FCM proxy group.
   'TGDC实验分流': false,     // Enables the Telegram DC/regional experiment; when disabled, the original Telegram rules, policy groups, and rule providers are left unchanged.
+  '入口解析': false,         // Master switch: when enabled, only the first enabled operator in Telecom > Unicom > Mobile order takes effect.
+  '电信入口解析': false,     // When enabled, use the China Telecom domestic entry resolution node.
+  '联通入口解析': false,     // When enabled, use the China Unicom domestic entry resolution node.
+  '移动入口解析': false,     // When enabled, use the China Mobile domestic entry resolution node.
 };
 
 // ============================================================================
@@ -200,6 +204,47 @@ const TGDC_RULES = [
 // When the same domain rule key appears, whether the subscription's original configuration (true) or template (false) takes priority (the template currently does not configure
 // proxy-server-nameserver-policy, so this switch currently only affects merging between subscription sources)
 const NAMESERVER_POLICY_PREFER_ORIGINAL = true;
+
+// ============================================================================
+// Domestic entry resolution: affects only the final node resolution chain
+// proxy-server-nameserver and proxy-server-nameserver-policy. Nodes are DNS
+// policy targets only and do not enter proxy groups.
+// ============================================================================
+const ENTRY_RESOLUTION_OPTIONS = [
+  {
+    key: '电信入口解析',
+    proxyName: '国内入口解析-电信',
+    proxy: {
+      name: '国内入口解析-电信',
+      type: 'http',
+      server: '36.111.33.167',
+      port: 13128
+    },
+    icon: 'https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/China.png'
+  },
+  {
+    key: '联通入口解析',
+    proxyName: '国内入口解析-联通',
+    proxy: {
+      name: '国内入口解析-联通',
+      type: 'http',
+      server: '119.188.131.55',
+      port: 17981
+    },
+    icon: 'https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/China_Map.png'
+  },
+  {
+    key: '移动入口解析',
+    proxyName: '国内入口解析-移动',
+    proxy: {
+      name: '国内入口解析-移动',
+      type: 'http',
+      server: '116.196.150.180',
+      port: 17981
+    },
+    icon: 'https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Server.png'
+  }
+];
 
 // ============================================================================
 // Standard Template Configuration (Kept in sync with the repository's mihomo.yaml, equivalent to the JSON representation of that YAML file)
@@ -990,8 +1035,17 @@ const serviceConfigs = TEMPLATE['proxy-groups']
     {
       name: 'TGDC实验分流',
       icon: 'https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Telegram.png'
+    },
+    {
+      name: '入口解析',
+      icon: 'https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Domestic.png'
     }
-  ]);
+  ].concat(
+    ENTRY_RESOLUTION_OPTIONS.map((option) => ({
+      name: option.key,
+      icon: option.icon
+    }))
+  ));
 
   
 // ============================================================================
@@ -1095,6 +1149,56 @@ function sameNameserverSet(a, b) {
   const sa = new Set(a);
   const sb = new Set(b);
   return sa.size === sb.size && Array.from(sa).every((value) => sb.has(value));
+}
+
+function selectedEntryResolutionOption() {
+  if (ruleOptionsEnable['入口解析'] !== true) {
+    return null;
+  }
+
+  return ENTRY_RESOLUTION_OPTIONS.find(
+    (option) => ruleOptionsEnable[option.key] === true
+  ) || null;
+}
+
+function withDnsPolicySuffix(value, suffix) {
+  const str = String(value);
+  const hashIndex = str.indexOf('#');
+  return (hashIndex === -1 ? str : str.slice(0, hashIndex)) + suffix;
+}
+
+function applyEntryResolution(result) {
+  const option = selectedEntryResolutionOption();
+  if (!option) {
+    return;
+  }
+
+  const suffix = '#' + option.proxyName;
+
+  if (
+    Array.isArray(result.proxies) &&
+    !result.proxies.some((proxy) => proxy && proxy.name === option.proxyName)
+  ) {
+    result.proxies.push(deepClone(option.proxy));
+  }
+
+  result.dns['proxy-server-nameserver'] = asNameserverList(
+    result.dns['proxy-server-nameserver']
+  ).map((value) => withDnsPolicySuffix(value, suffix));
+
+  const policy = result.dns['proxy-server-nameserver-policy'];
+  if (!policy || typeof policy !== 'object') {
+    return;
+  }
+
+  for (const rule of Object.keys(policy)) {
+    const value = policy[rule];
+    if (Array.isArray(value)) {
+      policy[rule] = value.map((item) => withDnsPolicySuffix(item, suffix));
+    } else if (typeof value === 'string') {
+      policy[rule] = withDnsPolicySuffix(value, suffix);
+    }
+  }
 }
 
 // Public DNS identification table: used to distinguish between "public directly connectable DNS" and "airport/user private DNS".
@@ -1730,6 +1834,9 @@ function main(config, profileName) {
     config,
     result
   );
+
+  // ---- 8. Domestic entry resolution: append the operator policy to the final node DNS result. ----
+  applyEntryResolution(result);
 
   return result;
 }
