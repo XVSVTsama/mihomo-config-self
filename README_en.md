@@ -83,6 +83,12 @@ https://raw.githubusercontent.com/XVSVTsama/mihomo-config-self/refs/heads/main/s
 
    The standard template embedded in the script stays synchronized with the repository [mihomo.yaml](https://raw.githubusercontent.com/XVSVTsama/mihomo-config-self/refs/heads/main/mihomo.yaml).
 
+## Node Domain & DNS Model
+
+[<kbd>Read: Node Domains, Hosts & Private DNS Model</kbd>](https://XVSVTsama.github.io/mihomo-config-self/proxy-infrastructure-domain-protection-model.html)
+
+> This document breaks down the distinct roles of `hosts` fake/real mappings, private DoH resolution, DNS policy, and the fake-IP filter, and how all four cooperate within the same node-resolution chain. It is aimed at people who want to write or understand node-resolution override scripts, and contains no real nodes, passwords, UUIDs, or subscription credentials.
+
 ## Recommended Learning References, Subscription Conversion Projects, and Clients
    [Looking for truly educational references?](https://t.me/xvsvts/152)
 

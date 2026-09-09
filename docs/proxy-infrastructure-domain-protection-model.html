@@ -1,0 +1,264 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>节点域名、Hosts 与私有 DNS 联动模型</title>
+<style>
+:root{--ink:#1f2937;--muted:#64748b;--line:#dbe3ee;--blue:#1d4ed8;--bluebg:#eff6ff;--green:#047857;--amber:#b45309;--bg:#f8fafc}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans CJK SC","Microsoft YaHei",sans-serif;line-height:1.76}main{max-width:1100px;margin:auto;background:#fff;min-height:100vh;padding:46px 30px 72px}h1{margin:0 0 10px;color:#0f172a;font-size:2.1rem;line-height:1.3}h2{margin:42px 0 14px;padding-bottom:8px;border-bottom:2px solid #e2e8f0;color:#0f3b82;font-size:1.45rem}h3{margin:28px 0 9px;color:#164e8a;font-size:1.1rem}h4{margin:24px 0 8px;color:#164e8a;font-size:1.02rem}p{margin:12px 0}.sub{color:var(--muted);font-size:1.05rem}.lead{margin:25px 0;padding:17px 21px;border-left:5px solid var(--blue);background:var(--bluebg);font-size:1.06rem}.ok{padding:14px 18px;border-left:4px solid #10b981;background:#ecfdf5}.warn{padding:14px 18px;border-left:4px solid #f59e0b;background:#fffbeb}.flow{padding:17px 21px;border:1px solid #bfdbfe;border-radius:9px;background:#f8fbff;text-align:center;color:#1e3a8a;font-weight:600}table{width:100%;border-collapse:collapse;margin:16px 0 22px;font-size:.95rem}th,td{padding:10px 12px;border:1px solid var(--line);text-align:left;vertical-align:top}th{background:#f1f5f9;color:#0f3b82}code{padding:2px 5px;background:#f1f5f9;border-radius:4px;color:#9f1239;font-family:ui-monospace,SFMono-Regular,Consolas,monospace}pre{overflow:auto;padding:16px 18px;border-radius:8px;background:#0f172a;color:#e2e8f0;line-height:1.55}.stage{display:grid;grid-template-columns:42px 1fr;gap:13px;margin:16px 0}.num{width:32px;height:32px;border-radius:50%;background:#1d4ed8;color:#fff;text-align:center;line-height:32px;font-weight:700}footer{margin-top:50px;padding-top:18px;border-top:1px solid var(--line);color:var(--muted);font-size:.9rem}@media(max-width:760px){main{padding:30px 18px 52px}table{display:block;overflow-x:auto}}
+a{color:var(--blue);text-decoration:none;border-bottom:1px solid #bfdbfe;cursor:pointer}a:hover{color:#1e40af;border-bottom-color:var(--blue)}
+[id]{scroll-margin-top:86px}.flash{animation:flashRing .5s ease-out 4}@keyframes flashRing{0%{background:#fef3c7;box-shadow:0 0 0 4px rgba(245,158,11,.45)}45%{background:#fffbeb;box-shadow:0 0 0 4px rgba(245,158,11,.28)}100%{background:transparent;box-shadow:none}}
+</style>
+</head>
+<body><main>
+<header><h1>节点域名、Hosts 与私有 DNS 联动模型</h1></header>
+<div class="lead"><strong>阅读顺序：</strong>先看“仅有 Hosts 真假映射”，再看“仅有私有 DoH 解析”，然后理解这两者如何同时作用于同一份配置、又如何联动发生，最后抽象成通用模型，并在文档末尾给准备编写覆写脚本的人提供设计指导。</div>
+<p class="sub">某些一线机场配置使用 Hosts 真假映射与私有 DoH 解析；下面分别对仅有 Hosts 真假映射与仅有私有 DoH 解析展开。</p>
+
+<h2>一、两个主题的分述</h2>
+<p>这一节把“仅有 Hosts 真假映射”与“仅有私有 DoH 解析”作为两个独立主题，分别说明某一侧在配置中的角色与作用；两者在真实配置中往往同时出现，组合逻辑在下一节（两个主题的关联）展开。</p>
+<h3 id="topic-hosts">1. 仅有 Hosts 真假映射</h3>
+<p>某些一线机场原始 YAML 中的 hosts 在形式上与广告屏蔽表、局域网解析表相同，但在节点语境下应理解为一组<strong>真假节点域名映射</strong>：左侧是可能被公共解析路径导向的“假节点域名”或低质量结果，右侧是配置希望正常用户连接的真实服务入口。本节聚焦 hosts 真假映射这一侧；私有 DoH 在下一节单独展开。</p>
+<pre># 简化模型：仅有 Hosts 真假映射的整体配置；以下为概念占位，不使用真实节点域名
+dns:
+  enable: true
+  # hosts 要参与节点解析，先启用 use-hosts
+  use-hosts: true
+  # 本机 DNS 监听端点，节点解析经此进入
+  listen: 127.0.0.1:7846
+  # 节点专用解析入口；必须与本机监听端点对应，才能进入 hosts 映射真假域名流程
+  proxy-server-nameserver:
+    - udp://127.0.0.1:7846
+
+# 假节点域名的真假映射：左侧为假候选，右侧为真服务入口
+hosts:
+  POSSIBLE_BAD_RESULT_A: REAL_SERVICE_ENTRY_A
+  POSSIBLE_BAD_RESULT_B: REAL_SERVICE_ENTRY_B
+  POSSIBLE_BAD_RESULT_C: REAL_SERVICE_ENTRY_C
+
+# 订阅中的原始节点仍引用左侧假域名
+proxies:
+  - name: Example Node
+    type: anytls
+    server: POSSIBLE_BAD_RESULT_A
+    port: 443
+    password: REDACTED_EXAMPLE_ONLY
+    sni: tls.example.com
+    udp: true</pre>
+<p id="hosts-entry">在这类 YAML 中，hosts 左侧是“假”起点的候选，右侧是“真”目标；前者是需要被修正的解析对象，后者是配置希望正常用户连接的服务入口。</p>
+<table><thead><tr><th>Hosts 映射情形</th><th>真假判定</th><th>仅凭 Hosts 能确认的结果</th></tr></thead><tbody>
+<tr><td>假域名 → 真域名</td><td>左假右真</td><td>解析对象修正为右侧真域名，后续仍需 DNS</td></tr>
+</tbody></table>
+<h4>（1）Hosts 真假映射的生效条件</h4>
+<p>在只分析 YAML 的前提下，至少要同时满足以下条件，才能说这组真假映射具备生效基础：</p>
+<table><thead><tr><th>条件</th><th>需要从 YAML 确认的内容</th><th>不满足时的含义</th></tr></thead><tbody>
+<tr><td>Hosts 开关开启</td><td><code>dns.use-hosts: true</code>，或目标客户端明确默认启用 hosts</td><td>映射表可能只存在于配置中，不参与解析</td></tr>
+<tr><td>左侧域名确实被使用</td><td>节点或相关解析请求使用 hosts 左侧的域名</td><td>该条映射不会影响没有使用它的对象</td></tr>
+<tr><td>右侧值合法</td><td>右侧是可解析域名或合法 IP</td><td>无法形成确定的服务入口</td></tr>
+<tr><td>本地 DNS 监听覆盖节点解析入口的同端口回环</td><td><code>dns.listen</code> 填写 IPv4 通配监听地址，<code>proxy-server-nameserver</code> 填写同一端口上的 IPv4 回环地址；通配监听包含该回环地址时，Mihomo 判定节点解析回到自身本地 DNS，产生回环，hosts 参与节点解析</td><td>监听地址不覆盖该回环（端口不一致，或只绑定特定接口而非通配）则不产生回环，节点域名由外部解析器处理，hosts 不参与</td></tr>
+<tr><td>没有被更高优先级规则抵消</td><td>没有其他同名 hosts、policy 或客户端规则覆盖它</td><td>最终结果可能不是右侧值</td></tr>
+</tbody></table>
+<p>因此，“左侧假目标 → 右侧真入口”描述的是 YAML 设计意图；“什么时候真正生效”取决于 hosts 开关、左侧域名是否实际被使用、右侧值是否有效、客户端是否让 hosts 参与解析，以及是否存在覆盖规则。</p>
+
+<h3>2. 仅有私有 DoH 解析</h3>
+<p>私有 DoH 是机场提供的一个以 HTTPS 传输的 DNS 端点，用于为节点域名提供解析。它与 hosts 在配置中同时存在，但作为解析来源独立于 hosts 的映射关系：无论节点域名是否发生 hosts 替换，私有 DoH 都只是被选中的一条解析来源。本节只看私有 DoH 这一侧，下表列出它可能落入的典型配置字段。</p>
+<p>下面给出两种模型：<strong>全部节点都走私有 DoH</strong>，用 <code>proxy-server-nameserver</code>；<strong>只有部分节点走私有 DoH</strong>，用 <code>proxy-server-nameserver-policy</code> 针对指定域名单独指定解析来源。以下均为概念占位，不使用真实端点。</p>
+<pre># 简化模型：全部节点都走私有 DoH；以下为概念占位，不使用真实 DoH 端点
+dns:
+  enable: true
+  # 本机 DNS 监听地址；保留该字段，避免 dns 配置缺失
+  listen: 127.0.0.1:53
+  # 所有节点域名统一由私有 DoH 解析
+  proxy-server-nameserver:
+    - https://private-dns.example/dns-query
+  # 普通业务走公共解析，不承担私有 DoH
+  nameserver:
+    - https://doh.pub/dns-query
+
+# 本主题 hosts 不承载真假映射（空表）
+hosts: {}
+
+# 订阅中的原始节点使用真实域名，最终地址由私有 DoH 决定
+proxies:
+  - name: Example Node
+    type: anytls
+    server: node.example.com
+    port: 443
+    password: REDACTED_EXAMPLE_ONLY
+    sni: tls.example.com
+    udp: true</pre>
+<pre># 简化模型：部分节点走私有 DoH；以下为概念占位，不使用真实 DoH 端点
+dns:
+  enable: true
+  # 本机 DNS 监听地址；保留该字段，避免 dns 配置缺失
+  listen: 127.0.0.1:53
+  # 未命中 policy 的节点走公共解析，不使用本机回环作为节点解析入口
+  proxy-server-nameserver:
+    - https://doh.pub/dns-query
+  # 仅对指定节点域名启用私有 DoH
+  proxy-server-nameserver-policy:
+    "*.private-doh.example":
+      - https://private-dns.example/dns-query
+  # 普通业务也走公共解析
+  nameserver:
+    - https://doh.pub/dns-query
+
+# 本主题 hosts 不承载真假映射（空表）
+hosts: {}
+
+# 订阅中的原始节点：命中 policy 的走私有 DoH，其余走常规解析
+proxies:
+  - name: Plain Node
+    type: anytls
+    server: plain.example.com
+    port: 443
+    password: REDACTED_EXAMPLE_ONLY
+    sni: tls.example.com
+    udp: true
+  - name: DoH Node
+    type: anytls
+    server: node.private-doh.example
+    port: 443
+    password: REDACTED_EXAMPLE_ONLY
+    sni: tls.example.com
+    udp: true</pre>
+<table><thead><tr><th>配置角色</th><th>典型字段</th><th>作用</th></tr></thead><tbody>
+<tr><td>节点专用解析入口</td><td><code>proxy-server-nameserver</code>、<code>proxy-server-nameserver-policy</code></td><td>为代理节点的 <code>server</code> 域名提供解析，私有 DoH 常作为其中一项来源</td></tr>
+<tr><td>普通解析入口</td><td><code>nameserver</code>、<code>nameserver-policy</code></td><td>为普通业务域名提供解析</td></tr>
+<tr><td>引导解析入口</td><td><code>default-nameserver</code></td><td>帮助解析 DoH 服务域名或其他初始域名</td></tr>
+<tr><td>本机 DNS 监听</td><td><code>dns.listen</code></td><td>当前 Mihomo 实例自己提供的本地 DNS 端点，可能被其他解析入口引用</td></tr>
+</tbody></table>
+<p>对节点域名而言，解析来源可遵循如下概念性优先级：</p>
+<pre>节点专用 policy
+    &gt; 节点专用解析入口（可能含私有 DoH）
+    &gt; 普通 policy
+    &gt; 普通解析入口</pre>
+<p>这里的“优先级”不是要求脚本必须重写所有字段，而是帮助判断：一个节点域名最终应沿哪条解析来源获得地址。域名级 policy 通常比全局列表更具体；节点专用来源通常比普通业务来源更贴近节点连接需求。</p>
+<h4>（1）减少公共 DNS 污染或不稳定结果</h4>
+<p>公共 DNS 可能受到地域调度、缓存差异、污染、拦截、过期记录或运营商策略影响。对于普通网页域名，这些差异未必会立即暴露；但对于机场节点域名，错误或过期的地址可能直接造成连接失败。因此，机场可能提供私有 DoH，使节点域名使用更稳定、更接近其服务端配置的解析结果。</p>
+<h4 id="topic-doh-result">（2）为节点设计专用的解析结果</h4>
+<p id="doh-entry-result">另一种可能是：公共 DNS 得到的结果并不是服务希望普通用户使用的入口。例如，公共 DNS 可能返回一个低质量、受限、失效或面向异常流量的地址，而私有 DoH 可能返回更适合正常用户连接的高质量中转入口。这里的“内鬼组结果”“危险分子低质量 IP”只能作为对配置意图的假设性解释，不能仅凭 YAML 证实机场一定在主动区分用户。</p>
+<div class="warn"><strong>重要限制：</strong>从静态 YAML 只能确认“存在一条私有 DoH 解析路径”，不能确认公共 DNS 与私有 DoH 的实际返回值差异，也不能确认其运营方的真实策略。分析时应把上述解释标注为可能的设计动机。</div>
+
+<h2>二、两个主题的关联：Hosts-DNS 联动流程</h2>
+<p>把“仅 Hosts 真假映射”与“仅私有 DoH 解析”这两个独立主题组合起来，可以得到一个不依赖具体机场名称的联动流程：hosts 决定解析对象的名字，私有 DoH 或节点解析入口决定这个名字从哪里获得地址。</p>
+<div class="stage"><div class="num">1</div><div><strong>配置意图层：</strong>订阅提供原始节点域名；hosts 可能提供替换关系；DNS 字段提供节点和普通业务的解析来源。</div></div>
+<div class="stage"><div class="num">2</div><div><strong>生效条件层：</strong>只有当 hosts 开关、DNS 监听与解析来源的关系、节点类型和映射内容都满足相应条件时，hosts 才有资格影响节点。</div></div>
+<div class="stage"><div class="num">3</div><div><strong>连接目标层：</strong>域名映射到新域名时，节点的潜在最终连接目标变为新域名；映射到 IP 时，节点不再需要域名解析。</div></div>
+<div class="stage"><div class="num">4</div><div><strong>解析路径层：</strong>对于最终仍是域名的节点，解析来源按照节点专用 policy、节点专用 DNS、普通 policy、普通 DNS 的产品定义进行选择。</div></div>
+<div class="stage"><div class="num">5</div><div><strong>一致性层：</strong>如果旧域名上的解析规则需要延续到新域名，脚本作者需要明确选择独立、迁移或双端兼容，而不是默认为某一种答案。</div></div>
+<div class="flow">原始 server → hosts 关系 → 最终 server → 节点 DNS 优先级 → 真实解析地址 → 节点连接</div>
+<p>在这个流程中，hosts 不是 DNS policy，私有 DoH 也不是 hosts。二者的联动只是：hosts 改变了需要解析的域名，DNS policy 决定这个最终域名应使用哪条解析路径。</p>
+<p>结合后的“入口”对应同一个目标：hosts 右侧的真域名（<a href="#hosts-entry">“真实服务入口”</a>），与私有 DoH 所提供的高质量中转入口（<a href="#doh-entry-result">“为节点设计专用的解析结果”</a>），指向的是配置希望正常用户连接的那一个服务入口。二者分工是：hosts 先把假域名修正成这个真域名，真正的入口地址仍由节点 DNS 优先级在解析阶段决定；若该路径使用了私有 DoH，那么最终解析到的就是私有 DoH 设计给正常用户的中转入口。</p>
+
+<h2>三、抽象模型：从具体机场配置到通用概念</h2>
+<pre>OriginalDomains
+  = 订阅中的原始节点域名
+
+HostRelations
+  = 原始域名到候选新域名或 IP 的关系
+
+ResolvedServers
+  = 经过允许的 hosts 关系后得到的最终节点目标
+
+NodeDnsSources
+  = 节点专用 policy、节点专用 DNS、普通 policy、普通 DNS
+
+EffectiveDnsDomains
+  = 最终目标中仍然属于域名的部分</pre>
+<table><thead><tr><th>模型对象</th><th>回答的问题</th></tr></thead><tbody>
+<tr><td><code>OriginalDomains</code></td><td>订阅最初希望连接哪个域名？</td></tr>
+<tr><td><code>HostRelations</code></td><td>配置是否声明了入口迁移或地址替换？</td></tr>
+<tr><td><code>ResolvedServers</code></td><td>在允许 hosts 后，节点最终可能连接什么？</td></tr>
+<tr><td><code>NodeDnsSources</code></td><td>最终节点域名由谁解析、按什么优先级解析？</td></tr>
+<tr><td><code>EffectiveDnsDomains</code></td><td>哪些最终节点目标仍需要 DNS policy？</td></tr>
+</tbody></table>
+<p>该模型可以解释不同机场的类似配置，也允许脚本作者选择不同的 policy 迁移策略：只保留最终键、旧新双端保留，或完全独立处理。</p>
+
+<h2>四、带注释的 YAML 模型示例</h2>
+<p>下面示例只表达配置语义，不代表任何具体机场的实际返回结果。示例不含真实节点凭据。</p>
+<pre># 节点与普通业务都由同一个 Mihomo DNS 实例提供解析服务
+dns:
+  enable: true
+  use-hosts: true
+
+  # 本机 DNS 服务监听地址
+  listen: 127.0.0.1:7846
+
+  # 节点专用解析入口；必须与 dns 监听端点对应，才能正确进入 hosts 映射真假域名流程
+  proxy-server-nameserver:
+    - udp://127.0.0.1:7846
+
+  # 节点或普通域名可能使用的私有 DoH
+  # 真实项目中应由配置作者确认其用途和优先级
+  nameserver:
+    - https://private-dns.example/dns-query
+
+  # 普通业务域名的更具体规则
+  nameserver-policy:
+    "+.example.net":
+      - https://dns.example.net/dns-query
+
+  # 这是附加兼容项，不是 hosts 生效条件
+  enhanced-mode: fake-ip
+  fake-ip-filter:
+    - old-node.example.com
+    - new-node.example.com
+
+# 旧节点入口到新节点入口的关系
+hosts:
+  old-node.example.com: new-node.example.com
+
+# 订阅原始节点仍然使用旧域名
+proxies:
+  - name: Example Node
+    type: anytls
+    server: old-node.example.com
+    port: 443
+    password: REDACTED_EXAMPLE_ONLY
+    sni: tls.example.com
+    udp: true</pre>
+<p>这个示例表达的是一种设计语义：节点订阅入口是旧域名，hosts 提供可能的新入口，DNS 提供解析来源，而 fake-IP 过滤只作为附加保护。具体脚本是否接受该 hosts 关系、是否迁移 DNS policy，应由脚本作者的明确设计决定。</p>
+
+<h2>五、Fake-IP 过滤：附加的防御性冗余</h2>
+<p>fake-IP 过滤不属于 hosts 生效的前提，也不是 DNS 优先级的一部分。它只解决一个附加问题：某些基础设施域名是否应该避免返回 <code>198.18.x.x</code> 一类虚假地址。</p>
+<p>旧、新节点域名同时出现在 <code>fake-ip-filter</code> 中，可能是为了兼容 hosts 未生效、订阅更新、旧客户端或缓存残留。它可以降低兼容风险，但不能据此证明 hosts 一定生效，也不能据此证明某个域名一定需要私有 DoH。</p>
+<div class="warn"><strong>职责边界：</strong>hosts 负责表达域名关系；DNS policy 负责表达解析来源；fake-IP filter 负责表达地址类型例外。三者可以协同，但不能相互替代。</div>
+
+<h2>六、最后：给 JS 编写者的通用指导</h2>
+<p>本节面向准备编写类似覆写脚本的人，而不是对任何现有仓库实现进行逐行解释。实现者可以依据自己的覆写入口、目标客户端和兼容目标进行取舍。</p>
+<h3>1. 先定义中间状态</h3>
+<p>建议分别保存原始节点目标、候选 hosts 结果、最终节点目标、节点类型、DNS policy 命中状态和异常状态。不要边读取配置边覆盖同一个 <code>server</code> 字段，否则很难判断一条 policy 是针对原始域名还是最终域名。</p>
+<h3>2. 明确四个独立决策</h3>
+<table><thead><tr><th>决策对象</th><th>需要定义的内容</th></tr></thead><tbody>
+<tr><td>Hosts 是否可用</td><td>开关、DNS 端点关系、节点类型和配置合法性的判定标准</td></tr>
+<tr><td>Hosts 关系如何解释</td><td>单跳、多跳、成环、IP 目标和无效目标的处理方式</td></tr>
+<tr><td>DNS policy 如何关联</td><td>独立、关系迁移或旧新双端兼容</td></tr>
+<tr><td>Fake-IP 是否保护</td><td>哪些域名属于基础设施例外，以及是否仅作兼容性选项</td></tr>
+</tbody></table>
+<h3>3. 明确优先级和失败策略</h3>
+<p>脚本应明确“第一个非空 DNS 来源组”还是“多个来源的 fallback”语义；应明确高优先级 policy 与低优先级 policy 冲突时谁胜出；应明确 hosts 不能确认时是保留原值、跳过节点还是报错。隐式 fallback 往往是复杂覆写中最难排查的来源。</p>
+<h3>4. 保证幂等性与可测试性</h3>
+<p>重复执行脚本不应不断新增重复 policy，也不应把已迁移的最终域名再次当成旧域名。测试至少应覆盖单跳、多跳、IP 映射、成环、hosts 关闭、DNS 来源不匹配、旧新 policy 冲突以及无 fake-IP-filter 的情况。</p>
+<h3>5. 保持安全边界</h3>
+<ul><li>测试与日志中不得写入真实密码、UUID、订阅令牌或完整 DoH 路径。</li><li>不要将 <code>server</code> 与 <code>sni</code> 视为同一个字段。</li><li>不要以 fake-IP-filter 的存在证明 hosts 已生效。</li><li>不要为了兼容监听地址而把实际连接目标改写成 <code>0.0.0.0</code>。</li><li>不确定时宁可保留原节点和原 policy，也不要生成无法解释的猜测性规则。</li></ul>
+<div class="lead"><strong>最终抽象：</strong>hosts 表达节点入口关系，私有 DNS 表达节点解析来源，DNS 优先级表达解析决策，fake-IP filter 表达附加的地址类型保护；JS 的职责是把这些独立语义安全地组合，而不是让某一层替代其他层。</div>
+<footer>本文档为通用配置分析与脚本设计指导，不包含任何真实节点、密码、UUID、订阅令牌或机场专属凭据。</footer>
+</main>
+<script>
+// 锚点链接：平滑滚动到目标，并让目标短暂高亮闪烁
+document.querySelectorAll('a[href^="#"]').forEach(function(a){
+  a.addEventListener('click',function(e){
+    var id=a.getAttribute('href').slice(1);
+    var el=document.getElementById(id);
+    if(!el)return;
+    e.preventDefault();
+    el.scrollIntoView({behavior:'smooth',block:'start'});
+    el.classList.remove('flash');
+    void el.offsetWidth;
+    el.classList.add('flash');
+    setTimeout(function(){el.classList.remove('flash');},2200);
+    history.replaceState(null,'','#'+id);
+  });
+});
+</script>
+</body></html>
