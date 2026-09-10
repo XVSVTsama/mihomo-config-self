@@ -80,6 +80,7 @@ const ruleOptionsEnable = {
   // --- Node and Network Feature Switches ---
   '强制证书验证': false,   // When enabled, uniformly sets subscription nodes skip-cert-verify to false (forcing certificate verification); when disabled, does not interfere and retains the subscription nodes' original settings. Applies equally to all nodes
   '启用 Reality 增强': true, // Whether to enable support-x25519mlkem768 (X25519MLKEM768 post-quantum key agreement) for Reality nodes with non-empty public-key/short-id
+  'IPv6优先': false,         // When enabled, prefer IPv6 according to each node's ip-version
   'FCM直连': true,          // Default ON: The hidden FCM group contains only DIRECT; when disabled, only 👉 Manual Select is retained (FCM group is not removed). The switch icon is taken from the icon field of the FCM proxy group.
   'TGDC实验分流': false,     // Enables the Telegram DC/regional experiment; when disabled, the original Telegram rules, policy groups, and rule providers are left unchanged.
   '入口解析': false,         // 开启后，三个国内入口节点全部加入同一个代理组。
@@ -1013,7 +1014,7 @@ const TEMPLATE = {
 // Bettbox visual switch icons: The client will read the global serviceConfigs (name corresponds to the key in ruleOptionsEnable,
 // and icon is the icon displayed on that switch row). Only proxy groups are covered above; source of icons for feature switches:
 // FCM Direct is derived from the icon field of the FCM proxy group (changing the proxy group icon in one place syncs it);
-// other feature switches (Force Certificate Verification, Enable Reality Enhancement) specify fixed icons here directly.
+// other feature switches (Force Certificate Verification, Enable Reality Enhancement, IPv6 Preference) specify fixed icons here directly.
 const serviceConfigs = TEMPLATE['proxy-groups']
   .filter(
     (group) =>
@@ -1037,6 +1038,10 @@ const serviceConfigs = TEMPLATE['proxy-groups']
     {
       name: '启用 Reality 增强',
       icon: 'https://fastly.jsdelivr.net/gh/MiToverG422/Qure@master/IconSet/Color/Spark.png'
+    },
+    {
+      name: 'IPv6优先',
+      icon: 'https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Global.png'
     },
     {
       name: 'TGDC实验分流',
@@ -1763,6 +1768,23 @@ function main(config, profileName) {
 
     if (forceCertVerify) {
       proxy["skip-cert-verify"] = false;
+    }
+  }
+
+  // 1.3 IPv6 preference: only modify the generic ip-version field when enabled.
+  // Keep ipv6 unchanged; toggle ipv6-prefer to ipv6; use ipv6-prefer for every other value or omission.
+  const preferIPv6 = ruleOptionsEnable['IPv6优先'] === true;
+
+  if (preferIPv6) {
+    for (const proxy of originalProxies) {
+      if (!proxy || typeof proxy !== 'object') {
+        continue;
+      }
+
+      if (proxy['ip-version'] === 'ipv6') {
+        continue;
+      }
+      proxy['ip-version'] = proxy['ip-version'] === 'ipv6-prefer' ? 'ipv6' : 'ipv6-prefer';
     }
   }
 

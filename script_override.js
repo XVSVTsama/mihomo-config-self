@@ -83,6 +83,7 @@ const ruleOptionsEnable = {
   // --- 节点与网络功能开关 ---
   '强制证书验证': false,   // 开启时统一把订阅节点 skip-cert-verify 置为 false（强制校验证书）；关闭时不干预，保留订阅节点原有设置。对全部节点一视同仁
   '启用 Reality 增强': true, // 是否为带非空 public-key/short-id 的 Reality 节点启用 support-x25519mlkem768（X25519MLKEM768 后量子密钥协商）
+  'IPv6优先': false,         // 开启后按节点 ip-version 优先使用 IPv6
   'FCM直连': true,          // 默认打开：隐藏组 FCM 仅含 DIRECT；关闭后仅保留 👉 手动切换（不移除 FCM 组）。开关图标取自 FCM 代理组的 icon 字段。
   'TGDC实验分流': false,     // 开启 Telegram DC/地区实验分流；关闭时不改变原 Telegram 规则、策略组和规则集。
   '入口解析': false,         // 开启后，三个国内入口节点全部加入同一个代理组。
@@ -993,7 +994,7 @@ const TEMPLATE = {
 // Bettbox 的可视化开关图标：客户端会读取全局 serviceConfigs（name 对应 ruleOptionsEnable 的 key，
 // icon 为该开关行显示的图标）。上面只覆盖代理组；功能开关的图标来源：
 // FCM直连 从 FCM 代理组的 icon 字段派生（改代理组 icon 一处即可同步）；
-// 其余功能开关（强制证书验证、启用 Reality 增强）在此直接指定固定图标。
+// 其余功能开关（强制证书验证、启用 Reality 增强、IPv6优先）在此直接指定固定图标。
 const serviceConfigs = TEMPLATE['proxy-groups']
   .filter(
     (group) =>
@@ -1017,6 +1018,10 @@ const serviceConfigs = TEMPLATE['proxy-groups']
     {
       name: '启用 Reality 增强',
       icon: 'https://fastly.jsdelivr.net/gh/MiToverG422/Qure@master/IconSet/Color/Spark.png'
+    },
+    {
+      name: 'IPv6优先',
+      icon: 'https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Global.png'
     },
     {
       name: 'TGDC实验分流',
@@ -1745,6 +1750,23 @@ function main(config, profileName) {
 
     if (forceCertVerify) {
       proxy["skip-cert-verify"] = false;
+    }
+  }
+
+  // 1.3 IPv6 优先开关：仅在开启时修改订阅节点的通用 ip-version 字段。
+  // ipv6 已经是仅 IPv6，保持不变；ipv6-prefer 切换为 ipv6；其他值（包括缺失）设为 ipv6-prefer。
+  const preferIPv6 = ruleOptionsEnable['IPv6优先'] === true;
+
+  if (preferIPv6) {
+    for (const proxy of originalProxies) {
+      if (!proxy || typeof proxy !== 'object') {
+        continue;
+      }
+
+      if (proxy['ip-version'] === 'ipv6') {
+        continue;
+      }
+      proxy['ip-version'] = proxy['ip-version'] === 'ipv6-prefer' ? 'ipv6' : 'ipv6-prefer';
     }
   }
 
