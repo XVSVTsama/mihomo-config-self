@@ -82,10 +82,7 @@ const ruleOptionsEnable = {
   '启用 Reality 增强': true, // Whether to enable support-x25519mlkem768 (X25519MLKEM768 post-quantum key agreement) for Reality nodes with non-empty public-key/short-id
   'FCM直连': true,          // Default ON: The hidden FCM group contains only DIRECT; when disabled, only 👉 Manual Select is retained (FCM group is not removed). The switch icon is taken from the icon field of the FCM proxy group.
   'TGDC实验分流': false,     // Enables the Telegram DC/regional experiment; when disabled, the original Telegram rules, policy groups, and rule providers are left unchanged.
-  '入口解析': false,         // Master switch: when enabled, only the first enabled operator in Telecom > Unicom > Mobile order takes effect.
-  '电信入口解析': false,     // When enabled, use the China Telecom domestic entry resolution node.
-  '联通入口解析': false,     // When enabled, use the China Unicom domestic entry resolution node.
-  '移动入口解析': false,     // When enabled, use the China Mobile domestic entry resolution node.
+  '入口解析': false,         // 开启后，三个国内入口节点全部加入同一个代理组。
 };
 
 // ============================================================================
@@ -1049,12 +1046,7 @@ const serviceConfigs = TEMPLATE['proxy-groups']
       name: '入口解析',
       icon: 'https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Domestic.png'
     }
-  ].concat(
-    ENTRY_RESOLUTION_OPTIONS.map((option) => ({
-      name: option.key,
-      icon: option.icon
-    }))
-  ));
+  ]);
 
   
 // ============================================================================
@@ -1160,14 +1152,10 @@ function sameNameserverSet(a, b) {
   return sa.size === sb.size && Array.from(sa).every((value) => sb.has(value));
 }
 
-function selectedEntryResolutionOption() {
-  if (ruleOptionsEnable['入口解析'] !== true) {
-    return null;
-  }
-
-  return ENTRY_RESOLUTION_OPTIONS.find(
-    (option) => ruleOptionsEnable[option.key] === true
-  ) || null;
+function selectedEntryResolutionOptions() {
+  return ruleOptionsEnable['入口解析'] === true
+    ? ENTRY_RESOLUTION_OPTIONS
+    : [];
 }
 
 function withDnsPolicySuffix(value, suffix) {
@@ -1177,30 +1165,32 @@ function withDnsPolicySuffix(value, suffix) {
 }
 
 function applyEntryResolution(result) {
-  const option = selectedEntryResolutionOption();
-  if (!option) {
+  const options = selectedEntryResolutionOptions();
+  if (options.length === 0) {
     return;
   }
 
-  const suffix = '#' + option.proxyName;
+  const groupName = '国内入口解析';
+  const proxyNames = options.map((option) => option.proxyName);
 
-  if (
-    Array.isArray(result.proxies) &&
-    !result.proxies.some((proxy) => proxy && proxy.name === option.proxyName)
-  ) {
-    const injectedProxy = deepClone(option.proxy);
-    injectedProxy.name = option.proxyName;
-    result.proxies.push(injectedProxy);
+  if (Array.isArray(result.proxies)) {
+    options.forEach((option) => {
+      if (!result.proxies.some((proxy) => proxy && proxy.name === option.proxyName)) {
+        const injectedProxy = deepClone(option.proxy);
+        injectedProxy.name = option.proxyName;
+        result.proxies.push(injectedProxy);
+      }
+    });
   }
 
   const displayGroup = {
-    name: '国内入口解析',
+    name: groupName,
     type: 'select',
-    proxies: [option.proxyName],
+    proxies: proxyNames,
     icon: 'https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Domestic.png'
   };
   const existingDisplayGroup = (result['proxy-groups'] || []).find(
-    (group) => group && group.name === displayGroup.name
+    (group) => group && group.name === groupName
   );
   if (existingDisplayGroup) {
     existingDisplayGroup.type = displayGroup.type;
@@ -1217,6 +1207,7 @@ function applyEntryResolution(result) {
     }
   }
 
+  const suffix = '#' + groupName;
   result.dns['proxy-server-nameserver'] = asNameserverList(
     result.dns['proxy-server-nameserver']
   ).map((value) => withDnsPolicySuffix(value, suffix));
@@ -1225,7 +1216,6 @@ function applyEntryResolution(result) {
   if (!policy || typeof policy !== 'object') {
     return;
   }
-
   for (const rule of Object.keys(policy)) {
     const value = policy[rule];
     if (Array.isArray(value)) {
@@ -1235,7 +1225,6 @@ function applyEntryResolution(result) {
     }
   }
 }
-
 // Public DNS identification table: used to distinguish between "public directly connectable DNS" and "airport/user private DNS".
 // Data refers to the public DNS list in the local MyClash repository, but only borrows the identification table here without copying its processing logic.
 const publicDnsList = [

@@ -85,10 +85,7 @@ const ruleOptionsEnable = {
   '启用 Reality 增强': true, // 是否为带非空 public-key/short-id 的 Reality 节点启用 support-x25519mlkem768（X25519MLKEM768 后量子密钥协商）
   'FCM直连': true,          // 默认打开：隐藏组 FCM 仅含 DIRECT；关闭后仅保留 👉 手动切换（不移除 FCM 组）。开关图标取自 FCM 代理组的 icon 字段。
   'TGDC实验分流': false,     // 开启 Telegram DC/地区实验分流；关闭时不改变原 Telegram 规则、策略组和规则集。
-  '入口解析': false,         // 主开关：开启后，按电信 > 联通 > 移动的顺序，只取第一个已开启的国内入口解析。
-  '电信入口解析': false,     // 开启后，使用电信国内入口解析节点。
-  '联通入口解析': false,     // 开启后，使用联通国内入口解析节点。
-  '移动入口解析': false,     // 开启后，使用移动国内入口解析节点。
+  '入口解析': false,         // 开启后，三个国内入口节点全部加入同一个代理组。
 };
 
 // 出现同一个域名规则 key 时，订阅原始配置(true) 还是模板(false) 优先（模板目前未配置
@@ -1029,12 +1026,7 @@ const serviceConfigs = TEMPLATE['proxy-groups']
       name: '入口解析',
       icon: 'https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Domestic.png'
     }
-  ].concat(
-    ENTRY_RESOLUTION_OPTIONS.map((option) => ({
-      name: option.key,
-      icon: option.icon
-    }))
-  ));
+  ]);
 
 // ============================================================================
 // 工具函数
@@ -1139,14 +1131,10 @@ function sameNameserverSet(a, b) {
   return sa.size === sb.size && Array.from(sa).every((value) => sb.has(value));
 }
 
-function selectedEntryResolutionOption() {
-  if (ruleOptionsEnable['入口解析'] !== true) {
-    return null;
-  }
-
-  return ENTRY_RESOLUTION_OPTIONS.find(
-    (option) => ruleOptionsEnable[option.key] === true
-  ) || null;
+function selectedEntryResolutionOptions() {
+  return ruleOptionsEnable['入口解析'] === true
+    ? ENTRY_RESOLUTION_OPTIONS
+    : [];
 }
 
 function withDnsPolicySuffix(value, suffix) {
@@ -1156,30 +1144,32 @@ function withDnsPolicySuffix(value, suffix) {
 }
 
 function applyEntryResolution(result) {
-  const option = selectedEntryResolutionOption();
-  if (!option) {
+  const options = selectedEntryResolutionOptions();
+  if (options.length === 0) {
     return;
   }
 
-  const suffix = '#' + option.proxyName;
+  const groupName = '国内入口解析';
+  const proxyNames = options.map((option) => option.proxyName);
 
-  if (
-    Array.isArray(result.proxies) &&
-    !result.proxies.some((proxy) => proxy && proxy.name === option.proxyName)
-  ) {
-    const injectedProxy = deepClone(option.proxy);
-    injectedProxy.name = option.proxyName;
-    result.proxies.push(injectedProxy);
+  if (Array.isArray(result.proxies)) {
+    options.forEach((option) => {
+      if (!result.proxies.some((proxy) => proxy && proxy.name === option.proxyName)) {
+        const injectedProxy = deepClone(option.proxy);
+        injectedProxy.name = option.proxyName;
+        result.proxies.push(injectedProxy);
+      }
+    });
   }
 
   const displayGroup = {
-    name: '国内入口解析',
+    name: groupName,
     type: 'select',
-    proxies: [option.proxyName],
+    proxies: proxyNames,
     icon: 'https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Domestic.png'
   };
   const existingDisplayGroup = (result['proxy-groups'] || []).find(
-    (group) => group && group.name === displayGroup.name
+    (group) => group && group.name === groupName
   );
   if (existingDisplayGroup) {
     existingDisplayGroup.type = displayGroup.type;
@@ -1196,6 +1186,7 @@ function applyEntryResolution(result) {
     }
   }
 
+  const suffix = '#' + groupName;
   result.dns['proxy-server-nameserver'] = asNameserverList(
     result.dns['proxy-server-nameserver']
   ).map((value) => withDnsPolicySuffix(value, suffix));
@@ -1204,7 +1195,6 @@ function applyEntryResolution(result) {
   if (!policy || typeof policy !== 'object') {
     return;
   }
-
   for (const rule of Object.keys(policy)) {
     const value = policy[rule];
     if (Array.isArray(value)) {
@@ -1214,7 +1204,6 @@ function applyEntryResolution(result) {
     }
   }
 }
-
 // 公共 DNS 识别表：用于区分“公共可直连 DNS”和“机场/用户的私有 DNS”。
 // 数据参考本地 MyClash 仓库里的公共 DNS 列表，但这里只借用识别表，不照搬其处理逻辑。
 const publicDnsList = [
