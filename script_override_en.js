@@ -1187,6 +1187,7 @@ function applyEntryResolution(result) {
     name: groupName,
     type: 'select',
     proxies: proxyNames,
+    url: 'https://g.cn/generate_204',
     icon: 'https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Domestic.png'
   };
   const existingDisplayGroup = (result['proxy-groups'] || []).find(
@@ -1195,6 +1196,7 @@ function applyEntryResolution(result) {
   if (existingDisplayGroup) {
     existingDisplayGroup.type = displayGroup.type;
     existingDisplayGroup.proxies = displayGroup.proxies.slice();
+    existingDisplayGroup.url = displayGroup.url;
     existingDisplayGroup.icon = displayGroup.icon;
   } else {
     const autoSelectIndex = (result['proxy-groups'] || []).findIndex(
