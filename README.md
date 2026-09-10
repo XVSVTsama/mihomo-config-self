@@ -87,7 +87,7 @@ https://raw.githubusercontent.com/XVSVTsama/mihomo-config-self/refs/heads/main/s
 
 [<kbd>在线阅读：节点域名、Hosts 与私有 DNS 联动模型</kbd>](https://XVSVTsama.github.io/mihomo-config-self/proxy-infrastructure-domain-protection-model.html)
 
-> 本文档拆解了配置中 `hosts` 真假映射、私有 DoH 解析、DNS policy 与 fake-IP filter 的各自职责，以及四者如何在同一条节点解析链路里协同生效。它面向想要编写或理解节点解析覆写脚本的人，不包含任何真实节点、密码、UUID 或订阅凭据。
+> 本文档拆解了配置中 `hosts` 真假映射、私有 DoH 解析、DNS policy 与 fake-IP filter 的各自职责，以及四者如何在同一条节点解析链路里协同生效。它面向想要编写或理解节点解析覆写脚本的人，不包含任何真实节点、密码、UUID 或订阅凭据。（本节及其中关于 `dns.use-hosts` 生效效果的说明由 AI 撰写。）
 
 ## 推荐学习参考，订阅转换项目与客户端
    [寻找真正可学习的参考?](https://t.me/xvsvts/152)
