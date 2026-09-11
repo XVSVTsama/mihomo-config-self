@@ -476,6 +476,7 @@ rules:
 
   - RULE-SET,google,🌍 PROXY
   - RULE-SET,google-cn,🌍 PROXY
+  - DOMAIN-WILDCARD,*.ikuuu.one,🌍 PROXY
 
   - RULE-SET,direct,DIRECT
 

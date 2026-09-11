@@ -763,6 +763,7 @@ const TEMPLATE = {
     "RULE-SET,ai-2,🤖 AI",
     "RULE-SET,google,🌍 PROXY",
     "RULE-SET,google-cn,🌍 PROXY",
+    "DOMAIN-WILDCARD,*.ikuuu.one,🌍 PROXY",
     "RULE-SET,direct,DIRECT",
     "PROCESS-NAME-REGEX,.*twitter.*,✖️ Twitter",
     "RULE-SET,twitter-x-domain,✖️ Twitter",
