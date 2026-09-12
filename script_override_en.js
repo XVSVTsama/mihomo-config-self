@@ -231,7 +231,7 @@ const DOMESTIC_ENTRY_PROXIES = {
   }
 };
 
-// Switch priority: Telecom > Unicom > Mobile. Node names are fixed here and should not be changed.
+// All three entry nodes are added to the “国内入口解析” proxy group for manual user selection; this order does not represent automatic priority. Node names are fixed here and should not be changed.
 const ENTRY_RESOLUTION_OPTIONS = [
   {
     key: '电信入口解析',
