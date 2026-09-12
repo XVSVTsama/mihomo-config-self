@@ -31,5 +31,9 @@
   "IBM Quad9 公共 DNS": "IBM Quad9 Public DNS",
   "OpenDNS 公共 DNS": "OpenDNS Public DNS",
   "DNS.SB 公共 DNS": "DNS.SB Public DNS",
-  "Quad101 公共 DNS": "Quad101 Public DNS"
+  "Quad101 公共 DNS": "Quad101 Public DNS",
+  "📲 Telegram": "Routes through proxy by default when TGDC is disabled",
+  "📲 Telegram-DC1-DC3-Miami": "When TGDC is enabled, matches United States/Miami nodes",
+  "📲 Telegram-DC2-DC4-Amsterdam": "When TGDC is enabled, matches Netherlands/Amsterdam nodes",
+  "📲 Telegram-DC5-SG": "When TGDC is enabled, matches Singapore/Hong Kong nodes"
 }
