@@ -355,7 +355,6 @@ const TEMPLATE = {
   },
   "sniffer": {
     "enable": true,
-    "force-dns-mapping": true,
     "parse-pure-ip": true,
     "override-destination": true,
     "sniff": {

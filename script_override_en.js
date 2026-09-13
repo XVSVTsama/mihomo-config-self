@@ -781,7 +781,6 @@ const TEMPLATE = {
   ],
   "sniffer": {
     "enable": true,
-    "force-dns-mapping": true,
     "force-domain": [
       "+.v2ex.com"
     ],
