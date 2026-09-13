@@ -927,6 +927,8 @@ const TEMPLATE = {
     "PROCESS-NAME-REGEX,.*telegram.*,📲 Telegram",
     "RULE-SET,telegramcidr,📲 Telegram,no-resolve",
     "RULE-SET,telegram_domain,📲 Telegram",
+    // Manus AI：覆盖 Manus Desktop、Manus Helper 等客户端进程
+    "PROCESS-NAME-REGEX,(?i).*manus.*,🤖 AI大模型",
     "PROCESS-NAME-REGEX,(?i).*claude.*,🤖 AI大模型",
     "PROCESS-NAME-REGEX,(?i).*anthropic.*,🤖 AI大模型",
     "DOMAIN,api.anthropic.com,🤖 AI大模型",
