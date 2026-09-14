@@ -715,8 +715,8 @@ const TEMPLATE = {
     "PROCESS-NAME-REGEX,.*telegram.*,📲 Telegram",
     "RULE-SET,telegramcidr,📲 Telegram,no-resolve",
     "RULE-SET,telegram_domain,📲 Telegram",
-    // Manus AI: covers Manus Desktop, Manus Helper, and other client processes.
-    "PROCESS-NAME-REGEX,(?i).*manus.*,🤖 AI",
+    // Manus AI: covers Manus Desktop, Manus Helper, and the Android client process.
+    "PROCESS-NAME-REGEX,(?i).*(manus|tech\\.butterfly\\.app).*,🤖 AI",
     // Claude / Anthropic: process matches take precedence and cover Claude Desktop, Claude Code, etc.
     "PROCESS-NAME-REGEX,(?i).*claude.*,🤖 AI",
     "PROCESS-NAME-REGEX,(?i).*anthropic.*,🤖 AI",

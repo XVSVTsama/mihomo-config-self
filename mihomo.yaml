@@ -423,8 +423,8 @@ rules:
   - "PROCESS-NAME-REGEX,.*telegram.*,📲 Telegram"
   - RULE-SET,telegramcidr,📲 Telegram,no-resolve
   - RULE-SET,telegram_domain,📲 Telegram
-  # Manus AI：覆盖 Manus Desktop、Manus Helper 等客户端进程
-  - PROCESS-NAME-REGEX,(?i).*manus.*,🤖 AI大模型
+  # Manus AI：覆盖 Manus Desktop、Manus Helper 及 Android 客户端进程
+  - PROCESS-NAME-REGEX,(?i).*(manus|tech\.butterfly\.app).*,🤖 AI大模型
   # Claude / Anthropic：进程命中优先，覆盖 Claude Desktop、Claude Code 等客户端
   - PROCESS-NAME-REGEX,(?i).*claude.*,🤖 AI大模型
   - PROCESS-NAME-REGEX,(?i).*anthropic.*,🤖 AI大模型
