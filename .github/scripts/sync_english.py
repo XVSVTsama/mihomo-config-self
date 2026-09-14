@@ -56,9 +56,11 @@ GROUP_NAME_MAP = """Proxy group names must be translated as:
 
 
 class ProviderError(Exception):
-    def __init__(self, provider, message):
+    def __init__(self, provider, message, truncated=False):
         self.provider = provider
         self.message = message
+        # True when the provider stopped because the output hit its token limit.
+        self.truncated = truncated
 
 
 def log(msg):
@@ -98,15 +100,23 @@ Rules:
     return f"Translate the following file from Chinese to English.\n{base_rules}"
 
 
-def strip_fences(text):
-    text = text.strip()
+def strip_fences(text, keep_indentation=False):
+    """Trim padding (and a wrapping code fence) from a model response.
+
+    keep_indentation is used for retry sub-chunks: their first line may start with
+    meaningful indentation, so only newlines are trimmed at the edges.
+    """
+    def trim(value):
+        return value.lstrip("\r\n").rstrip("\r\n") if keep_indentation else value.strip()
+
+    text = trim(text)
     if text.startswith("```") and text.endswith("```"):
         lines = text.splitlines()
         if lines:
             lines = lines[1:]
         if lines and lines[-1].strip().startswith("```"):
             lines = lines[:-1]
-        text = "\n".join(lines).strip()
+        text = trim("\n".join(lines))
     return text
 
 
@@ -266,6 +276,7 @@ def call_gemini(prompt, api_key, model, timeout):
             raise ProviderError(
                 "gemini",
                 "output finished with finishReason=%s" % finish_reason,
+                truncated=finish_reason == "MAX_TOKENS",
             )
         return candidate["content"]["parts"][0]["text"].strip()
     except (KeyError, IndexError, TypeError) as exc:
@@ -300,6 +311,7 @@ def call_deepseek(prompt, api_key, model, timeout):
             raise ProviderError(
                 "deepseek",
                 "output truncated because finish_reason=length",
+                truncated=True,
             )
         return choice["message"]["content"].strip()
     except (KeyError, IndexError, TypeError) as exc:
@@ -347,6 +359,102 @@ def call_provider(provider, prompt, api_key, model, timeout, max_attempts):
             if attempt < max_attempts:
                 sleep_before_retry(attempt)
     raise ProviderError(provider, last_error or "unknown failure")
+
+
+TRUNCATION_SPLIT_MIN_CHARS = int(os.environ.get("SYNC_TRUNCATION_MIN_CHARS", "400"))
+TRUNCATION_SPLIT_MAX_DEPTH = int(os.environ.get("SYNC_TRUNCATION_MAX_DEPTH", "4"))
+
+
+def split_chunk_for_retry(chunk, kind):
+    """Split a chunk for a truncation retry, never losing or duplicating content.
+
+    Prefers the same boundary rules used for whole files (blank lines, then lines
+    outside block comments). Falls back to a plain line split, because a long block
+    comment has no blank line and would otherwise stay unsplittable.
+    """
+    pieces = split_content(chunk, kind, max_chars=max(len(chunk) // 2, 1))
+    if len(pieces) >= 2 and "".join(pieces) == chunk:
+        return pieces
+    lines = chunk.splitlines(keepends=True)
+    if len(lines) >= 2:
+        target = len(chunk) // 2
+        total = 0
+        for index in range(1, len(lines)):
+            total += len(lines[index - 1])
+            if total >= target:
+                first = "".join(lines[:index])
+                second = "".join(lines[index:])
+                if first and second and first + second == chunk:
+                    return [first, second]
+    return []
+
+
+def translate_chunk(
+    provider,
+    kind,
+    glossary,
+    prompt,
+    chunk,
+    api_key,
+    model,
+    timeout,
+    max_attempts,
+    label="chunk",
+    depth=0,
+    keep_indentation=False,
+):
+    """Translate one chunk; if the provider truncated its output, retry smaller pieces.
+
+    Some providers cap the response length, so a dense chunk can hit that cap even
+    though the file itself is fine. Splitting the chunk the same way whole files are
+    split (at blank lines, then by line) keeps the run alive instead of stopping the
+    file and, with it, the whole sync.
+    """
+    if not contains_cjk(chunk):
+        return chunk
+    try:
+        raw = call_provider(
+            provider,
+            prompt + "\n\n" + chunk,
+            api_key,
+            model,
+            timeout,
+            max_attempts,
+        )
+        return strip_fences(raw, keep_indentation=keep_indentation)
+    except ProviderError as exc:
+        pieces = []
+        if (
+            getattr(exc, "truncated", False)
+            and depth < TRUNCATION_SPLIT_MAX_DEPTH
+            and len(chunk) > TRUNCATION_SPLIT_MIN_CHARS
+        ):
+            pieces = split_chunk_for_retry(chunk, kind)
+        if not pieces:
+            raise
+        log(
+            "  output truncated at %s (%d chars); splitting into %d pieces and retrying"
+            % (label, len(chunk), len(pieces))
+        )
+        return join_translated_chunks(
+            [
+                translate_chunk(
+                    provider,
+                    kind,
+                    glossary,
+                    prompt,
+                    piece,
+                    api_key,
+                    model,
+                    timeout,
+                    max_attempts,
+                    label="%s.%d" % (label, piece_index + 1),
+                    depth=depth + 1,
+                    keep_indentation=True,
+                )
+                for piece_index, piece in enumerate(pieces)
+            ]
+        )
 
 
 def validate(text, kind):
@@ -525,15 +633,20 @@ def main():
                     len(chunks),
                 )
                 try:
-                    raw = call_provider(
-                        provider,
-                        prompt + "\n\n" + chunk,
-                        provider_key(provider, gemini_key, deepseek_key),
-                        provider_model(provider, gemini_model, deepseek_model),
-                        request_timeout,
-                        max_attempts,
+                    translated_chunks.append(
+                        translate_chunk(
+                            provider,
+                            kind,
+                            glossary,
+                            prompt,
+                            chunk,
+                            provider_key(provider, gemini_key, deepseek_key),
+                            provider_model(provider, gemini_model, deepseek_model),
+                            request_timeout,
+                            max_attempts,
+                            label="chunk %d/%d" % (chunk_index, len(chunks)),
+                        )
                     )
-                    translated_chunks.append(strip_fences(raw))
                     used_provider = provider
                 except ProviderError as exc:
                     log("  status: FAIL")
