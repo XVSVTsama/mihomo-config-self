@@ -458,7 +458,6 @@ const TEMPLATE = {
       "https://dns.alidns.com/dns-query#DIRECT",
       "https://doh.pub/dns-query#DIRECT"
     ],
-    "direct-nameserver-follow-policy": true,
     "nameserver": [
       "https://cloudflare-dns.com/dns-query#👉 手动切换"
     ],
@@ -479,9 +478,6 @@ const TEMPLATE = {
       "rule-set:pixiv",
       "pixshaft.com"
     ],
-    "nameserver-policy": {
-      "rule-set:private,direct,proxy@direct,cn,echs_cn,echs_direct": "https://dns.alidns.com/dns-query#DIRECT"
-    }
   },
   "hosts": {
     "+.clash.dev": [

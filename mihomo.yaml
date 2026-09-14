@@ -169,7 +169,6 @@ dns:
   direct-nameserver: 
     - https://dns.alidns.com/dns-query#DIRECT
     - https://doh.pub/dns-query#DIRECT
-  direct-nameserver-follow-policy: true
   nameserver:
     - https://cloudflare-dns.com/dns-query#👉 手动切换
   # - https://dns.adguard-dns.com/dns-query     # AdGuard 公共 DNS  # 94.140.14.14        94.140.15.15
@@ -194,8 +193,6 @@ dns:
     - rule-set:applications
     - rule-set:pixiv
     - pixshaft.com
-  nameserver-policy: 
-    'rule-set:private,direct,proxy@direct,cn,echs_cn,echs_direct': https://dns.alidns.com/dns-query#DIRECT
 
 hosts                             :                                            
   '+.clash.dev'               : [ '127.0.0.1'          ]                
