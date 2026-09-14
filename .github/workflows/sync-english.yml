@@ -17,7 +17,7 @@ jobs:
   sync:
     if: vars.SYNC_ENGLISH_ENABLED != 'false'
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
         with:
@@ -60,8 +60,8 @@ jobs:
           GEMINI_MODEL: ${{ vars.GEMINI_MODEL || 'gemini-2.0-flash' }}
           DEEPSEEK_MODEL: ${{ vars.DEEPSEEK_MODEL || 'deepseek-v4-flash' }}
           SYNC_REQUEST_TIMEOUT: ${{ vars.SYNC_REQUEST_TIMEOUT || '60' }}
-          SYNC_MAX_ATTEMPTS: ${{ vars.SYNC_MAX_ATTEMPTS || '3' }}
-          SYNC_FILE_TIMEOUT: ${{ vars.SYNC_FILE_TIMEOUT || '600' }}
+          SYNC_MAX_ATTEMPTS: ${{ vars.SYNC_MAX_ATTEMPTS || '5' }}
+          SYNC_FILE_TIMEOUT: ${{ vars.SYNC_FILE_TIMEOUT || '1800' }}
           SYNC_TARGETS: ${{ steps.changes.outputs.targets }}
         run: python .github/scripts/sync_english.py
       - name: Validate generated English files
