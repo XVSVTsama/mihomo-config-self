@@ -15,6 +15,7 @@ Provider rules:
 - Uses a manual translation glossary to maintain consistency.
 """
 
+import http.client
 import json
 import os
 import socket
@@ -330,6 +331,12 @@ def call_provider(provider, prompt, api_key, model, timeout, max_attempts):
                 text = call_gemini(prompt, api_key, model, timeout)
             else:
                 text = call_deepseek(prompt, api_key, model, timeout)
+            if not text.strip():
+                log("  attempt %d: EMPTY response" % attempt)
+                last_error = "empty response"
+                if attempt < max_attempts:
+                    sleep_before_retry(attempt)
+                continue
             log("  attempt %d: OK (%.2fs)" % (attempt, time.time() - started))
             return text
         except urllib.error.HTTPError as exc:
@@ -353,9 +360,20 @@ def call_provider(provider, prompt, api_key, model, timeout, max_attempts):
                 provider,
                 "HTTP %d: %s" % (exc.code, detail),
             ) from exc
-        except (socket.timeout, urllib.error.URLError) as exc:
-            log("  attempt %d: TIMEOUT after %ds" % (attempt, timeout))
-            last_error = "TIMEOUT after %ds: %s" % (timeout, exc)
+        except (
+            socket.timeout,
+            urllib.error.URLError,
+            http.client.IncompleteRead,
+            http.client.HTTPException,
+            ConnectionResetError,
+            json.JSONDecodeError,
+        ) as exc:
+            if isinstance(exc, socket.timeout):
+                log("  attempt %d: TIMEOUT after %ds" % (attempt, timeout))
+                last_error = "TIMEOUT after %ds: %s" % (timeout, exc)
+            else:
+                log("  attempt %d: %s (%s)" % (attempt, type(exc).__name__, exc))
+                last_error = "%s: %s" % (type(exc).__name__, exc)
             if attempt < max_attempts:
                 sleep_before_retry(attempt)
     raise ProviderError(provider, last_error or "unknown failure")
