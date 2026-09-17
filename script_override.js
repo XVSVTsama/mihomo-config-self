@@ -461,7 +461,10 @@ const TEMPLATE = {
     "nameserver": [
       "https://cloudflare-dns.com/dns-query#👉 手动切换"
     ],
-    "prefer-h3": false,
+    "nameserver-policy": [
+      "rule-set:private,direct,proxy@direct,cn,echs_cn,echs_direct": "https://dns.alidns.com/dns-query#DIRECT"
+    ],
+      "prefer-h3": false,
     "respect-rules": false,
     "enhanced-mode": "fake-ip",
     "fake-ip-range": "198.18.0.1/16",
