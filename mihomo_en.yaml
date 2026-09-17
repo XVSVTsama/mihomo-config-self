@@ -168,7 +168,6 @@ dns:
   direct-nameserver: 
     - https://dns.alidns.com/dns-query#DIRECT
     - https://doh.pub/dns-query#DIRECT
-  direct-nameserver-follow-policy: true
   nameserver:
     - https://cloudflare-dns.com/dns-query#👉 手动切换
   # - https://dns.adguard-dns.com/dns-query     # AdGuard Public DNS  # 94.140.14.14        94.140.15.15
@@ -177,6 +176,9 @@ dns:
   # - https://doh.opendns.com/dns-query         # OpenDNS Public DNS  # 208.67.220.220      208.67.222.222
   # - https://doh.dns.sb/dns-query              # DNS.SB Public DNS   # 185.222.222.222     45.11.45.11
   # - https://dns.twnic.tw/dns-query            # Quad101 Public DNS  # 101.101.101.10      101.102.103.10
+  nameserver-policy:
+    'rule-set:private,direct,proxy@direct,cn,echs_cn,echs_direct':
+    - https://dns.alidns.com/dns-query#DIRECT
   prefer-h3: false
   respect-rules: false                                            
   enhanced-mode: fake-ip                  
@@ -193,8 +195,7 @@ dns:
     - rule-set:applications
     - rule-set:pixiv
     - pixshaft.com
-  nameserver-policy: 
-    'rule-set:private,direct,proxy@direct,cn,echs_cn,echs_direct': https://dns.alidns.com/dns-query#DIRECT
+
 hosts                             :                                            
   '+.clash.dev'               : [ '127.0.0.1'          ]                
   'services.googleapis.cn'    : [ 'services.googleapis.com' ]
@@ -207,7 +208,7 @@ hosts                             :
   #'dns.pub'                   : [ '119.29.29.29'       ]           # 🇨🇳 腾讯 DNS  
   #'doh.pub'                   : [ '1.12.12.12'         , '120.53.53.53'       ] # 🇨🇳 腾讯 DNS
   #'dot.pub'                   : [ '1.12.12.12'         , '120.53.53.53'       ] # 🇨🇳 腾讯 DNS
-  #'one.one.one.one'           : [ '1.0.0.1'            , '1.1.1.1'            ] # 🇺🇸 Cloudflare 公共 DNS
+  #'one.one.one.one'           : [ '1.0.0.1'            , '1.1.1.1'            ] # 🇺🇸 Cloudflare Public DNS
   '*.pangolin-sdk-toutiao': 0.0.0.0
   '*.pangolin-sdk-toutiao.*': 0.0.0.0
   '*.pstatp.com': 0.0.0.0
@@ -265,7 +266,7 @@ proxy-groups:
     type: select
     filter: "US|Residential"
     include-all-proxies: true
-  - name: 🤖 AI大模型
+  - name: 🤖 AI
     icon: "https://github.com/DustinWin/ruleset_geodata/releases/download/icons/ai.png"
     type: select
     filter: "US|Residential"
@@ -283,7 +284,7 @@ proxy-groups:
   # The switch icon is taken from this group's icon field, and changing the icon only requires modifying it here.
   - name: FCM
     icon: "https://fastly.jsdelivr.net/gh/MiToverG422/Qure@master/IconSet/Color/fcm.png"
-    # hidden: true  # Hide this group in the script to keep the UI clean; kept visible in the template to indicate that the group actually exists
+    # hidden: true  # Hide this group in the script to keep the UI clean; kept visible in the template to show that the group actually exists
     type: select
     proxies:
       - 👉 手动切换
@@ -295,7 +296,7 @@ proxy-groups:
   ipcidr_yaml: &ipcidr_yaml { type: http, interval: 86400, behavior: ipcidr }
   classical_yaml: &classical_yaml { type: http, interval: 86400, behavior: classical }
 
-# Rule Set Configuration
+# Rule Provider Configuration
 rule-providers:
   Gemini_Domain: { <<: *domain_yaml, url: 'https://cdn.jsdelivr.net/gh/Accademia/Additional_Rule_For_Clash@master/Gemini/Gemini_Domain.yaml', path: ./ruleset/Gemini_Domain.yaml }
   Grok_Domain: { <<: *domain_yaml, url: 'https://raw.githubusercontent.com/Accademia/Additional_Rule_For_Clash/refs/heads/main/Grok/Grok_Domain.yaml', path: ./ruleset/Grok_Domain.yaml }
@@ -405,14 +406,14 @@ rules:
 
   - DOMAIN-WILDCARD,*.deepseek.com,DIRECT
   - DOMAIN-WILDCARD,*.portal101.cn,DIRECT
-  # Huawei Cloud CDN distribution domain
+  # Huawei Cloud CDN Distribution Domains
   - DOMAIN-SUFFIX,cdnhwcqwg14.com,DIRECT
   - DOMAIN-SUFFIX,cdnhwcxcy07.com,DIRECT
-  # Alibaba Cloud CDN distribution domain
+  # Alibaba Cloud CDN Distribution Domains
   - DOMAIN-SUFFIX,cdngslb.com,DIRECT
-  # Akamai CDN distribution domain
+  # Akamai CDN Distribution Domains
   - DOMAIN-SUFFIX,edgekey.net,DIRECT
-  # Amazon CloudFront distribution domain (API CDN)
+  # Amazon CloudFront Distribution Domains (API CDN)
   - DOMAIN-SUFFIX,cloudfront.net,DIRECT
 
   - PROCESS-NAME-REGEX,.*nagram.*,📲 Telegram
@@ -462,17 +463,17 @@ rules:
  # - RULE-SET,Grok_IP,🤖 AI
   - IP-CIDR,17.253.4.0/23,🤖 AI,no-resolve
 
-  # CDN and static assets
+  # CDN and Static Resources
   - DOMAIN,anthropic.com.cdn.cloudflare.net,🤖 AI
   # Authentication / Content
   - DOMAIN,anthropic-com.ghost.io,🤖 AI
-  # Monitoring and telemetry
+  # Monitoring and Telemetry
   - DOMAIN-SUFFIX,sentry.io,🤖 AI
   - DOMAIN-SUFFIX,statsigapi.net,🤖 AI
   - DOMAIN,browser-intake-us5-datadoghq.com,🤖 AI
   - DOMAIN-KEYWORD,datadog,🤖 AI
   - DOMAIN-KEYWORD,sift,🤖 AI
-  # Compatibility with third-party monitoring entries in older AI rules
+  # Third-party monitoring entries for backward compatibility with legacy AI rules
   - RULE-SET,ai-1,🤖 AI
   - RULE-SET,ai-2,🤖 AI
 
