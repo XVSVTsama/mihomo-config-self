@@ -177,6 +177,9 @@ dns:
   # - https://doh.opendns.com/dns-query         # OpenDNS 公共 DNS  # 208.67.220.220      208.67.222.222
   # - https://doh.dns.sb/dns-query              # DNS.SB 公共 DNS   # 185.222.222.222     45.11.45.11
   # - https://dns.twnic.tw/dns-query            # Quad101 公共 DNS  # 101.101.101.10      101.102.103.10
+  nameserver-policy:
+    'rule-set:private,direct,proxy@direct,cn,echs_cn,echs_direct':
+    - https://dns.alidns.com/dns-query#DIRECT
   prefer-h3: false
   respect-rules: false                                            
   enhanced-mode: fake-ip                  
