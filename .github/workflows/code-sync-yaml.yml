@@ -1,10 +1,10 @@
 name: Code Sync Check (YAML)
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - mihomo_en.yaml
+  # 由「Sync English Translations」完成后触发：翻译成功 -> 立即校验中英 YAML 是否一致
+  workflow_run:
+    workflows: ["Sync English Translations"]
+    types: [completed]
   pull_request:
     paths:
       - mihomo.yaml
@@ -26,6 +26,8 @@ permissions:
 jobs:
   check-yaml:
     runs-on: ubuntu-latest
+    # workflow_run 事件：只在「翻译成功」时才执行；PR / 手动触发不受此限制
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
     steps:
       - uses: actions/checkout@v4
         with:
