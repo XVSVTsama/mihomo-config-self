@@ -462,7 +462,9 @@ const TEMPLATE = {
       "https://cloudflare-dns.com/dns-query#👉 手动切换"
     ],
     "nameserver-policy": {
-      "rule-set:private,direct,proxy@direct,cn,echs_cn,echs_direct": "https://dns.alidns.com/dns-query#DIRECT"
+      "rule-set:private,direct,proxy@direct,cn,echs_cn,echs_direct": [
+        "https://dns.alidns.com/dns-query#DIRECT"
+      ]
     },
       "prefer-h3": false,
     "respect-rules": false,
