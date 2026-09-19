@@ -173,6 +173,126 @@ def classify_diff(p1, p2, name1, name2):
                     )
     return reasonable, abnormal
 
+# ---------------------------------------------------------------------------
+# JS: positional (order-sensitive) line-by-line comparison.
+#
+# 目标：英文脚本必须是中文脚本的「逐行镜像」：代码行的数量、顺序、结构一一对应。
+# 允许的差异只有三类：
+#   1. 注释（译文行数可能不同，比较前整段剔除）
+#   2. 缩进、行尾逗号、行内多余空白
+#   3. 字符串「值」的翻译——且仅当中文侧该值含中文时（键名与功能性取值一律不允许改）
+# 其余任何差异（多行/少行/顺序错位/结构变化/功能性取值变化）都报错并指到第 k 行。
+# ---------------------------------------------------------------------------
+
+STRING_LITERAL_RE = re.compile(
+    r'"(?:[^"\\]|\\.)*"|\'(?:[^\'\\]|\\.)*\'|`(?:[^`\\]|\\.)*`'
+)
+CJK_RE = re.compile(r"[\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff]")
+VALUE_SLOT = "\x00"
+
+
+def js_code_lines(text):
+    """剥离注释、去掉空行，得到「代码行」序列（保留原次序）。"""
+    return [ln for ln in strip_js_comments(text).splitlines() if ln.strip()]
+
+
+def js_canon(line):
+    """去掉缩进 / 行尾逗号 / 多余空白，并归一化已知词条译文。"""
+    line = normalize_hardcoded(line).strip()
+    line = re.sub(r",\s*$", "", line)
+    return re.sub(r"\s+", " ", line)
+
+
+def js_split(line):
+    """返回 (结构骨架, 「值」字面量列表)：键名留在骨架里，「值」被占位。"""
+    line = js_canon(line)
+    skeleton, values, pos = [], [], 0
+    for match in STRING_LITERAL_RE.finditer(line):
+        skeleton.append(line[pos:match.start()])
+        following = line[match.end():].lstrip()
+        if following.startswith(":"):
+            skeleton.append(match.group(0))
+        else:
+            skeleton.append(VALUE_SLOT)
+            values.append(match.group(0))
+        pos = match.end()
+    skeleton.append(line[pos:])
+    return "".join(skeleton), values
+
+
+def js_classify(cn_line, en_line):
+    """判定一行：'same' 完全相同 / 'translation' 仅译文不同 / 'error' 其他任何差异。"""
+    if js_canon(cn_line) == js_canon(en_line):
+        return "same"
+    s1, v1 = js_split(cn_line)
+    s2, v2 = js_split(en_line)
+    if s1 != s2 or len(v1) != len(v2):
+        return "error"
+    for x, y in zip(v1, v2):
+        if x == y:
+            continue
+        if CJK_RE.search(x) or CJK_RE.search(y):
+            continue
+        return "error"
+    return "translation"
+
+
+def _contiguous_runs(points):
+    runs = []
+    for point in sorted(points):
+        if runs and point - runs[-1][1] <= 3:
+            runs[-1][1] = point
+        else:
+            runs.append([point, point])
+    return runs
+
+
+def run_js_check(text1, text2, name1, name2, print_limit=10):
+    """逐位比较两份 JS 的代码行；返回退出码（0 = 代码行 1:1 同序对应）。"""
+    a = js_code_lines(text1)
+    b = js_code_lines(text2)
+    errors, translations = [], []
+    for i in range(min(len(a), len(b))):
+        verdict = js_classify(a[i], b[i])
+        if verdict == "same":
+            continue
+        if verdict == "translation":
+            translations.append((i + 1, a[i], b[i]))
+        else:
+            errors.append((i + 1, a[i], b[i]))
+    for i in range(len(b), len(a)):
+        errors.append((i + 1, a[i], None))
+    for i in range(len(a), len(b)):
+        errors.append((i + 1, None, b[i]))
+
+    print("JS check (order-sensitive, line-by-line): %s vs %s" % (name1, name2))
+    print("  code lines: %s=%d | %s=%d" % (name1, len(a), name2, len(b)))
+    if translations:
+        print("  allowed (translation-only): %d line(s)" % len(translations))
+        for pos, x, y in translations[:3]:
+            print("    第 %d 行: %s  <->  %s" % (pos, x.strip()[:56], y.strip()[:56]))
+
+    if not errors:
+        print("Status: MATCHED - 代码行 1:1 同序对应，仅有译文/排版差异。")
+        return 0
+
+    print("Status: CODE MISMATCH - %d 处代码行不对应（不只是翻译差异）。" % len(errors))
+    runs = [r for r in _contiguous_runs([e[0] for e in errors]) if r[1] - r[0] >= 4]
+    if runs:
+        print("  连续错位区段（疑似整块重排）：")
+        for s, e in runs[:6]:
+            print("    第 %d-%d 行（%d 行）" % (s, e, e - s + 1))
+    for pos, x, y in errors[:print_limit]:
+        print(
+            "    第 %d 行: CN=%s | EN=%s"
+            % (pos, "—" if x is None else x.strip()[:56], "—" if y is None else y.strip()[:56])
+        )
+    if len(errors) > print_limit:
+        print("    ...（其余 %d 处省略）" % (len(errors) - print_limit))
+    print("RESULT: %d line position(s) differ beyond translation." % len(errors))
+    return 1
+
+
 def main():
     try:
         sys.stdout.reconfigure(encoding="utf-8", errors="replace")
@@ -204,6 +324,9 @@ def main():
         print(f"Error: Unknown file type {file_type}")
         sys.exit(1)
     
+    if file_type == 'js':
+        sys.exit(run_js_check(t1, t2, f1_path.name, f2_path.name))
+
     p1_lines = p1.splitlines()
     p2_lines = p2.splitlines()
 
