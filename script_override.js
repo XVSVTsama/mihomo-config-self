@@ -891,7 +891,7 @@ const TEMPLATE = {
     ]
   },
   "rules": [
-    "AND,((NETWORK,UDP),(DST-PORT,3478-3479/5349-5350/19302-19309),(NOT,((RULE-SET,direct))),(NOT,((RULE-SET,cncidr))),(NOT,((RULE-SET,cn))),(NOT,((RULE-SET,applications))),(NOT,((RULE-SET,games))),(NOT,((RULE-SET,games-cn)))),REJECT",
+    "AND,((NETWORK,UDP),(DST-PORT,3478-3479/5349-5350/19302-19309),(NOT,((RULE-SET,cncidr))),(NOT,((RULE-SET,cn))),(NOT,((RULE-SET,applications))),(NOT,((RULE-SET,games))),(NOT,((RULE-SET,games-cn)))),REJECT",
     "RULE-SET,HijackingPlus,REJECT",
     "SUB-RULE,(PROCESS-NAME,com.dragon.read.oversea.gp),fanqie",
     "DOMAIN-KEYWORD,ikuuu,🌍 PROXY",
