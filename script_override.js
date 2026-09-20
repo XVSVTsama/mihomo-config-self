@@ -642,12 +642,12 @@ const TEMPLATE = {
       "url": "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/category-ai-!cn.mrs",
       "path": "./ruleset/ai-2.mrs"
     },
-    "apple": {
+    "apple@cn": {
       "type": "http",
       "interval": 86400,
       "behavior": "domain",
       "url": "https://fastly.jsdelivr.net/gh/appshubcc/bett-rules@meta/geo/geosite/apple@cn.mrs",
-      "path": "./ruleset/apple.yaml"
+      "path": "./ruleset/apple@cn.mrs"
     },
     "applications": {
       "type": "http",
@@ -966,7 +966,7 @@ const TEMPLATE = {
     "RULE-SET,twitter-x-domain,✖️ Twitter",
     "RULE-SET,twitter-x-ip,✖️ Twitter,no-resolve",
     "RULE-SET,twitter-x-blackmatrix7-No_Resolve,✖️ Twitter",
-    "RULE-SET,apple,DIRECT",
+    "RULE-SET,apple@cn,DIRECT",
     "RULE-SET,games-cn,DIRECT",
     "PROCESS-NAME,bf6.exe,🎮 Games-Global",
     "RULE-SET,games,🎮 Games-Global",
