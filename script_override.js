@@ -443,6 +443,7 @@ const TEMPLATE = {
   },
   "dns": {
     "enable": true,
+    "cache-algorithm": "arc",
     "ipv6": true,
     "listen": "0.0.0.0:1053",
     "use-hosts": true,
