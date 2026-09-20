@@ -646,7 +646,7 @@ const TEMPLATE = {
       "type": "http",
       "interval": 86400,
       "behavior": "domain",
-      "url": "https://raw.githubusercontent.com/appshubcc/bett-rules/refs/heads/meta/geo/geosite/apple-cn.mrs",
+      "url": "https://fastly.jsdelivr.net/gh/appshubcc/bett-rules@meta/geo/geosite/apple@cn.mrs",
       "path": "./ruleset/apple.yaml"
     },
     "applications": {
@@ -758,13 +758,6 @@ const TEMPLATE = {
       "format": "mrs",
       "url": "https://fastly.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/googlefcm.mrs",
       "path": "./ruleset/googlefcm.mrs"
-    },
-    "icloud": {
-      "type": "http",
-      "interval": 86400,
-      "behavior": "domain",
-      "url": "https://raw.githubusercontent.com/appshubcc/bett-rules/refs/heads/meta/geo/geosite/icloud%40cn.mrs",
-      "path": "./ruleset/icloud.yaml"
     },
     "lancidr": {
       "type": "http",
@@ -973,7 +966,6 @@ const TEMPLATE = {
     "RULE-SET,twitter-x-domain,✖️ Twitter",
     "RULE-SET,twitter-x-ip,✖️ Twitter,no-resolve",
     "RULE-SET,twitter-x-blackmatrix7-No_Resolve,✖️ Twitter",
-    "RULE-SET,icloud,DIRECT",
     "RULE-SET,apple,DIRECT",
     "RULE-SET,games-cn,DIRECT",
     "PROCESS-NAME,bf6.exe,🎮 Games-Global",
