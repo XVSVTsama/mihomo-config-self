@@ -462,7 +462,7 @@ const TEMPLATE = {
       "https://cloudflare-dns.com/dns-query#👉 手动切换"
     ],
     "nameserver-policy": {
-      "rule-set:private,direct,proxy@direct,cn,echs_cn,echs_direct": [
+      "rule-set:private,proxy@direct,cn,echs_cn,echs_direct": [
         "https://dns.alidns.com/dns-query#DIRECT"
       ]
     },
@@ -475,7 +475,6 @@ const TEMPLATE = {
     "fake-ip-filter": [
       "rule-set:fakeip-filter_domain",
       "rule-set:private",
-      "rule-set:direct",
       "rule-set:cn",
       "rule-set:echs_cn",
       "rule-set:echs_direct",
@@ -672,13 +671,6 @@ const TEMPLATE = {
       "format": "mrs",
       "url": "https://github.com/DustinWin/ruleset_geodata/releases/download/mihomo-ruleset/cnip.mrs",
       "path": "./ruleset/cncidr.mrs"
-    },
-    "direct": {
-      "type": "http",
-      "interval": 86400,
-      "behavior": "domain",
-      "url": "https://cdn.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/direct.txt",
-      "path": "./ruleset/direct.yaml"
     },
     "echs_cn": {
       "type": "http",
@@ -977,7 +969,6 @@ const TEMPLATE = {
     "RULE-SET,ai-2,🤖 AI大模型",
     "RULE-SET,google,🌍 PROXY",
     "RULE-SET,google-cn,🌍 PROXY",
-    "RULE-SET,direct,DIRECT",
     "PROCESS-NAME-REGEX,.*twitter.*,✖️ Twitter",
     "RULE-SET,twitter-x-domain,✖️ Twitter",
     "RULE-SET,twitter-x-ip,✖️ Twitter,no-resolve",
