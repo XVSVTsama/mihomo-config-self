@@ -646,6 +646,7 @@ const TEMPLATE = {
       "type": "http",
       "interval": 86400,
       "behavior": "domain",
+      "format": "mrs",
       "url": "https://fastly.jsdelivr.net/gh/appshubcc/bett-rules@meta/geo/geosite/apple@cn.mrs",
       "path": "./ruleset/apple@cn.mrs"
     },
