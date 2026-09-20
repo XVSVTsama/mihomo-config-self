@@ -646,7 +646,7 @@ const TEMPLATE = {
       "type": "http",
       "interval": 86400,
       "behavior": "domain",
-      "url": "https://cdn.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/apple.txt",
+      "url": "https://raw.githubusercontent.com/appshubcc/bett-rules/refs/heads/meta/geo/geosite/apple-cn.mrs",
       "path": "./ruleset/apple.yaml"
     },
     "applications": {
@@ -763,7 +763,7 @@ const TEMPLATE = {
       "type": "http",
       "interval": 86400,
       "behavior": "domain",
-      "url": "https://cdn.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/icloud.txt",
+      "url": "https://raw.githubusercontent.com/appshubcc/bett-rules/refs/heads/meta/geo/geosite/icloud%40cn.mrs",
       "path": "./ruleset/icloud.yaml"
     },
     "lancidr": {
