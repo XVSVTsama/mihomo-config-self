@@ -479,6 +479,7 @@ const TEMPLATE = {
       "rule-set:cn",
       "rule-set:echs_cn",
       "rule-set:echs_direct",
+      "rule-set:googlefcm",
       "rule-set:applications",
       "rule-set:pixiv",
       "pixshaft.com"
