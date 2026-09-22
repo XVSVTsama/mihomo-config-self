@@ -65,7 +65,7 @@
 https://raw.githubusercontent.com/XVSVTsama/mihomo-config-self/refs/heads/main/script_override.js
 ```
 
-英文注释：
+英文注释（可能比前者落后）：
 
 ```text
 https://raw.githubusercontent.com/XVSVTsama/mihomo-config-self/refs/heads/main/script_override_en.js
