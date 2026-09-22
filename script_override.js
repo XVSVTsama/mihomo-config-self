@@ -450,7 +450,8 @@ const TEMPLATE = {
     "use-system-hosts": false,
     "default-nameserver": [
       "tls://223.5.5.5#DIRECT",
-      "tls://223.6.6.6#DIRECT"
+      "114.114.114.114#DIRECT",
+      "https://1.12.12.12/dns-query#DIRECT"
     ],
     "proxy-server-nameserver": [
       "https://hrbgyitz34.cloudflare-gateway.com/dns-query#DIRECT"
