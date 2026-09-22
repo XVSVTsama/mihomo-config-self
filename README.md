@@ -81,7 +81,7 @@ https://raw.githubusercontent.com/XVSVTsama/mihomo-config-self/refs/heads/main/s
    - `入口解析` 功能开关：默认关闭；开启后会将电信、联通、移动三个入口节点全部加入 `国内入口解析` 代理组，由用户在该组中手动选择实际使用的入口节点，并为最终节点解析 DNS 应用所选入口。三者没有脚本自动优先级；配置中的排列顺序不代表自动切换或优先选用。该功能会引入有时效性的国内公共节点，属于实验性能力，仅供测试使用。
    - 脚本首行为 Bettbox 兼容声明（`Compatible_With_Bettbox`）：Bettbox 客户端约定在脚本开头识别该声明（并非全量读取），脚本需遵循此约定，声明必须保持置顶，否则"自定义规则开关"入口不显示。
 
-   脚本内嵌的标准模板与仓库 [mihomo.yaml](https://raw.githubusercontent.com/XVSVTsama/mihomo-config-self/refs/heads/main/mihomo.yaml) 保持同步。
+   脚本内嵌的标准模板与仓库 [mihomo.yaml](https://raw.githubusercontent.com/XVSVTsama/mihomo-config-self/refs/heads/main/mihomo.yaml) 保持同步(如遇差异，以js为准)。
 
 ## 节点域名与 DNS 联动模型
 
