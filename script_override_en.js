@@ -1,57 +1,60 @@
-// Bettbox Compatibility Declaration: The expected behavior of the Bettbox client is to recognize this declaration at the beginning of the script (rather than a full read),
-// and the script must follow this convention: the declaration must be at the very top, and deleting or moving it down will cause the "Custom Rule Switch" entry to not display.
+// Bettbox Compatibility Statement: The expected behavior of Bettbox clients is to recognize this statement at the beginning of the script (not read it in full),
+// The script must follow this convention: the statement must be at the top. Deleting or moving it down will cause the "Custom Rule Switch" entrance not to be displayed.
 const Compatible_With_Bettbox = {
   ruleOptionsEnable: true
 };
 /**
  * ============================================================================
- *  Bettbox (FlClash-based Kernel / Mihomo Downstream Client) JS Override Script
+ * Bettbox (FlClash system kernel / mihomo downstream client) JS overwriting script
  * ============================================================================
  *
- *  Source:
- *    JS Script:
+ * Source:
+ *JS script:
  *    https://raw.githubusercontent.com/XVSVTsama/mihomo-config-self/refs/heads/main/script_override.js
- *    Template:
+ * Template:
  *    https://raw.githubusercontent.com/XVSVTsama/mihomo-config-self/refs/heads/main/mihomo.yaml
- *    Repository:
+ *    storehouse:
  *    https://github.com/XVSVTsama/mihomo-config-self
- *    Author:
+ *    author:
  *    https://github.com/XVSVTsama
- *    Latest Content (GitHub Commit):
+ * Latest content (GitHub commit):
  *    https://github.com/XVSVTsama/mihomo-config-self/commits/main/script_override.js
- *    Usage: This script can be loaded directly as a remote override script for Bettbox / FlClash-based clients
- *         (The first line of the file is the Bettbox compatibility declaration, please do not delete it).
+ * Usage: This script can be loaded directly as a remote overwrite script for Bettbox / FlClash client
+ * (The first line of the file is the Bettbox compatibility statement, please do not delete it).
  *
- *  Purpose:
- *    Merges the current subscription (original configuration) with the "Standard Template" (mihomo.yaml) maintained in this repository into the final effective configuration.
+ *Use:
+ * Merge the current subscription (original configuration) and the "standard template" (mihomo.yaml) maintained by this warehouse into the final effective configuration.
  *
- *  Merge Rules:
- *    1. Except for the special notes in items 2, 3, and 4 below, the final configuration is based on the TEMPLATE
- *       (corresponding to the mihomo.yaml template). That is, fields already written in the template will replace fields with the same name in the subscription's original configuration
- *       (such as DNS details, rules, rule-providers, sniffer,
- *       TUN, proxy-groups grouping structure, etc.). Top-level fields undefined in the template within the subscription's original configuration will not be retained
- *       (such as allow-lan or bind-address that come with certain subscriptions). The only exception is proxy-providers:
- *       If the subscription comes with proxy-providers, they will be retained as-is and injected into the final configuration.
+ *Merge rules:
+ * 1. Except for the parts specially stated in Articles 2, 3, and 4 below, the final configuration uses TEMPLATE
+ * (corresponding to the mihomo.yaml template) shall prevail, that is, the fields already written in the template will replace the original subscription configuration.
+ * Fields with the same name (such as dns details, rules, rule-providers, sniffers,
+ * The grouping structure of tun, proxy-groups, etc.). Top-level fields that are not defined by the template in the original subscription configuration will not be retained.
+ * (such as allow-lan and bind-address that come with some subscriptions), the only exception is proxy-providers:
+ * If the subscription comes with proxy-providers, the final configuration will be retained and injected as it is.
  *
- *    2. proxies: Uses the real node list from the subscription's original configuration (this item is empty in the template by default,
- *       serving only as a placeholder).
+ * 2. proxies: Use the real node list in the original subscription configuration (this item in the template is originally empty,
+ *Just a placeholder).
  *
- *    3. In proxy-groups, "proxies: " explicitly written in the template (with a value of empty/null, which are
- *       the groups described in the template comments as "all single nodes here": 👉 Manual Select, ♻️ Auto Select,
- *       🔄 Load Balance, 📲 Telegram, 🎮 Games-Global) will automatically be filled with the names of all nodes in the subscription;
- *       if the subscription also includes proxy-providers, these groups will simultaneously reference all providers via use. The remaining groups will remain exactly as they are in the template and will not be overwritten or supplemented by subscription nodes.
+ * 3. In proxy-groups, "proxies: " is explicitly written in the template (the value is empty/null, that is,
+ * The groups of "all single nodes here" in the template comments: 👉 manual switching, ♻️ automatic selection,
+ * 🔄 Load balancing, 📲 Telegram, 🎮 Games-Global) will automatically fill in all nodes in the subscription
+ * name; if the subscription also contains proxy-providers, these groups will be written to use references at the same time
+ * provider. The remaining groups remain as they are in the template and will not be overwritten or supplemented by subscription nodes.
  *
- *    4. [Special Handling] DNS and Hosts:
- *       - hosts rewrites node servers only when dns.use-hosts=true and dns.listen forms a closed loop with the DNS endpoints actually participating in node resolution; the original domain is used only to identify and migrate a private DNS policy, while the final output retains policy entries only for node domains that still require DNS resolution after rewriting;
- *       - Node DNS priority: proxy-server-nameserver-policy > proxy-server-nameserver
- *         (private only) > nameserver-policy > nameserver (private only);
- *       - Public DNS is only used to identify private DNS and prevent public DNS from entering node resolution;
- *       - The template's global proxy-server-nameserver is always retained as the final fallback;
- *       Conflicts with the same key are resolved according to NAMESERVER_POLICY_PREFER_ORIGINAL to determine priority.
+ * 4.【Special handling】DNS and hosts:
+ * - hosts only if dns.use-hosts=true and dns.listen is related to the DNS endpoint actually participating in node resolution
+ * Rewrite the node server when forming a closed loop; the original domain name is only used to identify and migrate private DNS policies,
+ * The final result only retains the node domain name policy that still needs DNS resolution after rewriting;
+ * - Node DNS priority: proxy-server-nameserver-policy > proxy-server-nameserver
+ * (private only) > nameserver-policy > nameserver (private only);
+ * - Public DNS is only used to identify private DNS to prevent public DNS from entering node resolution;
+ * - Template global proxy-server-nameserver is always retained as a final fallback;
+ * When the same key conflicts, NAMESERVER_POLICY_PREFER_ORIGINAL determines the priority.
  *
- *  Usage Method (General for Bettbox / FlClash-based clients):
- *    Config → "..." in the upper right corner of the corresponding subscription → Edit override script (or "Open script") → Create a new script,
- *    paste the entire content of this file into it and save, then enable this script on that subscription.
+ * How to use (common to Bettbox / FlClash client):
+ * Configuration → "..." in the upper right corner of the corresponding subscription → Edit override script (or "Open script") → Create a new script,
+ * Paste the entire content of this file and save it, then enable this script on the subscription.
  * ============================================================================
  */
 
@@ -59,43 +62,99 @@ const Compatible_With_Bettbox = {
 const ruleOptionsEnable = {
 
   /**
- * Custom Configuration Options
- * Define individual switches for each proxy group (policy group) in the template:
- * true  = Enable this policy group
- * false = Disable this policy group (automatically removed from proxy-groups, and references in other groups will be cleaned up)
- * There are also feature switches (such as FCM Direct): only adjusts nodes within the group, without involving the start/stop of policy groups.
+ * Custom configuration options
+ * Define switches separately for each agent group (policy group) in the template:
+ * true = enable this policy group
+ * false = disable this policy group (will be automatically removed from proxy-groups and clear references in other groups)
+ * There are also function switches (such as FCM direct connection): only the nodes in the group are adjusted, and the startup and shutdown of the policy group are not involved.
  */
 
-  // --- Individual Proxy Group (Policy Group) Control Switches ---
-  '🌍 PROXY': true,        // Main proxy policy group
-  '🔄 负载均衡': true,     // Load Balance policy group
-  '👉 手动切换': true,    // Manual Select policy group
-  '♻️ 自动选择': true,     // Delay Auto Select policy group
+  // --- Agent group (policy group) individual control switch ---
+  '🌍 PROXY': true,        //Master agent policy group
+  '🔄 负载均衡': true,     // Load balancing policy group
+  '👉 手动切换': true,    // Manually select policy group
+  '♻️ 自动选择': true,     // Delay automatic selection of policy group
   '📲 Telegram': true,     // Telegram communication software policy group
-  '🎮 Games-Global': true, // Gaming policy group
-  '✖️ Twitter': true,      // Twitter social platform policy group
-  '🤖 AI大模型': true,     // AI policy group
-  '🎵 TikTok': true,       // TikTok video platform policy group
+  '🎮 Games-Global': true, // Game strategy group
+  '✖️ Twitter': true,      // Twitter Social Platform Strategy Group
+  '🤖 AI大模型': true,     //AI large model strategy group
+  '🎵 TikTok': true,       //TikTok Video Platform Strategy Group
 
-  // --- Node and Network Feature Switches ---
-  '强制证书验证': false,   // When enabled, uniformly sets subscription nodes skip-cert-verify to false (forcing certificate verification); when disabled, does not interfere and retains the subscription nodes' original settings. Applies equally to all nodes
-  '启用 Reality 增强': true, // Whether to enable support-x25519mlkem768 (X25519MLKEM768 post-quantum key agreement) for Reality nodes with non-empty public-key/short-id
-  'IPv6优先': false,         // When enabled, prefer IPv6 according to each node's ip-version
-  'FCM直连': true,          // Default ON: The hidden FCM group contains only DIRECT; when disabled, only 👉 Manual Select is retained (FCM group is not removed). The switch icon is taken from the icon field of the FCM proxy group.
-  'TGDC实验分流': false,     // Enables the Telegram DC/regional experiment; when disabled, the original Telegram rules, policy groups, and rule providers are left unchanged.
-  '入口解析': false,         // 开启后，三个国内入口节点全部加入同一个代理组。
+  // --- Node and network function switch ---
+  '强制证书验证': false,   // When it is turned on, set skip-cert-verify of the subscription node to false (forced certificate verification); when it is turned off, no intervention is performed, and the original settings of the subscription node are retained. Treat all nodes equally
+  '启用 Reality 增强': true, // Whether to enable support-x25519mlkem768 (X25519MLKEM768 post-quantum key negotiation) for Reality nodes with non-empty public-key/short-id
+  'IPv6优先': false,         // After turning it on, IPv6 will be used first according to the node ip-version.
+  'FCM直连': true,          // Open by default: Hide group FCM only contains DIRECT; when closed, only keep 👉 Manual switch (without removing FCM group). The switch icon is taken from the icon field of the FCM agent group.
+  'TGDC实验分流': false,     // Enable Telegram DC/regional experimental distribution; when closed, the original Telegram rules, policy groups and rule sets will not be changed.
+  '入口解析': false,         // After opening, all three domestic entry nodes will join the same proxy group.
 };
 
+// When the same domain name rule key appears, whether to subscribe to the original configuration (true) or the template (false) takes precedence (the template is currently not configured
+// proxy-server-nameserver-policy, so this switch currently only affects the merge between subscription sources)
+const NAMESERVER_POLICY_PREFER_ORIGINAL = true;
+
 // ============================================================================
-// Telegram DC/regional experiment (injected only when the switch is true).
-// DC1/DC3: Miami; DC2/DC4: Amsterdam; DC5: Singapore.
-// Static CIDRs cannot reliably split same-city DCs, so groups use DC pairs.
+//Domestic entrance analysis node maintenance area
+// Only maintain the type / server / port and other optional fields below.
+// name should not be written here, it is fixed by ENTRY_RESOLUTION_OPTIONS to the domestic entrance resolution-operator.
+// Any Mihomo node field can be modified, deleted or added.
+// ============================================================================
+const DOMESTIC_ENTRY_PROXIES = {
+  //China Telecom
+  telecom: {
+    type: 'http',
+    server: '36.111.33.167',
+    port: 13128
+  },
+
+  //China Unicom
+  unicom: {
+    type: 'http',
+    server: '119.188.131.55',
+    port: 17981
+  },
+
+  //China Mobile
+  mobile: {
+    type: 'http',
+    server: '116.196.150.180',
+    port: 17981
+  }
+};
+
+// The three entry nodes will join the "domestic entry resolution" proxy group, which is manually selected by the user; the order here does not represent automatic priority. The node name is fixed here and should not be modified.
+const ENTRY_RESOLUTION_OPTIONS = [
+  {
+    key: '电信入口解析',
+    proxyName: '国内入口解析-电信',
+    proxy: DOMESTIC_ENTRY_PROXIES.telecom,
+    icon: 'https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/China.png'
+  },
+  {
+    key: '联通入口解析',
+    proxyName: '国内入口解析-联通',
+    proxy: DOMESTIC_ENTRY_PROXIES.unicom,
+    icon: 'https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/China_Map.png'
+  },
+  {
+    key: '移动入口解析',
+    proxyName: '国内入口解析-移动',
+    proxy: DOMESTIC_ENTRY_PROXIES.mobile,
+    icon: 'https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Server.png'
+  }
+];
+
+// ============================================================================
+// Telegram DC/regional experimental distribution (only injected when ruleOptionsEnable['TGDC experimental distribution'] is true)
+// DC1/DC3：Miami；DC2/DC4：Amsterdam；DC5：Singapore。
+// Static CIDR cannot reliably split intra-city DCs, so policy groups are named using DC pairs.
 // ============================================================================
 const TGDC_RULE_PROVIDERS = {
   telegram_dc1_dc3_miami: {
     type: 'inline',
     behavior: 'classical',
     payload: [
+      // DC1 Pluto / DC3 Aurora — Miami, USA
       'IP-CIDR,91.108.12.0/22,no-resolve',
       'IP-CIDR,149.154.172.0/22,no-resolve',
       'IP-CIDR6,2001:b28:f23d::/48,no-resolve',
@@ -105,6 +164,7 @@ const TGDC_RULE_PROVIDERS = {
     type: 'inline',
     behavior: 'classical',
     payload: [
+      // DC2 Venus / DC4 Vesta — Amsterdam, Netherlands
       'IP-CIDR,91.108.58.0/23,no-resolve',
       'IP-CIDR,91.108.4.0/22,no-resolve',
       'IP-CIDR,91.108.8.0/22,no-resolve',
@@ -112,6 +172,7 @@ const TGDC_RULE_PROVIDERS = {
       'IP-CIDR,95.161.64.0/20,no-resolve',
       'IP-CIDR,91.105.192.0/23,no-resolve',
       'IP-CIDR,185.76.151.0/24,no-resolve',
+      // EU supplementary candidate for Akiker/entire6548/RClogs.
       'IP-CIDR,5.28.192.0/18,no-resolve',
       'IP-CIDR,109.239.140.0/24,no-resolve',
       'IP-CIDR6,2001:67c:4e8::/48,no-resolve',
@@ -122,6 +183,7 @@ const TGDC_RULE_PROVIDERS = {
     type: 'inline',
     behavior: 'classical',
     payload: [
+      // DC5 Flora — Singapore
       'IP-CIDR,91.108.16.0/22,no-resolve',
       'IP-CIDR,91.108.56.0/23,no-resolve',
       'IP-CIDR,149.154.168.0/22,no-resolve',
@@ -131,8 +193,9 @@ const TGDC_RULE_PROVIDERS = {
   },
 };
 
-// Fallback selection excludes built-ins, rejects, rematches, and non-real nodes;
-// otherwise use the first usable subscription node.
+// empty-fallback must be the actual outbound node name, proxy-group cannot be filled in.
+// fallback uses low_filter idea: exclude non-real nodes such as built-in/rejection/rematch/multiply/strategy group, etc.
+// Then take the first node in the original order of the subscribed nodes after overwriting; if there is no result, use COMPATIBLE.
 const TGDC_FALLBACK_EXCLUDE_FILTER =
   /群|返利|循环|官网|客服|网站|网址|获取|订阅|流量|到期|机场|下次|版本|官址|备用|过期|已用|联系|邮箱|工单|贩卖|通知|倒卖|防止|国内|地址|频道|电报|无法|说明|使用|提示|访问|支持|教程|关注|更新|作者|加入|超时|收藏|优惠|福利|邀请|好友|失联|选择|剩余|公益|发布|DIZTNA|通路|登录|禁止|定时|渠道|牢记|永久|余额|阁下|本站|刷新|导航|建议|重置|以下|⚠️|@|t\.me\/\+|\bexpire\b|\bhttps?:\/\/|\.com|\btraffic\b/iu;
 const TGDC_FALLBACK_LOW_RATE_FILTER =
@@ -168,10 +231,12 @@ const TGDC_PROXY_GROUP_DEFINITIONS = [
   {
     name: '📲 Telegram-DC2-DC4-Amsterdam',
     filter: '(?i)🇳🇱|荷兰|阿姆斯特丹|amsterdam|\\bAMS\\b|\\bNL\\b|netherlands',
+    // Use FlagCDN's national flag resource to replace the possibly invalid Qure Netherlands icon.
     icon: 'https://flagcdn.com/w160/nl.png',
   },
   {
     name: '📲 Telegram-DC5-SG',
+    // According to the actual interconnection situation, the DC5 group includes both Hong Kong and Singapore nodes.
     filter: '(?i)🇸🇬|🇭🇰|新加坡|狮城|香港|singapore|hong\\s*kong|\\bSG\\b|\\bSGP\\b|\\bHK\\b|\\bHKG\\b',
     icon: 'https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Singapore.png',
   },
@@ -198,766 +263,40 @@ const TGDC_RULES = [
   'RULE-SET,telegram_domain,📲 Telegram(兜底)',
 ];
 
-// When the same domain rule key appears, whether the subscription's original configuration (true) or template (false) takes priority (the template currently does not configure
-// proxy-server-nameserver-policy, so this switch currently only affects merging between subscription sources)
-const NAMESERVER_POLICY_PREFER_ORIGINAL = true;
-
 // ============================================================================
-// Domestic Entry Resolution Node Maintenance Area
-// Only maintain type / server / port and other optional fields below.
-// Do not put name here; ENTRY_RESOLUTION_OPTIONS fixes it as 国内入口解析-运营商.
-// You may change, remove, or add any Mihomo node field.
+// Standard template configuration (synchronized with the warehouse mihomo.yaml, equivalent to the JSON representation of the yaml file)
 // ============================================================================
-const DOMESTIC_ENTRY_PROXIES = {
-  // China Telecom
-  telecom: {
-    type: 'http',
-    server: '36.111.33.167',
-    port: 13128
-  },
 
-  // China Unicom
-  unicom: {
-    type: 'http',
-    server: '119.188.131.55',
-    port: 17981
-  },
-
-  // China Mobile
-  mobile: {
-    type: 'http',
-    server: '116.196.150.180',
-    port: 17981
-  }
-};
-
-// All three entry nodes are added to the “国内入口解析” proxy group for manual user selection; this order does not represent automatic priority. Node names are fixed here and should not be changed.
-const ENTRY_RESOLUTION_OPTIONS = [
-  {
-    key: '电信入口解析',
-    proxyName: '国内入口解析-电信',
-    proxy: DOMESTIC_ENTRY_PROXIES.telecom,
-    icon: 'https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/China.png'
-  },
-  {
-    key: '联通入口解析',
-    proxyName: '国内入口解析-联通',
-    proxy: DOMESTIC_ENTRY_PROXIES.unicom,
-    icon: 'https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/China_Map.png'
-  },
-  {
-    key: '移动入口解析',
-    proxyName: '国内入口解析-移动',
-    proxy: DOMESTIC_ENTRY_PROXIES.mobile,
-    icon: 'https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Server.png'
-  }
-];
-
-// ============================================================================
-// Standard Template Configuration (Kept in sync with the repository's mihomo.yaml, equivalent to the JSON representation of that YAML file)
-// ============================================================================
 const TEMPLATE = {
-  "dns": {
-    "default-nameserver": [
-      "tls://223.5.5.5#DIRECT",
-      "tls://223.6.6.6#DIRECT"
-    ],
-    "direct-nameserver": [
-      "https://dns.alidns.com/dns-query#DIRECT",
-      "https://doh.pub/dns-query#DIRECT"
-    ],
-    "direct-nameserver-follow-policy": true,
-    "enable": true,
-    "enhanced-mode": "fake-ip",
-    "fake-ip-filter": [
-      "rule-set:fakeip-filter_domain",
-      "rule-set:private",
-      "rule-set:direct",
-      "rule-set:cn",
-      "rule-set:echs_cn",
-      "rule-set:echs_direct",
-      "rule-set:applications",
-      "rule-set:pixiv",
-      "pixshaft.com"
-    ],
-    "fake-ip-filter-mode": "blacklist",
-    "fake-ip-range": "198.18.0.1/16",
-    "fake-ip-range6": "fdfe:dcba:9876::1/64",
-    "ipv6": true,
-    "listen": "0.0.0.0:1053",
-    "nameserver": [
-      "https://cloudflare-dns.com/dns-query#👉 手动切换"
-    ],
-    "nameserver-policy": {
-      "rule-set:private,direct,proxy@direct,cn,echs_cn,echs_direct": "https://dns.alidns.com/dns-query#DIRECT"
-    },
-    "prefer-h3": false,
-    "proxy-server-nameserver": [
-      "https://hrbgyitz34.cloudflare-gateway.com/dns-query#DIRECT"
-    ],
-    "respect-rules": false,
-    "use-hosts": true,
-    "use-system-hosts": false
-  },
+  "mode": "rule",
+  "mixed-port": 7254,
+  "port": 7249,
+  "socks-port": 7346,
   "etag-support": true,
+  "global-ua": "clash.meta",
+  "ipv6": true,
+  "log-level": "info",
   "external-controller": "127.0.0.1:9090",
   "external-ui": "dashboard",
-  "global-ua": "clash.meta",
-  "hosts": {
-    "*.pangolin-sdk-toutiao": "0.0.0.0",
-    "*.pangolin-sdk-toutiao.*": "0.0.0.0",
-    "*.pglstatp-toutiao.com": "0.0.0.0",
-    "*.pglstatp-toutiao.com.*": "0.0.0.0",
-    "*.pstatp.com": "0.0.0.0",
-    "*.pstatp.com.*": "0.0.0.0",
-    "*default.ixigua.com": "0.0.0.0",
-    "+.clash.dev": [
-      "127.0.0.1"
-    ],
-    "+.mcdn.bilivideo.cn": [
-      "0.0.0.0"
-    ],
-    "+.mcdn.bilivideo.com": [
-      "0.0.0.0"
-    ],
-    "dns.msftncsi.com": [
-      "131.107.255.255",
-      "fd3e:4f5a:5b81::1"
-    ],
-    "gurd.snssdk.com": "0.0.0.0",
-    "gurd.snssdk.com.*": "0.0.0.0",
-    "mtalk.google.com": [
-      "142.250.107.188",
-      "108.177.125.188"
-    ],
-    "services.googleapis.cn": [
-      "services.googleapis.com"
-    ]
-  },
-  "ipv6": true,
+  "unified-delay": true,
+  "tcp-concurrent": true,
   "keep-alive-idle": 600,
   "keep-alive-interval": 15,
-  "log-level": "info",
-  "mixed-port": 7254,
-  "mode": "rule",
-  "ntp": {
-    "enable": true,
-    "port": 123,
-    "server": "time.apple.com",
-    "write-to-system": false
-  },
-  "port": 7249,
-  "proxies": null,
-  "proxy-groups": [
-    {
-      "icon": "https://github.com/DustinWin/ruleset_geodata/releases/download/icons/proxy.png",
-      "name": "🌍 PROXY",
-      "proxies": [
-        "👉 手动切换",
-        "♻️ 自动选择",
-        "🔄 负载均衡",
-        "DIRECT"
-      ],
-      "type": "select"
-    },
-    {
-      "icon": "https://www.clashverge.dev/assets/icons/balance.svg",
-      "interval": 300,
-      "lazy": true,
-      "name": "🔄 负载均衡",
-      "proxies": null,
-      "strategy": "sticky-sessions",
-      "type": "load-balance",
-      "url": "https://www.gstatic.com/generate_204"
-    },
-    {
-      "icon": "https://github.com/DustinWin/ruleset_geodata/releases/download/icons/select.png",
-      "name": "👉 手动切换",
-      "proxies": null,
-      "type": "select"
-    },
-    {
-      "icon": "https://github.com/DustinWin/ruleset_geodata/releases/download/icons/auto.png",
-      "interval": 300,
-      "name": "♻️ 自动选择",
-      "proxies": null,
-      "tolerance": 50,
-      "type": "url-test",
-      "url": "https://www.gstatic.com/generate_204"
-    },
-    {
-      "icon": "https://github.com/DustinWin/ruleset_geodata/releases/download/icons/telegram.png",
-      "name": "📲 Telegram",
-      "proxies": null,
-      "type": "select"
-    },
-    {
-      "icon": "https://github.com/DustinWin/ruleset_geodata/releases/download/icons/games-cn.png",
-      "name": "🎮 Games-Global",
-      "proxies": null,
-      "type": "select"
-    },
-    {
-      "filter": "US|Residential",
-      "icon": "https://www.clashverge.dev/assets/icons/twitter.svg",
-      "include-all-proxies": true,
-      "name": "✖️ Twitter",
-      "type": "select"
-    },
-    {
-      "filter": "US|Residential",
-      "icon": "https://github.com/DustinWin/ruleset_geodata/releases/download/icons/ai.png",
-      "include-all-proxies": true,
-      "name": "🤖 AI",
-      "type": "select"
-    },
-    {
-      "filter": "US|Residential",
-      "icon": "https://github.com/DustinWin/ruleset_geodata/releases/download/icons/tiktok.png",
-      "include-all-proxies": true,
-      "name": "🎵 TikTok",
-      "type": "select"
-    },
-    {
-      "hidden": true,
-      "icon": "https://fastly.jsdelivr.net/gh/MiToverG422/Qure@master/IconSet/Color/fcm.png",
-      "name": "FCM",
-      "proxies": [
-        "👉 手动切换",
-        "DIRECT"
-      ],
-      "type": "select"
-    }
-  ],
-  "rule-providers": {
-    "Gemini_Domain": {
-      "behavior": "domain",
-      "interval": 86400,
-      "path": "./ruleset/Gemini_Domain.yaml",
-      "type": "http",
-      "url": "https://cdn.jsdelivr.net/gh/Accademia/Additional_Rule_For_Clash@master/Gemini/Gemini_Domain.yaml"
-    },
-    "Grok_Domain": {
-      "behavior": "domain",
-      "interval": 86400,
-      "path": "./ruleset/Grok_Domain.yaml",
-      "type": "http",
-      "url": "https://raw.githubusercontent.com/Accademia/Additional_Rule_For_Clash/refs/heads/main/Grok/Grok_Domain.yaml"
-    },
-    "HijackingPlus": {
-      "behavior": "classical",
-      "interval": 86400,
-      "path": "./ruleset/HijackingPlus.yaml",
-      "type": "http",
-      "url": "https://raw.githubusercontent.com/Accademia/Additional_Rule_For_Clash/refs/heads/main/HijackingPlus/HijackingPlus_No_Resolve.yaml"
-    },
-    "TikTok": {
-      "behavior": "domain",
-      "format": "mrs",
-      "interval": 86400,
-      "path": "./ruleset/tiktok.mrs",
-      "type": "http",
-      "url": "https://github.com/DustinWin/ruleset_geodata/releases/download/mihomo-ruleset/tiktok.mrs"
-    },
-    "ai-1": {
-      "behavior": "domain",
-      "format": "mrs",
-      "interval": 86400,
-      "path": "./ruleset/ai-1.mrs",
-      "type": "http",
-      "url": "https://github.com/DustinWin/ruleset_geodata/releases/download/mihomo-ruleset/ai.mrs"
-    },
-    "ai-2": {
-      "behavior": "domain",
-      "format": "mrs",
-      "interval": 86400,
-      "path": "./ruleset/ai-2.mrs",
-      "type": "http",
-      "url": "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/category-ai-!cn.mrs"
-    },
-    "apple": {
-      "behavior": "domain",
-      "interval": 86400,
-      "path": "./ruleset/apple.yaml",
-      "type": "http",
-      "url": "https://cdn.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/apple.txt"
-    },
-    "applications": {
-      "behavior": "domain",
-      "interval": 86400,
-      "path": "./ruleset/applications.yaml",
-      "type": "http",
-      "url": "https://cdn.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/applications.txt"
-    },
-    "cn": {
-      "behavior": "domain",
-      "format": "mrs",
-      "interval": 86400,
-      "path": "./ruleset/cn.mrs",
-      "type": "http",
-      "url": "https://github.com/DustinWin/ruleset_geodata/releases/download/mihomo-ruleset/cn.mrs"
-    },
-    "cncidr": {
-      "behavior": "ipcidr",
-      "format": "mrs",
-      "interval": 86400,
-      "path": "./ruleset/cncidr.mrs",
-      "type": "http",
-      "url": "https://github.com/DustinWin/ruleset_geodata/releases/download/mihomo-ruleset/cnip.mrs"
-    },
-    "direct": {
-      "behavior": "domain",
-      "interval": 86400,
-      "path": "./ruleset/direct.yaml",
-      "type": "http",
-      "url": "https://cdn.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/direct.txt"
-    },
-    "echs_cn": {
-      "behavior": "domain",
-      "format": "mrs",
-      "interval": 86400,
-      "path": "./ruleset/echs_cn.mrs",
-      "type": "http",
-      "url": "https://raw.githubusercontent.com/echs-top/proxy/main/mrs/domain/cn.mrs"
-    },
-    "echs_cn_ip": {
-      "behavior": "ipcidr",
-      "format": "mrs",
-      "interval": 86400,
-      "path": "./ruleset/echs_cn_ip.mrs",
-      "type": "http",
-      "url": "https://raw.githubusercontent.com/echs-top/proxy/main/mrs/ip/cn.mrs"
-    },
-    "echs_direct": {
-      "behavior": "domain",
-      "format": "mrs",
-      "interval": 86400,
-      "path": "./ruleset/echs_direct.mrs",
-      "type": "http",
-      "url": "https://raw.githubusercontent.com/echs-top/proxy/main/mrs/domain/direct.mrs"
-    },
-    "echs_direct_ip": {
-      "behavior": "ipcidr",
-      "format": "mrs",
-      "interval": 86400,
-      "path": "./ruleset/echs_direct_ip.mrs",
-      "type": "http",
-      "url": "https://raw.githubusercontent.com/echs-top/proxy/main/mrs/ip/direct.mrs"
-    },
-    "fakeip-filter_domain": {
-      "behavior": "domain",
-      "format": "mrs",
-      "interval": 86400,
-      "path": "./ruleset/fakeip-filter_domain.mrs",
-      "type": "http",
-      "url": "https://github.com/DustinWin/ruleset_geodata/releases/download/mihomo-ruleset/fakeip-filter.mrs"
-    },
-    "games": {
-      "behavior": "domain",
-      "format": "mrs",
-      "interval": 86400,
-      "path": "./ruleset/games.mrs",
-      "type": "http",
-      "url": "https://github.com/DustinWin/ruleset_geodata/releases/download/mihomo-ruleset/games.mrs"
-    },
-    "games-cn": {
-      "behavior": "domain",
-      "format": "mrs",
-      "interval": 86400,
-      "path": "./ruleset/games-cn.mrs",
-      "type": "http",
-      "url": "https://github.com/DustinWin/ruleset_geodata/releases/download/mihomo-ruleset/games-cn.mrs"
-    },
-    "gfw": {
-      "behavior": "domain",
-      "format": "mrs",
-      "interval": 86400,
-      "path": "./ruleset/gfw.mrs",
-      "type": "http",
-      "url": "https://github.com/DustinWin/ruleset_geodata/releases/download/mihomo-ruleset/gfw.mrs"
-    },
-    "google": {
-      "behavior": "domain",
-      "interval": 86400,
-      "path": "./ruleset/google.yaml",
-      "type": "http",
-      "url": "https://cdn.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/google.txt"
-    },
-    "google-cn": {
-      "behavior": "domain",
-      "format": "mrs",
-      "interval": 86400,
-      "path": "./ruleset/google-cn.mrs",
-      "type": "http",
-      "url": "https://github.com/DustinWin/ruleset_geodata/releases/download/mihomo-ruleset/google-cn.mrs"
-    },
-    "googlefcm": {
-      "behavior": "domain",
-      "format": "mrs",
-      "interval": 86400,
-      "path": "./ruleset/googlefcm.mrs",
-      "type": "http",
-      "url": "https://fastly.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/googlefcm.mrs"
-    },
-    "icloud": {
-      "behavior": "domain",
-      "interval": 86400,
-      "path": "./ruleset/icloud.yaml",
-      "type": "http",
-      "url": "https://cdn.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/icloud.txt"
-    },
-    "lancidr": {
-      "behavior": "ipcidr",
-      "interval": 86400,
-      "path": "./ruleset/lancidr.yaml",
-      "type": "http",
-      "url": "https://cdn.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/lancidr.txt"
-    },
-    "pixiv": {
-      "behavior": "domain",
-      "format": "mrs",
-      "interval": 86400,
-      "path": "./ruleset/pixiv.mrs",
-      "type": "http",
-      "url": "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/pixiv.mrs"
-    },
-    "private": {
-      "behavior": "domain",
-      "interval": 86400,
-      "path": "./ruleset/private.yaml",
-      "type": "http",
-      "url": "https://cdn.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/private.txt"
-    },
-    "proxy": {
-      "behavior": "domain",
-      "format": "mrs",
-      "interval": 86400,
-      "path": "./ruleset/proxy.mrs",
-      "type": "http",
-      "url": "https://github.com/DustinWin/ruleset_geodata/releases/download/mihomo-ruleset/proxy.mrs"
-    },
-    "proxy@direct": {
-      "behavior": "domain",
-      "format": "mrs",
-      "interval": 86400,
-      "path": "./rules/proxy@direct.mrs",
-      "type": "http",
-      "url": "https://raw.githubusercontent.com/echs-top/proxy/main/mrs/domain/proxy@direct.mrs"
-    },
-    "telegram_domain": {
-      "behavior": "domain",
-      "format": "mrs",
-      "interval": 86400,
-      "path": "./rules/telegram_domain.mrs",
-      "type": "http",
-      "url": "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/telegram.mrs"
-    },
-    "telegramcidr": {
-      "behavior": "ipcidr",
-      "format": "mrs",
-      "interval": 86400,
-      "path": "./ruleset/telegramcidr.mrs",
-      "type": "http",
-      "url": "https://raw.githubusercontent.com/reddishJade/private_proxy/main/Mihomo/Provider/telegram%40ip.mrs"
-    },
-    "twitter-x-blackmatrix7-No_Resolve": {
-      "behavior": "classical",
-      "format": "yaml",
-      "interval": 86400,
-      "path": "./ruleset/twitter-x-blackmartix7-noreslove.mrs",
-      "type": "http",
-      "url": "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/refs/heads/master/rule/Clash/Twitter/Twitter_No_Resolve.yaml"
-    },
-    "twitter-x-domain": {
-      "behavior": "domain",
-      "format": "mrs",
-      "interval": 86400,
-      "path": "./ruleset/twitter/x-domain.mrs",
-      "type": "http",
-      "url": "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/twitter.mrs"
-    },
-    "twitter-x-ip": {
-      "behavior": "ipcidr",
-      "format": "mrs",
-      "interval": 86400,
-      "path": "./ruleset/twitter/x-ip.mrs",
-      "type": "http",
-      "url": "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geoip/twitter.mrs"
-    }
-  },
-  "rules": [
-    "AND,((NETWORK,UDP),(DST-PORT,3478-3479/5349-5350/19302-19309),(NOT,((RULE-SET,direct))),(NOT,((RULE-SET,cncidr))),(NOT,((RULE-SET,cn))),(NOT,((RULE-SET,applications))),(NOT,((RULE-SET,games))),(NOT,((RULE-SET,games-cn)))),REJECT",
-    "RULE-SET,HijackingPlus,REJECT",
-    "SUB-RULE,(PROCESS-NAME,com.dragon.read.oversea.gp),fanqie",
-    "DOMAIN-KEYWORD,ikuuu,🌍 PROXY",
-    "RULE-SET,applications,DIRECT",
-    "RULE-SET,echs_cn,DIRECT",
-    "RULE-SET,echs_cn_ip,DIRECT,no-resolve",
-    "RULE-SET,echs_direct,DIRECT",
-    "RULE-SET,echs_direct_ip,DIRECT,no-resolve",
-    "RULE-SET,cn,DIRECT",
-    "RULE-SET,cncidr,DIRECT,no-resolve",
-    "RULE-SET,googlefcm,FCM",
-    "DOMAIN,clash.razord.top,DIRECT",
-    "DOMAIN,yacd.haishan.me,DIRECT",
-    "PROCESS-NAME,svchost.exe,DIRECT",
-    "RULE-SET,proxy@direct,🌍 PROXY",
-    "RULE-SET,private,DIRECT,no-resolve",
-    "RULE-SET,lancidr,DIRECT,no-resolve",
-    "DOMAIN-WILDCARD,*.deepseek.com,DIRECT",
-    "DOMAIN-WILDCARD,*.portal101.cn,DIRECT",
-    "DOMAIN-SUFFIX,cdnhwcqwg14.com,DIRECT",
-    "DOMAIN-SUFFIX,cdnhwcxcy07.com,DIRECT",
-    "DOMAIN-SUFFIX,cdngslb.com,DIRECT",
-    "DOMAIN-SUFFIX,edgekey.net,DIRECT",
-    "DOMAIN-SUFFIX,cloudfront.net,DIRECT",
-    "PROCESS-NAME-REGEX,.*nagram.*,📲 Telegram",
-    "PROCESS-NAME-REGEX,.*telegram.*,📲 Telegram",
-    "RULE-SET,telegramcidr,📲 Telegram,no-resolve",
-    "RULE-SET,telegram_domain,📲 Telegram",
-    // Manus AI: covers Manus Desktop, Manus Helper, and the Android client process.
-    "PROCESS-NAME-REGEX,(?i).*(manus|tech\\.butterfly\\.app).*,🤖 AI",
-    // Claude / Anthropic: process matches take precedence and cover Claude Desktop, Claude Code, etc.
-    "PROCESS-NAME-REGEX,(?i).*claude.*,🤖 AI",
-    "PROCESS-NAME-REGEX,(?i).*anthropic.*,🤖 AI",
-    // Claude / Anthropic: official API, web login, OAuth, MCP, CLI updates, and plugin dependencies.
-    "DOMAIN,api.anthropic.com,🤖 AI",
-    "DOMAIN,console.anthropic.com,🤖 AI",
-    "DOMAIN,statsig.anthropic.com,🤖 AI",
-    "DOMAIN,status.anthropic.com,🤖 AI",
-    "DOMAIN,sentry.anthropic.com,🤖 AI",
-    "DOMAIN,support.anthropic.com,🤖 AI",
-    "DOMAIN,mcp-proxy.anthropic.com,🤖 AI",
-    "DOMAIN,platform.claude.com,🤖 AI",
-    "DOMAIN,code.claude.com,🤖 AI",
-    "DOMAIN,downloads.claude.ai,🤖 AI",
-    "DOMAIN,bridge.claudeusercontent.com,🤖 AI",
-    "DOMAIN,cdn.growthbook.io,🤖 AI",
-    "DOMAIN,cdn.usefathom.com,🤖 AI",
-    "DOMAIN,registry.npmjs.org,🤖 AI",
-    "DOMAIN,storage.googleapis.com,🤖 AI",
-    "DOMAIN,raw.githubusercontent.com,🤖 AI",
-    "DOMAIN,formulae.brew.sh,🤖 AI",
-    "DOMAIN,http-intake.logs.us5.datadoghq.com,🤖 AI",
-    "DOMAIN,browser-intake-us5-datadoghq.com,🤖 AI",
-    "DOMAIN,servd-anthropic-website.b-cdn.net,🤖 AI",
-    "DOMAIN,claudemcpclient.com,🤖 AI",
-    "DOMAIN,claudemcpcontent.com,🤖 AI",
-    "DOMAIN-SUFFIX,anthropic.com,🤖 AI",
-    "DOMAIN-SUFFIX,claude.ai,🤖 AI",
-    "DOMAIN-SUFFIX,claude.com,🤖 AI",
-    "DOMAIN-SUFFIX,claudeusercontent.com,🤖 AI",
-    "DOMAIN-SUFFIX,clau.de,🤖 AI",
-    "DOMAIN-SUFFIX,frame.claudeusercontent.com,🤖 AI",
-    "DOMAIN-SUFFIX,modelcontextprotocol.io,🤖 AI",
-    "IP-CIDR,160.79.104.0/21,🤖 AI,no-resolve",
-    "IP-CIDR6,2607:6bc0::/48,🤖 AI,no-resolve",
-    "RULE-SET,Gemini_Domain,🤖 AI",
-    "RULE-SET,Grok_Domain,🤖 AI",
-    "IP-CIDR,17.253.4.0/23,🤖 AI,no-resolve",
-    "DOMAIN,anthropic.com.cdn.cloudflare.net,🤖 AI",
-    "DOMAIN,anthropic-com.ghost.io,🤖 AI",
-    "DOMAIN-SUFFIX,sentry.io,🤖 AI",
-    "DOMAIN-SUFFIX,statsigapi.net,🤖 AI",
-    "DOMAIN,browser-intake-us5-datadoghq.com,🤖 AI",
-    "DOMAIN-KEYWORD,datadog,🤖 AI",
-    "DOMAIN-KEYWORD,sift,🤖 AI",
-    "RULE-SET,ai-1,🤖 AI",
-    "RULE-SET,ai-2,🤖 AI",
-    "RULE-SET,google,🌍 PROXY",
-    "RULE-SET,google-cn,🌍 PROXY",
-    "RULE-SET,direct,DIRECT",
-    "PROCESS-NAME-REGEX,.*twitter.*,✖️ Twitter",
-    "RULE-SET,twitter-x-domain,✖️ Twitter",
-    "RULE-SET,twitter-x-ip,✖️ Twitter,no-resolve",
-    "RULE-SET,twitter-x-blackmatrix7-No_Resolve,✖️ Twitter",
-    "RULE-SET,icloud,DIRECT",
-    "RULE-SET,apple,DIRECT",
-    "RULE-SET,games-cn,DIRECT",
-    "PROCESS-NAME,bf6.exe,🎮 Games-Global",
-    "RULE-SET,games,🎮 Games-Global",
-    "RULE-SET,TikTok,🎵 TikTok",
-    "RULE-SET,proxy,🌍 PROXY",
-    "RULE-SET,gfw,🌍 PROXY",
-    "MATCH,🌍 PROXY"
-  ],
-  "sniffer": {
-    "enable": true,
-    "force-domain": [
-      "+.v2ex.com"
-    ],
-    "override-destination": true,
-    "parse-pure-ip": true,
-    "skip-domain": [
-      "Mijia Cloud",
-      "dlg.io.mi.com",
-      "+.apple.com",
-      "+.icloud.com",
-      "+.wechat.com",
-      "+.qpic.cn",
-      "+.qq.com",
-      "+.wechatapp.com",
-      "+.vivox.com",
-      "+.oray.com",
-      "+.sunlogin.net"
-    ],
-    "skip-dst-address": [
-      "rule-set:telegramcidr",
-      "rule-set:twitter-x-ip",
-      "rule-set:lancidr",
-      "rule-set:cncidr",
-  // --- 1. Google Public DNS ---
-      "8.8.8.8/32",
-      "8.8.4.4/32",
-      "2001:4860:4860::8888/128",
-      "2001:4860:4860::8844/128",
-
-  // --- 2. Cloudflare Public DNS ---
-      "1.1.1.1/32",
-      "1.0.0.1/32",
-      "2606:4700:4700::1111/128",
-      "2606:4700:4700::1001/128",
-
-  // --- 3. Quad9 Public DNS (Security Filtering) ---
-      "9.9.9.9/32",
-      "149.112.112.112/32",
-      "2620:fe::fe/128",
-
-  // --- 4. OpenDNS (Cisco) ---
-      "208.67.222.222/32",
-      "208.67.220.220/32",
-      "2620:119:35::35/128",
-
-  // --- 5. AdGuard DNS (Ad Blocking) ---
-      "94.140.14.14/32",
-      "94.140.15.15/32",
-      "2a10:50c0::ad1:ff/128",
-      "2a10:50c0::ad2:ff/128",
-
-  // --- 6. CleanBrowsing (Security/Adult Content Blocking) ---
-      "185.228.168.9/32",
-      "185.228.169.9/32",
-
-  // --- 7. Verisign Public DNS ---
-      "64.6.64.6/32",
-      "64.6.65.6/32",
-
-  // --- 8. Yandex Public DNS ---
-      "77.88.8.8/32",
-      "77.88.8.1/32",
-
-  // --- 9. DNS.SB Public DNS ---
-      "185.222.222.222/32",
-      "45.11.45.11/32",
-
-  // --- 10. AliDNS ---
-      "223.5.5.5/32",
-      "223.6.6.6/32",
-      "2400:3200::1/128",
-      "2400:3200:baba::1/128",
-    
-  // --- 11. Tencent DNS (DNSPod) ---
-      "119.29.29.29/32",
-      "182.254.116.116/32",
-
-  // --- 12. Baidu DNS ---
-      "180.76.76.76/32",
-
-  // --- 13. 114DNS (Standard and Security Editions) ---
-      "114.114.114.114/32",
-      "114.114.115.115/32",
-      "114.114.114.119/32",
-      "114.114.115.119/32",
-
-  // --- 14. CNNIC Public DNS ---
-      "1.2.4.8/32",
-      "210.2.4.8/32",
-
-  // --- 15. 360 Safe DNS (DNSPai) ---
-       "101.226.4.6/32",
-      "218.30.118.6/32"
-    ],
-    "sniff": {
-      "HTTP": {
-        "ports": [
-          80,
-          "8080-8880"
-        ]
-      },
-      "QUIC": {
-        "ports": [
-          443,
-          8443
-        ]
-      },
-      "TLS": {
-        "ports": [
-          443,
-          8443
-        ]
-      }
-    }
-  },
-  "socks-port": 7346,
-  "store-fake-ip": true,
   "store-selected": true,
-  "sub-rules": {
-    "fanqie": [
-      "DOMAIN,p6-ad-sign.byteimg.com,REJECT",
-      "DOMAIN,p9-ad-sign.byteimg.com,REJECT",
-      "DOMAIN,i.snssdk.com,REJECT",
-      "DOMAIN,i-lq.snssdk.com,REJECT",
-      "DOMAIN,dig.bdurl.net,REJECT",
-      "DOMAIN-KEYWORD,zijieapi,REJECT",
-      "DOMAIN,activity-ag.awemeughun.com,REJECT",
-      "DOMAIN,mcs.snssdk.com,REJECT",
-      "DOMAIN,tnc3-alisc1.snssdk.com,REJECT",
-      "DOMAIN,security-lq.snssdk.com,REJECT",
-      "DOMAIN,tnc3-aliec2.snssdk.com,REJECT",
-      "DOMAIN,is.snssdk.com,REJECT",
-      "DOMAIN,v6-novelapp.ixigua.com,REJECT",
-      "DOMAIN-WILDCARD,*novelapp.ixigua.com,REJECT",
-      "DOMAIN-WILDCARD,*default.ixigua.com,REJECT",
-      "DOMAIN,msync-im1-vip6-std.easemob.com,REJECT",
-      "DOMAIN,apd-pcdnwxlogin.teg.tencent-cloud.net,REJECT",
-      "DOMAIN,api.iegadp.qq.com,REJECT",
-      "DOMAIN,sf3-ttcdn-tos.pstatp.com,REJECT",
-      "DOMAIN-SUFFIX,pglstatp-toutiao.com,REJECT",
-      "DOMAIN-SUFFIX,byteorge.com,REJECT",
-      "DOMAIN-SUFFIX,bytegoofy.com,REJECT",
-      "DOMAIN-SUFFIX,bytedance.com,REJECT",
-      "IP-CIDR,49.71.37.101/32,REJECT,no-resolve",
-      "IP-CIDR,117.71.105.23/32,REJECT,no-resolve",
-      "IP-CIDR,218.94.207.205/32,REJECT,no-resolve",
-      "IP-CIDR,117.92.229.188/32,REJECT,no-resolve",
-      "IP-CIDR,101.36.166.16/32,REJECT,no-resolve",
-      "IP-CIDR,180.96.2.114/32,REJECT,no-resolve",
-      "DOMAIN-WILDCARD,*.pangolin-sdk-toutiao.com,REJECT",
-      "DOMAIN-WILDCARD,*.pglstatp-toutiao.com,REJECT",
-      "DOMAIN-WILDCARD,*.pstatp.com,REJECT",
-      "DOMAIN,gurd.snssdk.com,REJECT",
-      "DOMAIN-WILDCARD,*.byteimg.com,REJECT",
-      "DOMAIN-WILDCARD,*.snssdk.com,REJECT",
-      "DOMAIN-WILDCARD,*.pangolin-sdk-toutiao,REJECT",
-      "DOMAIN-WILDCARD,*.pangolin-sdk-toutiao.*,REJECT",
-      "DOMAIN-WILDCARD,*.pstatp.com.*,REJECT",
-      "DOMAIN-WILDCARD,*.pglstatp-toutiao.com.*,REJECT",
-      "DOMAIN-WILDCARD,gurd.snssdk.com.*,REJECT",
-      "MATCH,DIRECT"
-    ]
-  },
-  "tcp-concurrent": true,
+  "store-fake-ip": true,
   "tun": {
-    "auto-detect-interface": true,
-    "auto-redirect": true,
-    "auto-route": true,
+    "enable": true,
     "device": "XVSVT",
+    "auto-detect-interface": true,
+    "auto-route": true,
+    "auto-redirect": true,
+    "strict-route": true,
+    "stack": "gvisor",
     "dns-hijack": [
       "any:53",
       "udp://any:53",
       "tcp://any:53"
     ],
-    "enable": true,
     "route-address": [
       "198.51.100.0/30",
       "1.0.0.0/8",
@@ -1006,17 +345,646 @@ const TEMPLATE = {
       "196.0.0.0/6",
       "200.0.0.0/5",
       "208.0.0.0/4"
-    ],
-    "stack": "gvisor",
-    "strict-route": true
+    ]
   },
-  "unified-delay": true
+  "ntp": {
+    "enable": true,
+    "write-to-system": false,
+    "server": "time.apple.com",
+    "port": 123
+  },
+  "sniffer": {
+    "enable": true,
+    "parse-pure-ip": true,
+    "override-destination": true,
+    "sniff": {
+      "HTTP": {
+        "ports": [
+          80,
+          "8080-8880"
+        ]
+      },
+      "TLS": {
+        "ports": [
+          443,
+          8443
+        ]
+      },
+      "QUIC": {
+        "ports": [
+          443,
+          8443
+        ]
+      }
+    },
+    "force-domain": [
+      "+.v2ex.com"
+    ],
+    "skip-domain": [
+      "Mijia Cloud",
+      "dlg.io.mi.com",
+      "+.apple.com",
+      "+.icloud.com",
+      "+.wechat.com",
+      "+.qpic.cn",
+      "+.qq.com",
+      "+.wechatapp.com",
+      "+.vivox.com",
+      "+.oray.com",
+      "+.sunlogin.net"
+    ],
+    "skip-dst-address": [
+      "rule-set:telegramcidr",
+      "rule-set:twitter-x-ip",
+      "rule-set:lancidr",
+      "rule-set:cncidr",
+      "8.8.8.8/32",
+      "8.8.4.4/32",
+      "2001:4860:4860::8888/128",
+      "2001:4860:4860::8844/128",
+      "1.1.1.1/32",
+      "1.0.0.1/32",
+      "2606:4700:4700::1111/128",
+      "2606:4700:4700::1001/128",
+      "9.9.9.9/32",
+      "149.112.112.112/32",
+      "2620:fe::fe/128",
+      "208.67.222.222/32",
+      "208.67.220.220/32",
+      "2620:119:35::35/128",
+      "94.140.14.14/32",
+      "94.140.15.15/32",
+      "2a10:50c0::ad1:ff/128",
+      "2a10:50c0::ad2:ff/128",
+      "185.228.168.9/32",
+      "185.228.169.9/32",
+      "64.6.64.6/32",
+      "64.6.65.6/32",
+      "77.88.8.8/32",
+      "77.88.8.1/32",
+      "185.222.222.222/32",
+      "45.11.45.11/32",
+      "223.5.5.5/32",
+      "223.6.6.6/32",
+      "2400:3200::1/128",
+      "2400:3200:baba::1/128",
+      "119.29.29.29/32",
+      "182.254.116.116/32",
+      "180.76.76.76/32",
+      "114.114.114.114/32",
+      "114.114.115.115/32",
+      "114.114.114.119/32",
+      "114.114.115.119/32",
+      "1.2.4.8/32",
+      "210.2.4.8/32",
+      "101.226.4.6/32",
+      "218.30.118.6/32"
+    ]
+  },
+  "dns": {
+    "enable": true,
+    "cache-algorithm": "arc",
+    "ipv6": true,
+    "listen": "0.0.0.0:1053",
+    "use-hosts": true,
+    "use-system-hosts": false,
+    "default-nameserver": [
+      "tls://223.5.5.5#DIRECT",
+      "114.114.114.114#DIRECT",
+      "https://1.12.12.12/dns-query#DIRECT"
+    ],
+    "proxy-server-nameserver": [
+      "https://hrbgyitz34.cloudflare-gateway.com/dns-query#DIRECT"
+    ],
+    "direct-nameserver": [
+      "https://dns.alidns.com/dns-query#DIRECT",
+      "https://doh.pub/dns-query#DIRECT"
+    ],
+    "nameserver": [
+      "https://cloudflare-dns.com/dns-query#👉 手动切换"
+    ],
+    "nameserver-policy": {
+      "rule-set:private,proxy@direct,cn,echs_cn,echs_direct": [
+        "https://dns.alidns.com/dns-query#DIRECT"
+      ]
+    },
+      "prefer-h3": false,
+    "respect-rules": false,
+    "enhanced-mode": "fake-ip",
+    "fake-ip-range": "198.18.0.1/16",
+    "fake-ip-range6": "fdfe:dcba:9876::1/64",
+    "fake-ip-filter-mode": "blacklist",
+    "fake-ip-filter": [
+      "rule-set:fakeip-filter_domain",
+      "rule-set:private",
+      "rule-set:cn",
+      "rule-set:echs_cn",
+      "rule-set:echs_direct",
+      "rule-set:googlefcm",
+      "rule-set:applications",
+      "rule-set:pixiv",
+      "pixshaft.com"
+    ],
+  },
+  "hosts": {
+    "+.clash.dev": [
+      "127.0.0.1"
+    ],
+    "services.googleapis.cn": [
+      "services.googleapis.com"
+    ],
+    "+.mcdn.bilivideo.com": [
+      "0.0.0.0"
+    ],
+    "+.mcdn.bilivideo.cn": [
+      "0.0.0.0"
+    ],
+    "mtalk.google.com": [
+      "142.250.107.188",
+      "108.177.125.188"
+    ],
+    "dns.msftncsi.com": [
+      "131.107.255.255",
+      "fd3e:4f5a:5b81::1"
+    ],
+    "*.pangolin-sdk-toutiao": "0.0.0.0",
+    "*.pangolin-sdk-toutiao.*": "0.0.0.0",
+    "*.pstatp.com": "0.0.0.0",
+    "*.pstatp.com.*": "0.0.0.0",
+    "*.pglstatp-toutiao.com": "0.0.0.0",
+    "*.pglstatp-toutiao.com.*": "0.0.0.0",
+    "gurd.snssdk.com": "0.0.0.0",
+    "gurd.snssdk.com.*": "0.0.0.0",
+    "*default.ixigua.com": "0.0.0.0"
+  },
+  "proxies": null,
+  "proxy-groups": [
+    {
+      "name": "🌍 PROXY",
+      "icon": "https://github.com/DustinWin/ruleset_geodata/releases/download/icons/proxy.png",
+      "type": "select",
+      "proxies": [
+        "👉 手动切换",
+        "♻️ 自动选择",
+        "🔄 负载均衡",
+        "DIRECT"
+      ]
+    },
+    {
+      "name": "🔄 负载均衡",
+      "icon": "https://www.clashverge.dev/assets/icons/balance.svg",
+      "type": "load-balance",
+      "proxies": null,
+      "url": "https://www.gstatic.com/generate_204",
+      "interval": 300,
+      "lazy": true,
+      "strategy": "sticky-sessions"
+    },
+    {
+      "name": "👉 手动切换",
+      "icon": "https://github.com/DustinWin/ruleset_geodata/releases/download/icons/select.png",
+      "type": "select",
+      "proxies": null
+    },
+    {
+      "name": "♻️ 自动选择",
+      "icon": "https://github.com/DustinWin/ruleset_geodata/releases/download/icons/auto.png",
+      "type": "url-test",
+      "url": "https://www.gstatic.com/generate_204",
+      "interval": 300,
+      "tolerance": 50,
+      "proxies": null
+    },
+    {
+      "name": "📲 Telegram",
+      "icon": "https://github.com/DustinWin/ruleset_geodata/releases/download/icons/telegram.png",
+      "type": "select",
+      "proxies": null
+    },
+    {
+      "name": "🎮 Games-Global",
+      "icon": "https://github.com/DustinWin/ruleset_geodata/releases/download/icons/games-cn.png",
+      "type": "select",
+      "proxies": null
+    },
+    {
+      "name": "✖️ Twitter",
+      "icon": "https://www.clashverge.dev/assets/icons/twitter.svg",
+      "type": "select",
+      "filter": "美国|住宅",
+      "include-all-proxies": true
+    },
+    {
+      "name": "🤖 AI大模型",
+      "icon": "https://github.com/DustinWin/ruleset_geodata/releases/download/icons/ai.png",
+      "type": "select",
+      "filter": "美国|住宅",
+      "include-all-proxies": true
+    },
+    {
+      "name": "🎵 TikTok",
+      "icon": "https://github.com/DustinWin/ruleset_geodata/releases/download/icons/tiktok.png",
+      "type": "select",
+      "filter": "美国|住宅",
+      "include-all-proxies": true
+    },
+    {
+      "hidden": true,
+      "icon": "https://fastly.jsdelivr.net/gh/MiToverG422/Qure@master/IconSet/Color/fcm.png",
+      "name": "FCM",
+      "proxies": [
+        "👉 手动切换",
+        "DIRECT"
+      ],
+      "type": "select"
+    }
+  ],
+  "rule-providers": {
+    "Gemini_Domain": {
+      "type": "http",
+      "interval": 86400,
+      "behavior": "domain",
+      "url": "https://cdn.jsdelivr.net/gh/Accademia/Additional_Rule_For_Clash@master/Gemini/Gemini_Domain.yaml",
+      "path": "./ruleset/Gemini_Domain.yaml"
+    },
+    "Grok_Domain": {
+      "type": "http",
+      "interval": 86400,
+      "behavior": "domain",
+      "url": "https://raw.githubusercontent.com/Accademia/Additional_Rule_For_Clash/refs/heads/main/Grok/Grok_Domain.yaml",
+      "path": "./ruleset/Grok_Domain.yaml"
+    },
+    "HijackingPlus": {
+      "type": "http",
+      "interval": 86400,
+      "behavior": "classical",
+      "url": "https://raw.githubusercontent.com/Accademia/Additional_Rule_For_Clash/refs/heads/main/HijackingPlus/HijackingPlus_No_Resolve.yaml",
+      "path": "./ruleset/HijackingPlus.yaml"
+    },
+    "TikTok": {
+      "type": "http",
+      "interval": 86400,
+      "behavior": "domain",
+      "format": "mrs",
+      "url": "https://github.com/DustinWin/ruleset_geodata/releases/download/mihomo-ruleset/tiktok.mrs",
+      "path": "./ruleset/tiktok.mrs"
+    },
+    "ai-1": {
+      "type": "http",
+      "interval": 86400,
+      "behavior": "domain",
+      "format": "mrs",
+      "url": "https://github.com/DustinWin/ruleset_geodata/releases/download/mihomo-ruleset/ai.mrs",
+      "path": "./ruleset/ai-1.mrs"
+    },
+    "ai-2": {
+      "type": "http",
+      "interval": 86400,
+      "behavior": "domain",
+      "format": "mrs",
+      "url": "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/category-ai-!cn.mrs",
+      "path": "./ruleset/ai-2.mrs"
+    },
+    "apple@cn": {
+      "type": "http",
+      "interval": 86400,
+      "behavior": "domain",
+      "format": "mrs",
+      "url": "https://fastly.jsdelivr.net/gh/appshubcc/bett-rules@meta/geo/geosite/apple@cn.mrs",
+      "path": "./ruleset/apple@cn.mrs"
+    },
+    "applications": {
+      "type": "http",
+      "interval": 86400,
+      "behavior": "domain",
+      "url": "https://cdn.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/applications.txt",
+      "path": "./ruleset/applications.yaml"
+    },
+    "cn": {
+      "type": "http",
+      "interval": 86400,
+      "behavior": "domain",
+      "format": "mrs",
+      "url": "https://github.com/DustinWin/ruleset_geodata/releases/download/mihomo-ruleset/cn.mrs",
+      "path": "./ruleset/cn.mrs"
+    },
+    "cncidr": {
+      "type": "http",
+      "interval": 86400,
+      "behavior": "ipcidr",
+      "format": "mrs",
+      "url": "https://github.com/DustinWin/ruleset_geodata/releases/download/mihomo-ruleset/cnip.mrs",
+      "path": "./ruleset/cncidr.mrs"
+    },
+    "echs_cn": {
+      "type": "http",
+      "interval": 86400,
+      "behavior": "domain",
+      "format": "mrs",
+      "url": "https://raw.githubusercontent.com/echs-top/proxy/main/mrs/domain/cn.mrs",
+      "path": "./ruleset/echs_cn.mrs"
+    },
+    "echs_cn_ip": {
+      "type": "http",
+      "interval": 86400,
+      "behavior": "ipcidr",
+      "format": "mrs",
+      "url": "https://raw.githubusercontent.com/echs-top/proxy/main/mrs/ip/cn.mrs",
+      "path": "./ruleset/echs_cn_ip.mrs"
+    },
+    "echs_direct": {
+      "type": "http",
+      "interval": 86400,
+      "behavior": "domain",
+      "format": "mrs",
+      "url": "https://raw.githubusercontent.com/echs-top/proxy/main/mrs/domain/direct.mrs",
+      "path": "./ruleset/echs_direct.mrs"
+    },
+    "echs_direct_ip": {
+      "type": "http",
+      "interval": 86400,
+      "behavior": "ipcidr",
+      "format": "mrs",
+      "url": "https://raw.githubusercontent.com/echs-top/proxy/main/mrs/ip/direct.mrs",
+      "path": "./ruleset/echs_direct_ip.mrs"
+    },
+    "fakeip-filter_domain": {
+      "type": "http",
+      "interval": 86400,
+      "behavior": "domain",
+      "format": "mrs",
+      "url": "https://github.com/DustinWin/ruleset_geodata/releases/download/mihomo-ruleset/fakeip-filter.mrs",
+      "path": "./ruleset/fakeip-filter_domain.mrs"
+    },
+    "games": {
+      "type": "http",
+      "interval": 86400,
+      "behavior": "domain",
+      "format": "mrs",
+      "url": "https://github.com/DustinWin/ruleset_geodata/releases/download/mihomo-ruleset/games.mrs",
+      "path": "./ruleset/games.mrs"
+    },
+    "games-cn": {
+      "type": "http",
+      "interval": 86400,
+      "behavior": "domain",
+      "format": "mrs",
+      "url": "https://github.com/DustinWin/ruleset_geodata/releases/download/mihomo-ruleset/games-cn.mrs",
+      "path": "./ruleset/games-cn.mrs"
+    },
+    "gfw": {
+      "type": "http",
+      "interval": 86400,
+      "behavior": "domain",
+      "format": "mrs",
+      "url": "https://github.com/DustinWin/ruleset_geodata/releases/download/mihomo-ruleset/gfw.mrs",
+      "path": "./ruleset/gfw.mrs"
+    },
+    "google": {
+      "type": "http",
+      "interval": 86400,
+      "behavior": "domain",
+      "url": "https://cdn.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/google.txt",
+      "path": "./ruleset/google.yaml"
+    },
+    "google-cn": {
+      "type": "http",
+      "interval": 86400,
+      "behavior": "domain",
+      "format": "mrs",
+      "url": "https://github.com/DustinWin/ruleset_geodata/releases/download/mihomo-ruleset/google-cn.mrs",
+      "path": "./ruleset/google-cn.mrs"
+    },
+    "googlefcm": {
+      "type": "http",
+      "interval": 86400,
+      "behavior": "domain",
+      "format": "mrs",
+      "url": "https://fastly.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/googlefcm.mrs",
+      "path": "./ruleset/googlefcm.mrs"
+    },
+    "lancidr": {
+      "type": "http",
+      "interval": 86400,
+      "behavior": "ipcidr",
+      "url": "https://cdn.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/lancidr.txt",
+      "path": "./ruleset/lancidr.yaml"
+    },
+    "pixiv": {
+      "type": "http",
+      "interval": 86400,
+      "behavior": "domain",
+      "format": "mrs",
+      "url": "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/pixiv.mrs",
+      "path": "./ruleset/pixiv.mrs"
+    },
+    "private": {
+      "type": "http",
+      "interval": 86400,
+      "behavior": "domain",
+      "url": "https://cdn.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/private.txt",
+      "path": "./ruleset/private.yaml"
+    },
+    "proxy": {
+      "type": "http",
+      "interval": 86400,
+      "behavior": "domain",
+      "format": "mrs",
+      "url": "https://github.com/DustinWin/ruleset_geodata/releases/download/mihomo-ruleset/proxy.mrs",
+      "path": "./ruleset/proxy.mrs"
+    },
+    "proxy@direct": {
+      "type": "http",
+      "interval": 86400,
+      "behavior": "domain",
+      "format": "mrs",
+      "url": "https://raw.githubusercontent.com/echs-top/proxy/main/mrs/domain/proxy@direct.mrs",
+      "path": "./rules/proxy@direct.mrs"
+    },
+    "telegram_domain": {
+      "type": "http",
+      "interval": 86400,
+      "behavior": "domain",
+      "format": "mrs",
+      "url": "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/telegram.mrs",
+      "path": "./rules/telegram_domain.mrs"
+    },
+    "telegramcidr": {
+      "type": "http",
+      "interval": 86400,
+      "behavior": "ipcidr",
+      "format": "mrs",
+      "url": "https://raw.githubusercontent.com/reddishJade/private_proxy/main/Mihomo/Provider/telegram%40ip.mrs",
+      "path": "./ruleset/telegramcidr.mrs"
+    },
+    "twitter-x-blackmatrix7-No_Resolve": {
+      "type": "http",
+      "interval": 86400,
+      "behavior": "classical",
+      "format": "yaml",
+      "url": "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/refs/heads/master/rule/Clash/Twitter/Twitter_No_Resolve.yaml",
+      "path": "./ruleset/twitter-x-blackmartix7-noreslove.mrs"
+    },
+    "twitter-x-domain": {
+      "type": "http",
+      "interval": 86400,
+      "behavior": "domain",
+      "format": "mrs",
+      "url": "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/twitter.mrs",
+      "path": "./ruleset/twitter/x-domain.mrs"
+    },
+    "twitter-x-ip": {
+      "type": "http",
+      "interval": 86400,
+      "behavior": "ipcidr",
+      "format": "mrs",
+      "url": "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geoip/twitter.mrs",
+      "path": "./ruleset/twitter/x-ip.mrs"
+    }
+  },
+  "sub-rules": {
+    "fanqie": [
+      "DOMAIN,p6-ad-sign.byteimg.com,REJECT",
+      "DOMAIN,p9-ad-sign.byteimg.com,REJECT",
+      "DOMAIN,i.snssdk.com,REJECT",
+      "DOMAIN,i-lq.snssdk.com,REJECT",
+      "DOMAIN,dig.bdurl.net,REJECT",
+      "DOMAIN-KEYWORD,zijieapi,REJECT",
+      "DOMAIN,activity-ag.awemeughun.com,REJECT",
+      "DOMAIN,mcs.snssdk.com,REJECT",
+      "DOMAIN,tnc3-alisc1.snssdk.com,REJECT",
+      "DOMAIN,security-lq.snssdk.com,REJECT",
+      "DOMAIN,tnc3-aliec2.snssdk.com,REJECT",
+      "DOMAIN,is.snssdk.com,REJECT",
+      "DOMAIN,v6-novelapp.ixigua.com,REJECT",
+      "DOMAIN-WILDCARD,*novelapp.ixigua.com,REJECT",
+      "DOMAIN-WILDCARD,*default.ixigua.com,REJECT",
+      "DOMAIN,msync-im1-vip6-std.easemob.com,REJECT",
+      "DOMAIN,apd-pcdnwxlogin.teg.tencent-cloud.net,REJECT",
+      "DOMAIN,api.iegadp.qq.com,REJECT",
+      "DOMAIN,sf3-ttcdn-tos.pstatp.com,REJECT",
+      "DOMAIN-SUFFIX,pglstatp-toutiao.com,REJECT",
+      "DOMAIN-SUFFIX,byteorge.com,REJECT",
+      "DOMAIN-SUFFIX,bytegoofy.com,REJECT",
+      "DOMAIN-SUFFIX,bytedance.com,REJECT",
+      "IP-CIDR,49.71.37.101/32,REJECT,no-resolve",
+      "IP-CIDR,117.71.105.23/32,REJECT,no-resolve",
+      "IP-CIDR,218.94.207.205/32,REJECT,no-resolve",
+      "IP-CIDR,117.92.229.188/32,REJECT,no-resolve",
+      "IP-CIDR,101.36.166.16/32,REJECT,no-resolve",
+      "IP-CIDR,180.96.2.114/32,REJECT,no-resolve",
+      "DOMAIN-WILDCARD,*.pangolin-sdk-toutiao.com,REJECT",
+      "DOMAIN-WILDCARD,*.pglstatp-toutiao.com,REJECT",
+      "DOMAIN-WILDCARD,*.pstatp.com,REJECT",
+      "DOMAIN,gurd.snssdk.com,REJECT",
+      "DOMAIN-WILDCARD,*.byteimg.com,REJECT",
+      "DOMAIN-WILDCARD,*.snssdk.com,REJECT",
+      "DOMAIN-WILDCARD,*.pangolin-sdk-toutiao,REJECT",
+      "DOMAIN-WILDCARD,*.pangolin-sdk-toutiao.*,REJECT",
+      "DOMAIN-WILDCARD,*.pstatp.com.*,REJECT",
+      "DOMAIN-WILDCARD,*.pglstatp-toutiao.com.*,REJECT",
+      "DOMAIN-WILDCARD,gurd.snssdk.com.*,REJECT",
+      "MATCH,DIRECT"
+    ]
+  },
+  "rules": [
+    "AND,((NETWORK,UDP),(DST-PORT,3478-3479/5349-5350/19302-19309),(NOT,((RULE-SET,cncidr))),(NOT,((RULE-SET,cn))),(NOT,((RULE-SET,applications))),(NOT,((RULE-SET,games))),(NOT,((RULE-SET,games-cn)))),REJECT",
+    "RULE-SET,HijackingPlus,REJECT",
+    "SUB-RULE,(PROCESS-NAME,com.dragon.read.oversea.gp),fanqie",
+    "DOMAIN-KEYWORD,ikuuu,🌍 PROXY",
+    "RULE-SET,applications,DIRECT",
+    "RULE-SET,echs_cn,DIRECT",
+    "RULE-SET,echs_cn_ip,DIRECT,no-resolve",
+    "RULE-SET,echs_direct,DIRECT",
+    "RULE-SET,echs_direct_ip,DIRECT,no-resolve",
+    "RULE-SET,cn,DIRECT",
+    "RULE-SET,cncidr,DIRECT,no-resolve",
+    "RULE-SET,googlefcm,FCM",
+    "DOMAIN,clash.razord.top,DIRECT",
+    "DOMAIN,yacd.haishan.me,DIRECT",
+    "PROCESS-NAME,svchost.exe,DIRECT",
+    "RULE-SET,proxy@direct,🌍 PROXY",
+    "RULE-SET,private,DIRECT,no-resolve",
+    "RULE-SET,lancidr,DIRECT,no-resolve",
+    "DOMAIN-WILDCARD,*.deepseek.com,DIRECT",
+    "DOMAIN-WILDCARD,*.portal101.cn,DIRECT",
+    "DOMAIN-SUFFIX,cdnhwcqwg14.com,DIRECT",
+    "DOMAIN-SUFFIX,cdnhwcxcy07.com,DIRECT",
+    "DOMAIN-SUFFIX,cdngslb.com,DIRECT",
+    "DOMAIN-SUFFIX,edgekey.net,DIRECT",
+    "DOMAIN-SUFFIX,cloudfront.net,DIRECT",
+    "PROCESS-NAME-REGEX,.*nagram.*,📲 Telegram",
+    "PROCESS-NAME-REGEX,.*telegram.*,📲 Telegram",
+    "RULE-SET,telegramcidr,📲 Telegram,no-resolve",
+    "RULE-SET,telegram_domain,📲 Telegram",
+    // Manus AI: Covers Manus Desktop, Manus Helper and Android client processes
+    "PROCESS-NAME-REGEX,(?i).*(manus|tech\\.butterfly\\.app).*,🤖 AI大模型",
+    "PROCESS-NAME-REGEX,(?i).*claude.*,🤖 AI大模型",
+    "PROCESS-NAME-REGEX,(?i).*anthropic.*,🤖 AI大模型",
+    "DOMAIN,api.anthropic.com,🤖 AI大模型",
+    "DOMAIN,console.anthropic.com,🤖 AI大模型",
+    "DOMAIN,statsig.anthropic.com,🤖 AI大模型",
+    "DOMAIN,status.anthropic.com,🤖 AI大模型",
+    "DOMAIN,sentry.anthropic.com,🤖 AI大模型",
+    "DOMAIN,support.anthropic.com,🤖 AI大模型",
+    "DOMAIN,mcp-proxy.anthropic.com,🤖 AI大模型",
+    "DOMAIN,platform.claude.com,🤖 AI大模型",
+    "DOMAIN,code.claude.com,🤖 AI大模型",
+    "DOMAIN,downloads.claude.ai,🤖 AI大模型",
+    "DOMAIN,bridge.claudeusercontent.com,🤖 AI大模型",
+    "DOMAIN,cdn.growthbook.io,🤖 AI大模型",
+    "DOMAIN,cdn.usefathom.com,🤖 AI大模型",
+    "DOMAIN,registry.npmjs.org,🤖 AI大模型",
+    "DOMAIN,storage.googleapis.com,🤖 AI大模型",
+    "DOMAIN,raw.githubusercontent.com,🤖 AI大模型",
+    "DOMAIN,formulae.brew.sh,🤖 AI大模型",
+    "DOMAIN,http-intake.logs.us5.datadoghq.com,🤖 AI大模型",
+    "DOMAIN,browser-intake-us5-datadoghq.com,🤖 AI大模型",
+    "DOMAIN,servd-anthropic-website.b-cdn.net,🤖 AI大模型",
+    "DOMAIN,claudemcpclient.com,🤖 AI大模型",
+    "DOMAIN,claudemcpcontent.com,🤖 AI大模型",
+    "DOMAIN-SUFFIX,anthropic.com,🤖 AI大模型",
+    "DOMAIN-SUFFIX,claude.ai,🤖 AI大模型",
+    "DOMAIN-SUFFIX,claude.com,🤖 AI大模型",
+    "DOMAIN-SUFFIX,claudeusercontent.com,🤖 AI大模型",
+    "DOMAIN-SUFFIX,clau.de,🤖 AI大模型",
+    "DOMAIN-SUFFIX,frame.claudeusercontent.com,🤖 AI大模型",
+    "DOMAIN-SUFFIX,modelcontextprotocol.io,🤖 AI大模型",
+    "IP-CIDR,160.79.104.0/21,🤖 AI大模型,no-resolve",
+    "IP-CIDR6,2607:6bc0::/48,🤖 AI大模型,no-resolve",
+    "RULE-SET,Gemini_Domain,🤖 AI大模型",
+    "RULE-SET,Grok_Domain,🤖 AI大模型",
+    "IP-CIDR,17.253.4.0/23,🤖 AI大模型,no-resolve",
+    "DOMAIN,anthropic.com.cdn.cloudflare.net,🤖 AI大模型",
+    "DOMAIN,anthropic-com.ghost.io,🤖 AI大模型",
+    "DOMAIN-SUFFIX,sentry.io,🤖 AI大模型",
+    "DOMAIN-SUFFIX,statsigapi.net,🤖 AI大模型",
+    "DOMAIN,browser-intake-us5-datadoghq.com,🤖 AI大模型",
+    "DOMAIN-KEYWORD,datadog,🤖 AI大模型",
+    "DOMAIN-KEYWORD,sift,🤖 AI大模型",
+    "RULE-SET,ai-1,🤖 AI大模型",
+    "RULE-SET,ai-2,🤖 AI大模型",
+    "RULE-SET,google,🌍 PROXY",
+    "RULE-SET,google-cn,🌍 PROXY",
+    "PROCESS-NAME-REGEX,.*twitter.*,✖️ Twitter",
+    "RULE-SET,twitter-x-domain,✖️ Twitter",
+    "RULE-SET,twitter-x-ip,✖️ Twitter,no-resolve",
+    "RULE-SET,twitter-x-blackmatrix7-No_Resolve,✖️ Twitter",
+    "RULE-SET,apple@cn,DIRECT",
+    "RULE-SET,games-cn,DIRECT",
+    "PROCESS-NAME,bf6.exe,🎮 Games-Global",
+    "RULE-SET,games,🎮 Games-Global",
+    "RULE-SET,TikTok,🎵 TikTok",
+    "RULE-SET,proxy,🌍 PROXY",
+    "RULE-SET,gfw,🌍 PROXY",
+    "MATCH,🌍 PROXY"
+  ]
 };
 
-// Bettbox visual switch icons: The client will read the global serviceConfigs (name corresponds to the key in ruleOptionsEnable,
-// and icon is the icon displayed on that switch row). Only proxy groups are covered above; source of icons for feature switches:
-// FCM Direct is derived from the icon field of the FCM proxy group (changing the proxy group icon in one place syncs it);
-// other feature switches (Force Certificate Verification, Enable Reality Enhancement, IPv6 Preference) specify fixed icons here directly.
+// Bettbox's visual switch icon: the client will read the global serviceConfigs (name corresponds to the key of ruleOptionsEnable,
+// icon is the icon displayed for this switch row). The above only covers the agent group; the icon source of the function switch:
+// FCM direct connection is derived from the icon field of the FCM agent group (change the agent group icon in one place to synchronize);
+// The remaining function switches (force certificate verification, enable Reality enhancement, IPv6 priority) directly specify the fixed icon here.
 const serviceConfigs = TEMPLATE['proxy-groups']
   .filter(
     (group) =>
@@ -1055,19 +1023,18 @@ const serviceConfigs = TEMPLATE['proxy-groups']
     }
   ]);
 
-  
 // ============================================================================
-// Utility Functions
+// Utility function
 // ============================================================================
 
-// Deep clone: avoids mutual contamination of the same TEMPLATE instance when main() is called multiple times
+// Deep copy: avoid contaminating the same TEMPLATE with each other when calling main() multiple times
 function deepClone(value) {
   return JSON.parse(JSON.stringify(value));
 }
 
-// Determines whether a group is the template's placeholder group for "all single nodes here":
-// has the proxies field explicitly written and its value is null, for example:
-//   - name: 👉 Manual Select
+// Determine whether it is a placeholder group for "all single nodes here" in the template:
+// The proxies field is explicitly written and the value is null, for example:
+// - name: 👉 Manual switch
 //     proxies:
 //     type: select
 function isAllNodesPlaceholder(group) {
@@ -1075,10 +1042,10 @@ function isAllNodesPlaceholder(group) {
 }
 
 // =====================================================
-// Intelligent DNS Node Domain Supplement Logic
+// DNS node domain name intelligent supplementary logic
 // =====================================================
 
-// Determines whether the server is an IP address
+// Determine whether server is IP
 function isIPAddress(host) {
   if (!host || typeof host !== "string") {
     return true;
@@ -1103,7 +1070,7 @@ function normalizeDomain(domain) {
     : "";
 }
 
-// Wildcard domain matching
+// Wildcard domain name matching
 function matchWildcardDomain(rule, host) {
   rule = normalizeDomain(rule);
   host = normalizeDomain(host);
@@ -1112,7 +1079,7 @@ function matchWildcardDomain(rule, host) {
     return false;
   }
 
-  // Rules like +.example.com
+  // Rules of the form +.example.com
   if (rule.startsWith("+.")) {
     const suffix = rule.substring(2);
     return (
@@ -1121,13 +1088,13 @@ function matchWildcardDomain(rule, host) {
     );
   }
 
-  // Rules like .example.com
+  // Rules of the form .example.com
   if (rule.startsWith(".")) {
     const suffix = rule.substring(1);
     return host.endsWith("." + suffix);
   }
 
-  // * Wildcard
+  // * wildcard
   if (rule.includes("*")) {
     const ruleParts = rule.split(".");
     const hostParts = host.split(".");
@@ -1140,7 +1107,7 @@ function matchWildcardDomain(rule, host) {
     );
   }
 
-  // Regular domain
+  // Ordinary domain name
   return host === rule;
 }
 
@@ -1150,8 +1117,8 @@ function asNameserverList(nameservers) {
   }
 
   return typeof nameservers === "string" ? [nameservers] : [];
-} 
-// Compares whether two nameserver lists are equivalent (ignoring order and duplicates, compared as sets)
+}
+// Compare two nameserver lists for equality (ignore order and duplication, compare by set)
 function sameNameserverSet(a, b) {
   if (!Array.isArray(a) || !Array.isArray(b)) return false;
   const sa = new Set(a);
@@ -1234,21 +1201,21 @@ function applyEntryResolution(result) {
     }
   }
 }
-// Public DNS identification table: used to distinguish between "public directly connectable DNS" and "airport/user private DNS".
-// Data refers to the public DNS list in the local MyClash repository, but only borrows the identification table here without copying its processing logic.
+// Public DNS identification table: Used to distinguish between "public directly connectable DNS" and "airport/user's private DNS".
+//The data refers to the public DNS list in the local MyClash warehouse, but here we only borrow the identification table and do not copy its processing logic.
 const publicDnsList = [
   // Domestic
   '223.5.5.5', '223.6.6.6', '119.29.29.29', '1.12.12.12',
   '120.53.53.53', '114.114.114.114', '180.76.76.76', '1.2.4.8',
   '116.116.116.116', '101.226.4.6', '123.125.81.6', '180.184.1.1',
   '180.184.2.2',
-  // Overseas
+  // Abroad
   '1.1.1.1', '1.0.0.1', '8.8.8.8', '8.8.4.4', '9.9.9.9',
   '149.112.112.112', '208.67.222.222', '208.67.220.220',
   '94.140.14.14', '94.140.15.15', '76.76.2.0', '76.76.10.0',
   '185.228.168.9', '185.228.169.9', '77.88.8.8', '77.88.8.1',
   '156.154.70.1', '156.154.71.1', '127.0.0.1',
-  // Domain Keywords
+  //Domain name keywords
   'alidns', 'doh.pub', 'dot.pub', 'dns.pub', 'dnspod', 'dns.baidu',
   'dns.google', 'cloudflare', 'quad9', 'opendns', 'nextdns', 'adguard',
   'system'
@@ -1303,7 +1270,7 @@ function hasDnsListenLoop(dns) {
     asNameserverList(dns.nameserver)
   ];
 
-  // Check sources actually participating in resolution by priority:
+  // Check the sources actually participating in parsing by priority:
   // proxy-server-nameserver-policy > proxy-server-nameserver > nameserver-policy > nameserver.
   for (const group of candidates) {
     if (group.length > 0) {
@@ -1313,7 +1280,7 @@ function hasDnsListenLoop(dns) {
   return false;
 }
 
-// Extract DNS merge sources from the original configuration.
+// Extract the DNS merge source from the original configuration.
 function collectDnsRules(config) {
   const result = {
     nameservers: [],
@@ -1328,7 +1295,6 @@ function collectDnsRules(config) {
   if (!dns || typeof dns !== "object") {
     return result;
   }
-
   result.nameservers = asNameserverList(dns.nameserver);
 
   if (
@@ -1349,7 +1315,7 @@ function collectDnsRules(config) {
     Object.assign(result.proxyServerNameserverPolicy, dns["proxy-server-nameserver-policy"]);
   }
 
-  // hosts participates in node server rewriting only when use-hosts=true and DNS listening forms a closed loop
+  // hosts only participate in node server rewriting when use-hosts=true and DNS monitoring forms a closed loop.
   if (
     dns["use-hosts"] === true &&
     hasDnsListenLoop(dns) &&
@@ -1362,7 +1328,7 @@ function collectDnsRules(config) {
   return result;
 }
 
-// Resolve hosts multi-level mapping chain: follow step by step when the target is still a domain, until the end point is an IP, no further mappings exist, or a cycle is formed
+//Resolve hosts multi-level mapping chain: when the target is still a domain name, follow it step by step until the end point is IP, no more mappings or a loop
 function resolveHostsChain(startDomain, hosts) {
   const chain = [];
   const visited = new Set();
@@ -1399,15 +1365,15 @@ function resolveHostsChain(startDomain, hosts) {
   return { target: "", chain, type: "cycle" };
 }
 
-// Intelligently supplement DNS based on node domains
+// Supplement DNS based on node domain name
 function smartMergeDnsNode(config, result) {
   const rules = collectDnsRules(config);
   const newPolicy = result.dns["proxy-server-nameserver-policy"] || {};
   const newHosts = result.hosts || {};
   const proxies = Array.isArray(config.proxies) ? config.proxies : [];
 
-  // Keep node domains before mapping to identify and migrate policies, and separately record domains that still require DNS for actual connections.
-  // Nodes mapped to IPs produce no DNS policy; for nodes mapped to another domain, retain only the final-domain policy.
+  // Keep the domain name before node mapping to identify and migrate the policy, and separately record the domain name that still requires DNS when actually connecting.
+  // Nodes mapped to IP do not generate DNS policy; only the policy of the final domain name is retained when mapped to another domain name.
   const originalDomains = new Set();
   const originalDomainByProxy = new Map();
   for (const proxy of proxies) {
@@ -1425,9 +1391,9 @@ function smartMergeDnsNode(config, result) {
     }
   }
 
-  // Process hosts first: rewrite proxy.server before matching DNS policies.
-  // Some subscriptions' proxy-server-nameserver is udp://127.0.0.1:xxx, combined with the local mihomo DNS
-  // module's internal hosts; rewriting proxy.server from hosts can bypass this dependency.
+  // Process hosts first: override proxy.server before matching DNS policy.
+  // The partially subscribed proxy-server-nameserver is udp://127.0.0.1:xxx, and cooperates with local mihomo DNS
+  // hosts within the module; rewriting proxy.server from hosts can circumvent this dependency.
   for (const proxy of proxies) {
     if (!proxy || typeof proxy !== "object") {
       continue;
@@ -1485,7 +1451,7 @@ function smartMergeDnsNode(config, result) {
     }
   }
 
-  // Original domains identify migratable subscription policies; output policy entries match only actual connection domains.
+  // The original domain name is used to identify the migrationable subscription policy; the output policy only matches the actual connection domain name.
   const matchesAnyNodeDomain = (rule) => {
     for (const domain of allNodeDomains) {
       if (matchWildcardDomain(rule, domain)) {
@@ -1524,9 +1490,9 @@ function smartMergeDnsNode(config, result) {
   const policyMatchesDomain = (policy, domain) =>
     Object.keys(policy).some((rule) => matchWildcardDomain(rule, domain));
 
-  // When a policy only matches the domain before hosts rewriting and the final domain is not covered,
-  // add an exact policy for the final domain. The original domain is only the migration source and is not written to the final output;
-  // an original rule that directly matches the final domain remains unchanged and takes priority.
+  // When a policy only hits the domain name before hosts is rewritten, but the final domain name is not covered by the policy,
+  //Add a precise policy for the final domain name. The original domain name only serves as the migration source and is not written into the final result;
+  // The original rule that has directly matched the final domain name remains intact and takes precedence.
   const copyResolvedDomainPolicy = (policy, shouldCopy) => {
     for (const { original, effective } of nodeDomainPairs) {
       if (
@@ -1545,8 +1511,8 @@ function smartMergeDnsNode(config, result) {
     }
   };
 
-  // Priority: proxy-server-nameserver-policy > proxy-server-nameserver (private only)
-  //           > nameserver-policy > nameserver (private only).
+  //Priority: proxy-server-nameserver-policy > proxy-server-nameserver (private only)
+  // > nameserver-policy > nameserver (private only).
   const matchedProxyPolicyKeys = new Set();
   for (const rule in rules.proxyServerNameserverPolicy) {
     if (!matchesAnyNodeDomain(rule)) {
@@ -1558,7 +1524,7 @@ function smartMergeDnsNode(config, result) {
     }
   }
 
-  // A proxy-server-nameserver-policy matching the original domain also covers the final mapped domain by priority.
+  // When proxy-server-nameserver-policy hits the original domain name, its priority also covers the final mapped domain name.
   copyResolvedDomainPolicy(rules.proxyServerNameserverPolicy, () => true);
 
   const proxyCoveredDomains = new Set();
@@ -1612,7 +1578,7 @@ function smartMergeDnsNode(config, result) {
       }
     }
 
-    // nameserver-policy can likewise follow a hosts domain chain, but must not override a higher-priority policy.
+    // nameserver-policy can also be passed along with the domain name mapping link of hosts, but it must not override higher priority.
     copyResolvedDomainPolicy(
       rules.nameserverPolicy,
       ({ effective }) => !proxyCoveredDomains.has(effective)
@@ -1627,7 +1593,7 @@ function smartMergeDnsNode(config, result) {
     }
   }
 
-  // Remove policy items identical to the global fallback, and deduplicate values.
+  // Remove the policy items that are the same as the global bottom line and deduplicate the values.
   const globalProxyServerNameservers = asNameserverList(
     result.dns["proxy-server-nameserver"]
   );
@@ -1659,13 +1625,14 @@ function smartMergeDnsNode(config, result) {
 }
 
 // ============================================================================
-// Telegram DC experiment: only modifies result when the switch is enabled.
+// TGDC experiment diversion: only modify result when the switch is true.
 // ============================================================================
 function applyTelegramDcExperiment(result, originalProxies) {
   if (ruleOptionsEnable['TGDC实验分流'] !== true) {
     return;
   }
 
+  // Insert the Telegram rule set before the original Telegram rule set; keep the original order of other providers.
   const originalProviders = result['rule-providers'] || {};
   const providersWithTelegramDc = {};
   let inserted = false;
@@ -1681,6 +1648,7 @@ function applyTelegramDcExperiment(result, originalProxies) {
   }
   result['rule-providers'] = providersWithTelegramDc;
 
+  //The original 📲 Telegram group is changed to the bottom group, and three DC/region groups are inserted after "♻️Automatic selection"; nodes are automatically filtered by filter. Empty groups are natively fallbacked by Mihomo.
   const telegramFallback = (result['proxy-groups'] || []).find(
     (group) => group && group.name === '📲 Telegram'
   );
@@ -1705,6 +1673,7 @@ function applyTelegramDcExperiment(result, originalProxies) {
   );
   result['proxy-groups'] = proxyGroups;
 
+  //Place specific DC/region rules before Telegram full rules; the original Telegram rules are changed to point to the bottom group.
   if (!Array.isArray(result.rules)) {
     result.rules = [];
   }
@@ -1723,15 +1692,15 @@ function applyTelegramDcExperiment(result, originalProxies) {
 }
 
 // ============================================================================
-// Entry Function: Bettbox / FlClash-based clients will call main(config) and use its return value
+// Entry function: Bettbox / FlClash client will call main(config) and use its return value
 // ============================================================================
 function main(config, profileName) {
   config = config || {};
 
-  // ---- 1. Extract dynamic data from the subscription's original configuration that will be overwritten by the template but needs to be retained/merged ----
+  // ---- 1. Take out the dynamic data that will be overwritten by the template but needs to be retained/merged from the original subscription configuration ----
   const originalProxies = Array.isArray(config.proxies) ? config.proxies : [];
 
-  // 1.1 Reality Enhancement Switch Handling
+  // 1.1 Reality enhanced switch processing
   const enableRealityEnhance = ruleOptionsEnable['启用 Reality 增强'] === true;
 
   if (enableRealityEnhance) {
@@ -1759,8 +1728,8 @@ function main(config, profileName) {
     }
   }
 
-  // 1.2 Node TLS Certificate Verification Switch Handling: By default, does not interfere with subscription nodes' original skip-cert-verify;
-  //     when "Force Certificate Verification" is enabled, uniformly sets them to false (forcing certificate verification), treating all nodes equally
+  // 1.2 Node TLS certificate verification switch processing: By default, the original skip-cert-verify of the subscribing node will not be interfered;
+  // When "mandatory certificate verification" is turned on, set it to false (mandatory certificate verification) and treat all nodes equally.
   const forceCertVerify = ruleOptionsEnable['强制证书验证'] === true;
 
   for (const proxy of originalProxies) {
@@ -1773,8 +1742,8 @@ function main(config, profileName) {
     }
   }
 
-  // 1.3 IPv6 preference: only modify the generic ip-version field when enabled.
-  // Keep ipv6 unchanged; toggle ipv6-prefer to ipv6; use ipv6-prefer for every other value or omission.
+  // 1.3 IPv6 priority switch: Modify the general ip-version field of the subscribing node only when turned on.
+  // ipv6 is already IPv6 only and remains unchanged; ipv6-prefer is switched to ipv6; other values ​​(including missing ones) are set to ipv6-prefer.
   const preferIPv6 = ruleOptionsEnable['IPv6优先'] === true;
 
   if (preferIPv6) {
@@ -1795,28 +1764,28 @@ function main(config, profileName) {
       ? config['proxy-providers']
       : null;
 
-  // ---- 2. Use the template as the main body, and deep clone a copy to act as the final result ----
+  // ---- 2. Use the template as the main body and make a deep copy as the final result ----
   const result = deepClone(TEMPLATE);
 
-  // ---- 2.5 Telegram DC experiment (default off; injects after being enabled) ----
+  // ---- 2.5 TGDC experimental shunt (off by default; controlled by UI switch) ----
   applyTelegramDcExperiment(result, originalProxies);
 
-  // ---- 3. Replace the node list with the real nodes from the subscription ----
+  // ---- 3. Replace the node list with the real nodes in the subscription ----
   result.proxies = originalProxies;
   if (originalProxyProviders) {
     result['proxy-providers'] = originalProxyProviders;
   }
 
-  // ---- 4. Dynamically filter policy groups: read individual switches from ruleOptionsEnable ----
-  // Identify all disabled policy group names
+  // ---- 4. Dynamic filtering policy group: read the individual switch of ruleOptionsEnable ----
+  //Identify all disabled policy group names
   const disabledGroupNames = new Set();
   const activeGroupNames = new Set();
 
   (result['proxy-groups'] || []).forEach(group => {
     if (group && group.name) {
-      // After enabling TGDC, 📲 Telegram(兜底) continues to use the original 📲 Telegram switch.
+      // After TGDC is turned on, 📲 Telegram still uses the original 📲 Telegram switch.
       const optionName = group.name === '📲 Telegram(兜底)' ? '📲 Telegram' : group.name;
-      // By default, keep enabled if this name is not written in rule options
+      // By default, if this name is not written in the rule options, it will remain enabled.
       if (ruleOptionsEnable[optionName] === false) {
         disabledGroupNames.add(group.name);
       } else {
@@ -1830,20 +1799,20 @@ function main(config, profileName) {
     group => group && group.name && !disabledGroupNames.has(group.name)
   );
 
-  // Clean up references to "disabled policy groups" in other enabled policy groups
+  // Clear references to the "disabled policy group" in other enabled policy groups
   const fallbackTarget = activeGroupNames.has('🌍 PROXY') ? '🌍 PROXY' : 'DIRECT';
 
   result['proxy-groups'].forEach(group => {
     if (Array.isArray(group.proxies)) {
       group.proxies = group.proxies.filter(p => !disabledGroupNames.has(p));
-      // If the list is empty after filtering, fill in the fallback policy (prefer 🌍 PROXY, then DIRECT)
+      // If the list is empty after elimination, fill in the minimum strategy (first 🌍 PROXY, secondly DIRECT)
       if (group.proxies.length === 0) {
         group.proxies = [fallbackTarget];
       }
     }
   });
 
-  // ---- 5. Fill groups marked as "all single nodes here" with the subscription's real node names ----
+  // ---- 5. Fill in the group marked "Here are all single nodes" with the real node name of the subscription ----
   const allNodeNames = originalProxies
     .map((p) => p && p.name)
     .filter((name) => typeof name === 'string' && name.length > 0);
@@ -1857,8 +1826,8 @@ function main(config, profileName) {
     }
   });
 
-  // ---- 5.5 FCM Direct Switch: When enabled by default, the hidden FCM group contains only DIRECT;
-  //      when disabled, only 👉 Manual Select is retained (this switch does not remove the FCM group, only rewrites the nodes inside the group) ----
+  // ---- 5.5 FCM direct connection switch: When turned on by default, the FCM hidden group only contains DIRECT;
+  // Only retain after closing 👉 Manual switch (this switch does not remove the FCM group, only rewrites the nodes in the group) ----
   const fcmDirectEnabled = ruleOptionsEnable['FCM直连'] === true;
   result['proxy-groups'].forEach((group) => {
     if (group && group.name === 'FCM') {
@@ -1866,7 +1835,7 @@ function main(config, profileName) {
     }
   });
 
-  // ---- 6. Clean up rules pointing to disabled policy groups in rules, pointing them to the fallback policy group instead ----
+  // ---- 6. Clean up the rules in rules that point to the disabled policy group and point to the guaranteed policy group ----
   if (Array.isArray(result.rules)) {
     result.rules = result.rules.map(rule => {
       let updatedRule = rule;
@@ -1879,13 +1848,13 @@ function main(config, profileName) {
     });
   }
 
-  // ---- 7. Intelligent DNS Node Supplement ----
+  // ---- 7. DNS node intelligence supplement ----
   smartMergeDnsNode(
     config,
     result
   );
 
-  // ---- 8. Domestic entry resolution: append the operator policy to the final node DNS result. ----
+  // ---- 8. Domestic entrance resolution: append operator policy to the final node DNS result. ----
   applyEntryResolution(result);
 
   return result;

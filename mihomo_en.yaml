@@ -266,7 +266,7 @@ proxy-groups:
     type: select
     filter: "US|Residential"
     include-all-proxies: true
-  - name: 🤖 AI
+  - name: 🤖 AI大模型
     icon: "https://github.com/DustinWin/ruleset_geodata/releases/download/icons/ai.png"
     type: select
     filter: "US|Residential"
@@ -284,7 +284,7 @@ proxy-groups:
   # The switch icon is taken from this group's icon field, and changing the icon only requires modifying it here.
   - name: FCM
     icon: "https://fastly.jsdelivr.net/gh/MiToverG422/Qure@master/IconSet/Color/fcm.png"
-    # hidden: true  # Hide this group in the script to keep the UI clean; kept visible in the template to show that the group actually exists
+    # hidden: true  # 脚本中隐藏该组以保持界面简洁；模板保留可见，以表明该组确实存在
     type: select
     proxies:
       - 👉 手动切换
@@ -406,14 +406,14 @@ rules:
 
   - DOMAIN-WILDCARD,*.deepseek.com,DIRECT
   - DOMAIN-WILDCARD,*.portal101.cn,DIRECT
-  # Huawei Cloud CDN Distribution Domains
+  # Huawei Cloud CDN Distribution Domain
   - DOMAIN-SUFFIX,cdnhwcqwg14.com,DIRECT
   - DOMAIN-SUFFIX,cdnhwcxcy07.com,DIRECT
-  # Alibaba Cloud CDN Distribution Domains
+  # Alibaba Cloud CDN Distribution Domain
   - DOMAIN-SUFFIX,cdngslb.com,DIRECT
-  # Akamai CDN Distribution Domains
+  # Akamai CDN Distribution Domain
   - DOMAIN-SUFFIX,edgekey.net,DIRECT
-  # Amazon CloudFront Distribution Domains (API CDN)
+  # Amazon CloudFront Distribution Domain (API CDN)
   - DOMAIN-SUFFIX,cloudfront.net,DIRECT
 
   - PROCESS-NAME-REGEX,.*nagram.*,📲 Telegram
@@ -422,10 +422,10 @@ rules:
   - RULE-SET,telegram_domain,📲 Telegram
   # Manus AI: Covers Manus Desktop, Manus Helper, and the Android client process
   - PROCESS-NAME-REGEX,(?i).*(manus|tech\.butterfly\.app).*,🤖 AI
-  # Claude / Anthropic: process matches take precedence and cover Claude Desktop, Claude Code, etc.
+  # // Claude / Anthropic: process matches take precedence and cover Claude Desktop, Claude Code, etc.
   - PROCESS-NAME-REGEX,(?i).*claude.*,🤖 AI
   - PROCESS-NAME-REGEX,(?i).*anthropic.*,🤖 AI
-  # Claude / Anthropic: official API, web login, OAuth, MCP, CLI updates, and plugin dependencies.
+  # // Claude / Anthropic: official API, web login, OAuth, MCP, CLI updates, and plugin dependencies.
   - DOMAIN,api.anthropic.com,🤖 AI
   - DOMAIN,console.anthropic.com,🤖 AI
   - DOMAIN,statsig.anthropic.com,🤖 AI
@@ -473,7 +473,7 @@ rules:
   - DOMAIN,browser-intake-us5-datadoghq.com,🤖 AI
   - DOMAIN-KEYWORD,datadog,🤖 AI
   - DOMAIN-KEYWORD,sift,🤖 AI
-  # Third-party monitoring entries for backward compatibility with legacy AI rules
+  # Compatible with third-party monitoring entries in older AI rules
   - RULE-SET,ai-1,🤖 AI
   - RULE-SET,ai-2,🤖 AI
 
