@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-"""Translate Chinese source files to English with Gemini first, DeepSeek fallback.
+"""Translate Chinese source files to English with Gemini first, DeepSeek second,
+public Google Translate as the final fallback.
 
 Pairs:
   mihomo.yaml        -> mihomo_en.yaml
@@ -7,10 +8,12 @@ Pairs:
   README.md          -> README_en.md
 
 Provider rules:
-- Start with Gemini.
-- If Gemini fails on a file, fall back to DeepSeek for that file and lock all
-  later files to DeepSeek.
-- If the active provider fails without a fallback, stop immediately.
+- Start with the first configured provider (Gemini, else DeepSeek).
+- If the active provider fails on a file, fall back to the next provider in the
+  chain (Gemini -> DeepSeek -> Google Translate) and lock all later files to it.
+- Google Translate is the always-available final fallback (no API key needed);
+  it translates comment/prose text only so code structure is preserved.
+- If the active provider fails and there is no next provider, stop immediately.
 - English files are only replaced after local validation passes.
 - Uses a manual translation glossary to maintain consistency.
 """
@@ -24,6 +27,7 @@ import sys
 import tempfile
 import time
 import urllib.error
+import urllib.parse
 import urllib.request
 from datetime import datetime
 from pathlib import Path
@@ -228,15 +232,36 @@ def build_chunk_prompt(kind, glossary, chunk_index, total):
 
 
 def provider_label(provider):
-    return "Gemini" if provider == "gemini" else "DeepSeek"
+    return {
+        "gemini": "Gemini",
+        "deepseek": "DeepSeek",
+        "google": "Google Translate",
+    }.get(provider, provider)
 
 
 def provider_key(provider, gemini_key, deepseek_key):
-    return gemini_key if provider == "gemini" else deepseek_key
+    if provider == "gemini":
+        return gemini_key
+    if provider == "deepseek":
+        return deepseek_key
+    return None
 
 
 def provider_model(provider, gemini_model, deepseek_model):
-    return gemini_model if provider == "gemini" else deepseek_model
+    if provider == "gemini":
+        return gemini_model
+    if provider == "deepseek":
+        return deepseek_model
+    return "public translate.googleapis.com (dict-chrome-ex)"
+
+
+def next_in_chain(chain, provider):
+    """Return the provider after `provider` in the chain, or None if it is last."""
+    try:
+        index = chain.index(provider)
+    except ValueError:
+        return None
+    return chain[index + 1] if index + 1 < len(chain) else None
 
 
 def sleep_before_retry(attempt, retry_after=None):
@@ -338,6 +363,7 @@ def call_provider(provider, prompt, api_key, model, timeout, max_attempts):
                     sleep_before_retry(attempt)
                 continue
             log("  attempt %d: OK (%.2fs)" % (attempt, time.time() - started))
+            _note_provider(provider, True, time.time() - started)
             return text
         except urllib.error.HTTPError as exc:
             detail = exc.read().decode("utf-8", errors="replace")[:300]
@@ -376,7 +402,240 @@ def call_provider(provider, prompt, api_key, model, timeout, max_attempts):
                 last_error = "%s: %s" % (type(exc).__name__, exc)
             if attempt < max_attempts:
                 sleep_before_retry(attempt)
+    _note_provider(provider, False)
     raise ProviderError(provider, last_error or "unknown failure")
+
+
+GOOGLE_GLOSSARY_HITS = 0
+PROVIDER_STATS = {}
+GOOGLE_TRANSLATE_URL = "https://translate.googleapis.com/translate_a/t"
+
+
+def _note_provider(provider, ok, latency=None):
+    stats = PROVIDER_STATS.setdefault(
+        provider, {"ok": 0, "fail": 0, "ok_time_sum": 0.0}
+    )
+    if ok:
+        stats["ok"] += 1
+        stats["ok_time_sum"] += latency or 0.0
+    else:
+        stats["fail"] += 1
+
+
+def _extract_google_text(body):
+    """Return translated text from either of the two public-endpoint shapes:
+
+      flat    ["hello"]                 -> body[0] is already a string
+      nested  [["hello", "zh-CN"], ...] -> body[0] is a segment list, [0] is text
+    """
+    if not isinstance(body, list) or not body:
+        return ""
+    first = body[0]
+    if isinstance(first, str):
+        return first
+    if isinstance(first, list) and first:
+        parts = []
+        for segment in body:
+            if isinstance(segment, list) and segment and isinstance(segment[0], str):
+                parts.append(segment[0])
+        return "".join(parts)
+    return ""
+
+
+def call_google_fragment(text, target_lang="en", timeout=30):
+    """Translate one plain-text fragment via the public (key-less) Google endpoint.
+
+    Uses the `dict-chrome-ex` client on /translate_a/t, which returns
+    [[translated, language-code]] JSON and generally works from datacenter/cloud
+    IPs where the legacy `client=gtx` endpoint is rate-limited (HTTP 429).
+    """
+    params = {
+        "client": "dict-chrome-ex",
+        "sl": "auto",
+        "tl": target_lang,
+        "q": text,
+    }
+    url = GOOGLE_TRANSLATE_URL + "?" + urllib.parse.urlencode(params)
+    request = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
+    with urllib.request.urlopen(request, timeout=timeout) as response:
+        body = json.loads(response.read().decode("utf-8"))
+    return _extract_google_text(body)
+
+
+def google_translate_fragment(text, glossary, timeout=30):
+    """Translate one comment/prose fragment, honoring the glossary first.
+
+    Whitespace wrap is preserved; on any failure the original text is returned so
+    this best-effort final fallback never corrupts structure.
+    """
+    stripped = text.strip()
+    if not stripped or not contains_cjk(stripped):
+        return text
+    global GOOGLE_GLOSSARY_HITS
+    if glossary and stripped in glossary:
+        translated = glossary[stripped]
+        GOOGLE_GLOSSARY_HITS += 1
+        log("  google glossary hit: %r -> %r" % (stripped[:40], translated[:40]))
+    else:
+        try:
+            translated = call_google_fragment(stripped, timeout=timeout)
+        except Exception as exc:
+            log("  google fragment failed (%s): %s" % (type(exc).__name__, exc))
+            return text
+    lead = text[: len(text) - len(text.lstrip())]
+    trail = text[len(text.rstrip()):]
+    return lead + translated + trail
+
+
+def _comment_ranges(line, kind, state):
+    """Return (comment ranges, new_state) for one line.
+
+    Only comment/prose text is marked for translation so YAML keys, JS
+    identifiers and all functional values stay byte-identical and pass
+    check_code_sync.py.
+    """
+    if kind == "yaml":
+        idx = len(line)
+        for i, char in enumerate(line):
+            if char == "#" and (i == 0 or line[i - 1].isspace()):
+                idx = i
+                break
+        return ([(idx, len(line))] if idx < len(line) else []), False
+    if kind != "js":
+        return ([(0, len(line))] if contains_cjk(line) else []), state
+    in_block = state
+    ranges = []
+    i = 0
+    n = len(line)
+    while i < n:
+        if in_block:
+            j = line.find("*/", i)
+            if j == -1:
+                ranges.append((i, n))
+                i = n
+            else:
+                ranges.append((i, j + 2))
+                i = j + 2
+                in_block = False
+        else:
+            if line[i:i + 2] == "//" and not (i > 0 and line[i - 1] == ":"):
+                ranges.append((i, n))
+                i = n
+                continue
+            if line[i:i + 2] == "/*":
+                j = line.find("*/", i + 2)
+                if j == -1:
+                    ranges.append((i, n))
+                    in_block = True
+                    i = n
+                else:
+                    ranges.append((i, j + 2))
+                    i = j + 2
+                continue
+            i += 1
+    return ranges, in_block
+
+
+def google_translate_chunk(chunk, kind, glossary, timeout=30):
+    """Translate a chunk with Google, preserving all code/structure.
+
+    Line-by-line: only comment spans (yaml/js) or prose lines (readme) that
+    contain CJK are sent to Google; everything else is carried over untouched.
+    """
+    if kind == "readme":
+        return "\n".join(
+            google_translate_fragment(line, glossary, timeout)
+            if contains_cjk(line)
+            else line
+            for line in chunk.splitlines()
+        )
+    state = False
+    output = []
+    for line in chunk.splitlines():
+        ranges, state = _comment_ranges(line, kind, state)
+        if not ranges:
+            output.append(line)
+            continue
+        rebuilt = ""
+        pos = 0
+        for start, end in ranges:
+            rebuilt += line[pos:start]
+            fragment = line[start:end]
+            rebuilt += (
+                google_translate_fragment(fragment, glossary, timeout)
+                if contains_cjk(fragment)
+                else fragment
+            )
+            pos = end
+        rebuilt += line[pos:]
+        output.append(rebuilt)
+    return "\n".join(output)
+
+
+def emit_report(report, chain_str, written_count, total):
+    """Print a summary and, when available, write GHA step summary + JSON report."""
+    text = build_report_text(report, chain_str, written_count, total)
+    print("\n%s" % text)
+
+    summary_path = os.environ.get("GITHUB_STEP_SUMMARY")
+    if summary_path:
+        try:
+            with open(summary_path, "a", encoding="utf-8") as fh:
+                fh.write(text + "\n")
+        except OSError as exc:
+            log("Warning: could not write step summary: %s" % exc)
+
+    report_path = os.environ.get("SYNC_REPORT_PATH")
+    if report_path:
+        try:
+            payload = {
+                "chain": chain_str,
+                "files": report,
+                "provider_stats": PROVIDER_STATS,
+                "glossary_hits": GOOGLE_GLOSSARY_HITS,
+            }
+            with open(report_path, "w", encoding="utf-8") as fh:
+                json.dump(payload, fh, ensure_ascii=False, indent=2)
+            log("report written to %s" % report_path)
+        except OSError as exc:
+            log("Warning: could not write report to %s: %s" % (report_path, exc))
+
+
+def build_report_text(report, chain_str, written_count, total):
+    lines = [
+        "## English Sync Report",
+        "",
+        "| File | Target | Kind | Chunks | Provider used | Validation |",
+        "|---|---|---|---|---|---|",
+    ]
+    for r in report:
+        lines.append(
+            "| %s | %s | %s | %d | %s | %s |"
+            % (
+                r["source"],
+                r["target"],
+                r["kind"],
+                r["chunks"],
+                r["provider_used"] or "skipped",
+                r["validation"] or "n/a",
+            )
+        )
+    lines += ["", "## Provider stats", ""]
+    if PROVIDER_STATS:
+        for prov, s in PROVIDER_STATS.items():
+            avg = (s["ok_time_sum"] / s["ok"]) if s["ok"] else 0.0
+            lines.append(
+                "- **%s**: ok=%d fail=%d avg_ok=%.1fs"
+                % (provider_label(prov), s["ok"], s["fail"], avg)
+            )
+    else:
+        lines.append("- none")
+    lines.append("")
+    lines.append("- Chain: **%s**" % chain_str)
+    lines.append("- Files updated: **%d/%d**" % (written_count, total))
+    if GOOGLE_GLOSSARY_HITS:
+        lines.append("- Glossary terms applied in Google fallback: **%d**" % GOOGLE_GLOSSARY_HITS)
+    return "\n".join(lines)
 
 
 TRUNCATION_SPLIT_MIN_CHARS = int(os.environ.get("SYNC_TRUNCATION_MIN_CHARS", "400"))
@@ -430,6 +689,8 @@ def translate_chunk(
     """
     if not contains_cjk(chunk):
         return chunk
+    if provider == "google":
+        return google_translate_chunk(chunk, kind, glossary, timeout=timeout)
     try:
         raw = call_provider(
             provider,
@@ -556,13 +817,28 @@ def stop(idx, total, src_name, dst_name, written, untouched):
 def main():
     gemini_key = os.environ.get("GEMINI_API_KEY", "")
     deepseek_key = os.environ.get("DEEPSEEK_API_KEY", "")
-    if not gemini_key and not deepseek_key:
-        print("::error::Neither GEMINI_API_KEY nor DEEPSEEK_API_KEY is set")
+    use_google = os.environ.get("SYNC_USE_GOOGLE_FALLBACK", "1") != "0"
+
+    chain = []
+    if gemini_key:
+        chain.append("gemini")
+    if deepseek_key:
+        chain.append("deepseek")
+    if use_google:
+        chain.append("google")
+    if not chain:
+        print(
+            "::error::No translation provider available (set GEMINI_API_KEY/"
+            "DEEPSEEK_API_KEY or enable the Google fallback)"
+        )
         sys.exit(1)
 
-    provider = "gemini" if gemini_key else "deepseek"
-    if not gemini_key:
-        print("::warning::GEMINI_API_KEY is not set; starting with DeepSeek")
+    provider = chain[0]
+    if provider != "gemini":
+        print(
+            "::warning::GEMINI_API_KEY is not set; starting with %s"
+            % provider_label(provider)
+        )
 
     gemini_model = os.environ.get("GEMINI_MODEL", "gemini-2.0-flash")
     deepseek_model = os.environ.get("DEEPSEEK_MODEL", "deepseek-v4-flash").strip()
@@ -599,6 +875,7 @@ def main():
     untouched = [dst for _, dst, _ in pairs]
     total = len(pairs)
     switched = False
+    report = []
 
     for idx, (src_name, dst_name, kind) in enumerate(pairs, start=1):
         src_path = ROOT / src_name
@@ -611,6 +888,14 @@ def main():
         file_start = time.time()
         content = src_path.read_text(encoding="utf-8")
         chunks = split_content(content, kind)
+        file_meta = {
+            "source": src_name,
+            "target": dst_name,
+            "kind": kind,
+            "chunks": len(chunks),
+            "provider_used": None,
+            "validation": None,
+        }
         text = None
         used_provider = None
         invalid_attempts = 0
@@ -624,8 +909,8 @@ def main():
                 stop(idx, total, src_name, dst_name, written, untouched)
                 sys.exit(1)
 
-            if provider == "deepseek" and switched:
-                label = "DeepSeek (locked, Gemini skipped)"
+            if switched:
+                label = "%s (fallback)" % provider_label(provider)
             else:
                 label = provider_label(provider)
             log(
@@ -669,13 +954,18 @@ def main():
                 except ProviderError as exc:
                     log("  status: FAIL")
                     log("  error: %s" % exc.message)
-                    if provider == "gemini" and deepseek_key:
-                        log("  action: switching to DeepSeek")
+                    next_p = next_in_chain(chain, provider)
+                    if next_p is not None:
+                        log("  action: switching to %s" % provider_label(next_p))
                         print(
-                            "::warning::Gemini failed for %s; switching to DeepSeek"
-                            % src_name
+                            "::warning::%s failed for %s; switching to %s"
+                            % (
+                                provider_label(provider),
+                                src_name,
+                                provider_label(next_p),
+                            )
                         )
-                        provider = "deepseek"
+                        provider = next_p
                         switched = True
                         failed = True
                         break
@@ -692,13 +982,18 @@ def main():
             if error:
                 log("  status: INVALID")
                 log("  error: %s" % error)
-                if provider == "gemini" and deepseek_key:
-                    log("  action: switching to DeepSeek")
+                next_p = next_in_chain(chain, provider)
+                if next_p is not None:
+                    log("  action: switching to %s" % provider_label(next_p))
                     print(
-                        "::warning::Gemini result invalid for %s; switching to DeepSeek"
-                        % src_name
+                        "::warning::%s result invalid for %s; switching to %s"
+                        % (
+                            provider_label(provider),
+                            src_name,
+                            provider_label(next_p),
+                        )
                     )
-                    provider = "deepseek"
+                    provider = next_p
                     switched = True
                     continue
                 invalid_attempts += 1
@@ -717,6 +1012,11 @@ def main():
         written.append(dst_name)
         if dst_name in untouched:
             untouched.remove(dst_name)
+        file_meta["provider_used"] = (
+            provider_label(used_provider) if used_provider else "skipped"
+        )
+        file_meta["validation"] = "ok"
+        report.append(file_meta)
         log(
             "  result: %s written (%s)"
             % (dst_name, provider_label(used_provider))
@@ -731,11 +1031,17 @@ def main():
             stop(idx, total, src_name, dst_name, written, untouched)
             sys.exit(1)
 
-    log("Sync finished: %d/%d files updated" % (len(written), total))
-    if switched:
-        log("chain: Gemini -> DeepSeek (locked)")
-    else:
-        log("chain: %s only" % provider_label(provider))
+    chain_str = " -> ".join(provider_label(p) for p in chain)
+    log(
+        "Sync finished: %d/%d files updated | chain: %s%s"
+        % (
+            len(written),
+            total,
+            chain_str,
+            " (fallback triggered)" if switched else "",
+        )
+    )
+    emit_report(report, chain_str, len(written), total)
 
 
 if __name__ == "__main__":

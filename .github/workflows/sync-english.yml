@@ -63,6 +63,8 @@ jobs:
           SYNC_MAX_ATTEMPTS: ${{ vars.SYNC_MAX_ATTEMPTS || '5' }}
           SYNC_FILE_TIMEOUT: ${{ vars.SYNC_FILE_TIMEOUT || '1800' }}
           SYNC_TARGETS: ${{ steps.changes.outputs.targets }}
+          SYNC_USE_GOOGLE_FALLBACK: ${{ vars.SYNC_USE_GOOGLE_FALLBACK || '1' }}
+          SYNC_REPORT_PATH: ${{ runner.temp }}/en-sync-report.json
         run: python .github/scripts/sync_english.py
       - name: Validate generated English files
         if: steps.changes.outputs.run == 'true'
@@ -82,3 +84,10 @@ jobs:
         with:
           commit_message: "chore: sync English translations from Chinese"
           file_pattern: "mihomo_en.yaml script_override_en.js README_en.md"
+      - name: Upload English sync report
+        if: steps.changes.outputs.run == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: en-sync-report
+          path: ${{ runner.temp }}/en-sync-report.json
+          if-no-files-found: warn
