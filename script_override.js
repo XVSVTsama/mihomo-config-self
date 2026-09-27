@@ -291,7 +291,7 @@ const TEMPLATE = {
     "auto-route": true,
     "auto-redirect": true,
     "strict-route": true,
-    "stack": "gvisor",
+    "stack": "mips",
     "dns-hijack": [
       "any:53",
       "udp://any:53",
