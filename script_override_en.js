@@ -38,7 +38,7 @@ const Compatible_With_Bettbox = {
  *
  * 3. In proxy-groups, "proxies: " is explicitly written in the template (the value is empty/null, that is,
  * The groups of "all single nodes here" in the template comments: 👉 manual switching, ♻️ automatic selection,
- * 🔄 Load balancing, 📲 Telegram, 🎮 Games-Global) will automatically fill in all nodes in the subscription
+ * 🔄 Load Balancing, 📲 Telegram, 🎮 Games-Global) will automatically fill in all nodes in the subscription
  * name; if the subscription also contains proxy-providers, these groups will be written to use references at the same time
  * provider. The remaining groups remain as they are in the template and will not be overwritten or supplemented by subscription nodes.
  *
@@ -89,12 +89,12 @@ const ruleOptionsEnable = {
   '入口解析': false,         // After opening, all three domestic entry nodes will join the same proxy group.
 };
 
-// When the same domain name rule key appears, whether to subscribe to the original configuration (true) or the template (false) takes precedence (the template is currently not configured
+// When the same domain name rule key appears, whether to subscribe to the original configuration (true) or the template (false) takes precedence (the template is currently not configured)
 // proxy-server-nameserver-policy, so this switch currently only affects the merge between subscription sources)
 const NAMESERVER_POLICY_PREFER_ORIGINAL = true;
 
 // ============================================================================
-//Domestic entrance analysis node maintenance area
+// Domestic entrance analysis node maintenance area
 // Only maintain the type / server / port and other optional fields below.
 // name should not be written here, it is fixed by ENTRY_RESOLUTION_OPTIONS to the domestic entrance resolution-operator.
 // Any Mihomo node field can be modified, deleted or added.
@@ -107,7 +107,7 @@ const DOMESTIC_ENTRY_PROXIES = {
     port: 13128
   },
 
-  //China Unicom
+  // China Unicom
   unicom: {
     type: 'http',
     server: '119.188.131.55',
@@ -460,12 +460,21 @@ const TEMPLATE = {
       "https://dns.alidns.com/dns-query#DIRECT",
       "https://doh.pub/dns-query#DIRECT"
     ],
+    "direct-nameserver-follow-policy": true,
     "nameserver": [
       "https://cloudflare-dns.com/dns-query#👉 手动切换"
     ],
     "nameserver-policy": {
-      "rule-set:private,proxy@direct,cn,echs_cn,echs_direct": [
+      "rule-set:proxy@direct,cn,echs_cn,echs_direct": [
         "https://dns.alidns.com/dns-query#DIRECT"
+      ],
+      "rule-set:private": [
+        "system"
+      ],
+      "rule-set:douyin": [
+        "system",
+        "180.184.1.1",
+        "180.184.2.2"
       ]
     },
       "prefer-h3": false,
@@ -652,6 +661,14 @@ const TEMPLATE = {
       "format": "mrs",
       "url": "https://fastly.jsdelivr.net/gh/appshubcc/bett-rules@meta/geo/geosite/apple@cn.mrs",
       "path": "./ruleset/apple@cn.mrs"
+    },
+    "douyin": {
+      "type": "http",
+      "interval": 86400,
+      "behavior": "domain",
+      "format": "mrs",
+      "url": "https://fastly.jsdelivr.net/gh/appshubcc/bett-rules@meta/geo/geosite/douyin.mrs",
+      "path": "./ruleset/douyin.mrs"
     },
     "applications": {
       "type": "http",
@@ -1315,7 +1332,7 @@ function collectDnsRules(config) {
     Object.assign(result.proxyServerNameserverPolicy, dns["proxy-server-nameserver-policy"]);
   }
 
-  // hosts only participate in node server rewriting when use-hosts=true and DNS monitoring forms a closed loop.
+  // hosts only participate in node server rewriting when use-hosts=true and DNS monitoring forms a closed loop
   if (
     dns["use-hosts"] === true &&
     hasDnsListenLoop(dns) &&
@@ -1648,7 +1665,7 @@ function applyTelegramDcExperiment(result, originalProxies) {
   }
   result['rule-providers'] = providersWithTelegramDc;
 
-  //The original 📲 Telegram group is changed to the bottom group, and three DC/region groups are inserted after "♻️Automatic selection"; nodes are automatically filtered by filter. Empty groups are natively fallbacked by Mihomo.
+  // The original 📲 Telegram group is changed to the bottom group, and three DC/region groups are inserted after "♻️ Automatic selection"; nodes are automatically filtered by filter. Empty groups are natively fallbacked by Mihomo.
   const telegramFallback = (result['proxy-groups'] || []).find(
     (group) => group && group.name === '📲 Telegram'
   );
