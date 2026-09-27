@@ -460,12 +460,21 @@ const TEMPLATE = {
       "https://dns.alidns.com/dns-query#DIRECT",
       "https://doh.pub/dns-query#DIRECT"
     ],
+    "direct-nameserver-follow-policy": true,
     "nameserver": [
       "https://cloudflare-dns.com/dns-query#👉 手动切换"
     ],
     "nameserver-policy": {
-      "rule-set:private,proxy@direct,cn,echs_cn,echs_direct": [
+      "rule-set:proxy@direct,cn,echs_cn,echs_direct": [
         "https://dns.alidns.com/dns-query#DIRECT"
+      ],
+      "rule-set:private": [
+        "system"
+      ],
+      "rule-set:douyin": [
+        "system",
+        "180.184.1.1",
+        "180.184.2.2"
       ]
     },
       "prefer-h3": false,
@@ -652,6 +661,14 @@ const TEMPLATE = {
       "format": "mrs",
       "url": "https://fastly.jsdelivr.net/gh/appshubcc/bett-rules@meta/geo/geosite/apple@cn.mrs",
       "path": "./ruleset/apple@cn.mrs"
+    },
+    "douyin": {
+      "type": "http",
+      "interval": 86400,
+      "behavior": "domain",
+      "format": "mrs",
+      "url": "https://fastly.jsdelivr.net/gh/appshubcc/bett-rules@meta/geo/geosite/douyin.mrs",
+      "path": "./ruleset/douyin.mrs"
     },
     "applications": {
       "type": "http",
