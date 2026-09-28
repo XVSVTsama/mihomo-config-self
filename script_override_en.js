@@ -231,8 +231,8 @@ const TGDC_PROXY_GROUP_DEFINITIONS = [
   {
     name: '📲 Telegram-DC2-DC4-Amsterdam',
     filter: '(?i)🇳🇱|荷兰|阿姆斯特丹|amsterdam|\\bAMS\\b|\\bNL\\b|netherlands',
-    // Use FlagCDN's national flag resource to replace the possibly invalid Qure Netherlands icon.
-    icon: 'https://flagcdn.com/w160/nl.png',
+    // Qure has no native Netherlands icon; this is a self-drawn Qure-style Netherlands flag hosted in this repo's assets/icons.
+    icon: 'https://fastly.jsdelivr.net/gh/XVSVTsama/mihomo-config-self@main/assets/icons/Netherlands.png',
   },
   {
     name: '📲 Telegram-DC5-SG',
