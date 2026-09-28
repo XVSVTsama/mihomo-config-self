@@ -231,8 +231,8 @@ const TGDC_PROXY_GROUP_DEFINITIONS = [
   {
     name: '📲 Telegram-DC2-DC4-Amsterdam',
     filter: '(?i)🇳🇱|荷兰|阿姆斯特丹|amsterdam|\\bAMS\\b|\\bNL\\b|netherlands',
-    // 使用 FlagCDN 的国家旗帜资源，替代可能失效的 Qure Netherlands 图标。
-    icon: 'https://flagcdn.com/w160/nl.png',
+    // Qure 无荷兰原生图标，此为按 Qure 风格自绘的荷兰旗，托管于本仓库 assets/icons。
+    icon: 'https://fastly.jsdelivr.net/gh/XVSVTsama/mihomo-config-self@main/assets/icons/Netherlands.png',
   },
   {
     name: '📲 Telegram-DC5-SG',
