@@ -5,23 +5,36 @@ on:
     branches: [main]
     paths:
       - mihomo.yaml
-      - script_override.js
       - README.md
       - .github/translation_glossary.json
+  workflow_run:
+    workflows: ["Template Generate"]
+    types: [completed]
   workflow_dispatch:
+
+concurrency:
+  group: sync-english-${{ github.event_name }}
+  cancel-in-progress: true
 
 permissions:
   contents: write
 
 jobs:
   sync:
-    if: vars.SYNC_ENGLISH_ENABLED != 'false'
+    # - Bot commits (e.g. from Template Generate) must not retrigger the
+    #   push path; they are handled via workflow_run instead.
+    # - workflow_run only proceeds when Template Generate succeeded.
+    if: >-
+      vars.SYNC_ENGLISH_ENABLED != 'false' &&
+      (github.event_name != 'push' || github.event.head_commit.author.name != 'github-actions[bot]') &&
+      (github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success')
     runs-on: ubuntu-latest
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          ref: ${{ github.event_name == 'workflow_run' && 'main' || github.sha }}
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
@@ -35,6 +48,17 @@ jobs:
         run: |
           if [ "$GITHUB_EVENT_NAME" = "workflow_dispatch" ]; then
             echo "run=true" >> "$GITHUB_OUTPUT"
+          elif [ "$GITHUB_EVENT_NAME" = "workflow_run" ]; then
+            # Triggered by Template Generate: script_override.js always needs
+            # translation; mihomo.yaml too if the generate run changed it.
+            HEAD_SHA="${{ github.event.workflow_run.head_sha }}"
+            CHANGED="$(git diff --name-only "$HEAD_SHA" HEAD)"
+            TARGETS="script_override.js"
+            if echo "$CHANGED" | grep -qE '(^|/)mihomo\.yaml$'; then
+              TARGETS="script_override.js,mihomo.yaml"
+            fi
+            echo "run=true" >> "$GITHUB_OUTPUT"
+            echo "targets=$TARGETS" >> "$GITHUB_OUTPUT"
           else
             BEFORE="${{ github.event.before }}"
             AFTER="${{ github.event.after }}"
