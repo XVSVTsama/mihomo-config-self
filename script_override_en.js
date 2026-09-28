@@ -9,7 +9,7 @@ const Compatible_With_Bettbox = {
  * ============================================================================
  *
  * Source:
- * JS script:
+ *JS script:
  *    https://raw.githubusercontent.com/XVSVTsama/mihomo-config-self/refs/heads/main/script_override.js
  * Template:
  *    https://raw.githubusercontent.com/XVSVTsama/mihomo-config-self/refs/heads/main/mihomo.yaml
@@ -29,7 +29,7 @@ const Compatible_With_Bettbox = {
  * 1. Except for the parts specially stated in Articles 2, 3, and 4 below, the final configuration uses TEMPLATE
  * (corresponding to the mihomo.yaml template) shall prevail, that is, the fields already written in the template will replace the original subscription configuration.
  * Fields with the same name (such as dns details, rules, rule-providers, sniffers,
- * The grouping structure of tun, proxy-groups, etc.). Top-level fields not defined by the template in the original subscription configuration will not be retained.
+ * The grouping structure of tun, proxy-groups, etc.). Top-level fields that are not defined by the template in the original subscription configuration will not be retained.
  * (such as allow-lan and bind-address that come with some subscriptions), the only exception is proxy-providers:
  * If the subscription comes with proxy-providers, the final configuration will be retained and injected as it is.
  *
@@ -39,7 +39,7 @@ const Compatible_With_Bettbox = {
  * 3. In proxy-groups, "proxies: " is explicitly written in the template (the value is empty/null, that is,
  * The groups of "all single nodes here" in the template comments: 👉 manual switching, ♻️ automatic selection,
  * 🔄 Load Balancing, 📲 Telegram, 🎮 Games-Global) will automatically fill in all nodes in the subscription
- * name; if the subscription also comes with proxy-providers, these groups will be written to use references at the same time
+ * name; if the subscription also contains proxy-providers, these groups will be written to use references at the same time
  * provider. The remaining groups remain as they are in the template and will not be overwritten or supplemented by subscription nodes.
  *
  * 4.【Special handling】DNS and hosts:
@@ -89,25 +89,25 @@ const ruleOptionsEnable = {
   '入口解析': false,         // After opening, all three domestic entry nodes will join the same proxy group.
 };
 
-// When the same domain name rule key appears, whether to subscribe to the original configuration (true) or the template (false) takes precedence (the template is currently not configured
+// When the same domain name rule key appears, whether to subscribe to the original configuration (true) or the template (false) takes precedence (the template is currently not configured)
 // proxy-server-nameserver-policy, so this switch currently only affects the merge between subscription sources)
 const NAMESERVER_POLICY_PREFER_ORIGINAL = true;
 
 // ============================================================================
-//Domestic entrance analysis node maintenance area
+// Domestic entrance analysis node maintenance area
 // Only maintain the type / server / port and other optional fields below.
 // name should not be written here, it is fixed by ENTRY_RESOLUTION_OPTIONS to the domestic entrance resolution-operator.
 // Any Mihomo node field can be modified, deleted or added.
 // ============================================================================
 const DOMESTIC_ENTRY_PROXIES = {
-  // China Telecom
+  //China Telecom
   telecom: {
     type: 'http',
     server: '36.111.33.167',
     port: 13128
   },
 
-  //China Unicom
+  // China Unicom
   unicom: {
     type: 'http',
     server: '119.188.131.55',
@@ -231,7 +231,7 @@ const TGDC_PROXY_GROUP_DEFINITIONS = [
   {
     name: '📲 Telegram-DC2-DC4-Amsterdam',
     filter: '(?i)🇳🇱|荷兰|阿姆斯特丹|amsterdam|\\bAMS\\b|\\bNL\\b|netherlands',
-    // Qure has no native Netherlands icon; this is a self-drawn Qure-style Netherlands flag hosted in this repo's assets/icons.
+    // There is no native Dutch icon in Qure. This is a self-painted Dutch flag in Qure style and is hosted in this warehouse assets/icons.
     icon: 'https://fastly.jsdelivr.net/gh/XVSVTsama/mihomo-config-self@main/assets/icons/Netherlands.png',
   },
   {
@@ -1332,7 +1332,7 @@ function collectDnsRules(config) {
     Object.assign(result.proxyServerNameserverPolicy, dns["proxy-server-nameserver-policy"]);
   }
 
-  // hosts only participate in node server rewriting when use-hosts=true and DNS monitoring forms a closed loop.
+  // hosts only participate in node server rewriting when use-hosts=true and DNS monitoring forms a closed loop
   if (
     dns["use-hosts"] === true &&
     hasDnsListenLoop(dns) &&
@@ -1509,7 +1509,7 @@ function smartMergeDnsNode(config, result) {
 
   // When a policy only hits the domain name before hosts is rewritten, but the final domain name is not covered by the policy,
   //Add a precise policy for the final domain name. The original domain name only serves as the migration source and is not written into the final result;
-  // The original rule that directly matched the final domain name remains intact and takes precedence.
+  // The original rule that has directly matched the final domain name remains intact and takes precedence.
   const copyResolvedDomainPolicy = (policy, shouldCopy) => {
     for (const { original, effective } of nodeDomainPairs) {
       if (
@@ -1665,7 +1665,7 @@ function applyTelegramDcExperiment(result, originalProxies) {
   }
   result['rule-providers'] = providersWithTelegramDc;
 
-  //The original 📲 Telegram group is changed to a pocket group, and three DC/region groups are inserted after "♻️Automatic selection"; nodes are automatically filtered by filter. Empty groups are natively fallbacked by Mihomo.
+  // The original 📲 Telegram group is changed to the bottom group, and three DC/region groups are inserted after "♻️ Automatic selection"; nodes are automatically filtered by filter. Empty groups are natively fallbacked by Mihomo.
   const telegramFallback = (result['proxy-groups'] || []).find(
     (group) => group && group.name === '📲 Telegram'
   );
@@ -1793,7 +1793,7 @@ function main(config, profileName) {
     result['proxy-providers'] = originalProxyProviders;
   }
 
-  
+  // ---- 4. Dynamic filtering policy group: read the individual switch of ruleOptionsEnable ----
   //Identify all disabled policy group names
   const disabledGroupNames = new Set();
   const activeGroupNames = new Set();
