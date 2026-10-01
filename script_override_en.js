@@ -1,7 +1,19 @@
 // Bettbox Compatibility Statement: The expected behavior of Bettbox clients is to recognize this statement at the beginning of the script (not read it in full),
 // The script must follow this convention: the statement must be at the top. Deleting or moving it down will cause the "Custom Rule Switch" entrance not to be displayed.
 const Compatible_With_Bettbox = {
-  ruleOptionsEnable: true
+  ruleOptionsEnable: true,
+  // Declare the switch name belonging to the policy group, which must be exactly the same as the key of ruleOptionsEnable
+  policyGroupOptions: [
+    '🌍 PROXY',
+    '🔄 负载均衡',
+    '👉 手动切换',
+    '♻️ 自动选择',
+    '📲 Telegram',
+    '🎮 Games-Global',
+    '✖️ Twitter',
+    '🤖 AI大模型',
+    '🎵 TikTok',
+  ]
 };
 /**
  * ============================================================================
@@ -1509,7 +1521,7 @@ function smartMergeDnsNode(config, result) {
 
   // When a policy only hits the domain name before hosts is rewritten, but the final domain name is not covered by the policy,
   //Add a precise policy for the final domain name. The original domain name only serves as the migration source and is not written into the final result;
-  // The original rule that has directly matched the final domain name remains intact and takes precedence.
+  // The original rule that directly matched the final domain name remains intact and takes precedence.
   const copyResolvedDomainPolicy = (policy, shouldCopy) => {
     for (const { original, effective } of nodeDomainPairs) {
       if (
@@ -1610,7 +1622,7 @@ function smartMergeDnsNode(config, result) {
     }
   }
 
-  // Remove the policy items that are the same as the global bottom line and deduplicate the values.
+  //Remove the policy items that are the same as the global bottom line, and deduplicate the values.
   const globalProxyServerNameservers = asNameserverList(
     result.dns["proxy-server-nameserver"]
   );
@@ -1665,7 +1677,7 @@ function applyTelegramDcExperiment(result, originalProxies) {
   }
   result['rule-providers'] = providersWithTelegramDc;
 
-  // The original 📲 Telegram group is changed to the bottom group, and three DC/region groups are inserted after "♻️ Automatic selection"; nodes are automatically filtered by filter. Empty groups are natively fallbacked by Mihomo.
+  //The original 📲 Telegram group is changed to a pocket group, and three DC/region groups are inserted after "♻️Automatic selection"; nodes are automatically filtered by filter. Empty groups are natively fallbacked by Mihomo.
   const telegramFallback = (result['proxy-groups'] || []).find(
     (group) => group && group.name === '📲 Telegram'
   );
