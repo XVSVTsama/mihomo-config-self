@@ -1,7 +1,19 @@
 // Bettbox 兼容声明：Bettbox 客户端的预期行为是在脚本开头识别该声明（并非全量读取），
 // 脚本需遵循此约定：声明必须置顶，删除或下移会导致"自定义规则开关"入口不显示。
 const Compatible_With_Bettbox = {
-  ruleOptionsEnable: true
+  ruleOptionsEnable: true,
+  // 声明属于策略组的开关名称，需与 ruleOptionsEnable 的键完全一致
+  policyGroupOptions: [
+    '🌍 PROXY',
+    '🔄 负载均衡',
+    '👉 手动切换',
+    '♻️ 自动选择',
+    '📲 Telegram',
+    '🎮 Games-Global',
+    '✖️ Twitter',
+    '🤖 AI大模型',
+    '🎵 TikTok',
+  ]
 };
 /**
  * ============================================================================
