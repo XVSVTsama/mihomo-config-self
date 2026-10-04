@@ -205,20 +205,16 @@ const TGDC_RULE_PROVIDERS = {
   },
 };
 
-// empty-fallback 必须是实际存在的出站节点名称，不能填写 proxy-group。
-// fallback 使用 low_filter 思路：排除内置/拒绝/重匹配/倍率/策略组等非真实节点，
-// 再按覆写后订阅节点的原始顺序取第一个节点；若没有结果，则使用 COMPATIBLE。
+// 地区组没有匹配节点时，按订阅原始顺序展示全部合格节点供手动选择。
+// 仅从订阅直接列出的节点中排除异常、内置/拒绝/重匹配和提示信息；免费、低倍率、高倍率均允许。
+// 若仍无候选，使用 COMPATIBLE；empty-fallback 只接受单节点名称，不能填写策略组或多个节点。
 const TGDC_FALLBACK_EXCLUDE_FILTER =
   /群|返利|循环|官网|客服|网站|网址|获取|订阅|流量|到期|机场|下次|版本|官址|备用|过期|已用|联系|邮箱|工单|贩卖|通知|倒卖|防止|国内|地址|频道|电报|无法|说明|使用|提示|访问|支持|教程|关注|更新|作者|加入|超时|收藏|优惠|福利|邀请|好友|失联|选择|剩余|公益|发布|DIZTNA|通路|登录|禁止|定时|渠道|牢记|永久|余额|阁下|本站|刷新|导航|建议|重置|以下|⚠️|@|t\.me\/\+|\bexpire\b|\bhttps?:\/\/|\.com|\btraffic\b/iu;
-const TGDC_FALLBACK_LOW_RATE_FILTER =
-  /^(?!.*(?:剩|期)).*(?:(?<!\d)0\.[0-5]|(?<=[ |｜丨∣┃\-‐–—−－﹣])0[*×✕✖⨯⨉x倍])|(?:(?<=[ |｜丨∣┃\-‐–—−－﹣])[*×✕✖⨯⨉x]0(?= |倍|$))|^(?!.*(?:客户端|软件)).*下载|低倍|免费|(?<![A-Za-z])free(?![A-Za-z])/i;
-const TGDC_FALLBACK_HIGH_RATE_FILTER =
-  /(?<=[ |｜丨∣┃\-‐–—−－﹣])((?:[*×✕✖⨯⨉x]\s*(?:[2-9]\d*|[1-9]\d+)(?:\.\d+)?)|(?:(?<![\d.])(?:[2-9]\d*|[1-9]\d+)(?:\.\d+)?\s*(?:倍|[*×✕✖⨯⨉x])))/i;
 
-function selectTelegramDcFallbackNode(originalProxies) {
+function selectTelegramDcFallbackNodes(originalProxies) {
   const proxies = Array.isArray(originalProxies) ? originalProxies : [];
-  const fallbackProxy = proxies.find((proxy) => {
-    if (!proxy || typeof proxy !== 'object' || typeof proxy.name !== 'string' || proxy.name.length === 0) {
+  return proxies.filter((proxy) => {
+    if (!proxy || typeof proxy !== 'object' || typeof proxy.name !== 'string' || proxy.name.trim().length === 0) {
       return false;
     }
     const type = String(proxy.type || '').toLowerCase();
@@ -227,11 +223,8 @@ function selectTelegramDcFallbackNode(originalProxies) {
     }
     const name = proxy.name;
     if (TGDC_FALLBACK_EXCLUDE_FILTER.test(name)) return false;
-    if (TGDC_FALLBACK_LOW_RATE_FILTER.test(name)) return false;
-    if (TGDC_FALLBACK_HIGH_RATE_FILTER.test(name)) return false;
     return true;
-  });
-  return fallbackProxy?.name || 'COMPATIBLE';
+  }).map((proxy) => proxy.name);
 }
 
 const TGDC_PROXY_GROUP_DEFINITIONS = [
@@ -254,15 +247,37 @@ const TGDC_PROXY_GROUP_DEFINITIONS = [
   },
 ];
 
-function buildTelegramDcProxyGroups(fallbackNodeName) {
-  return TGDC_PROXY_GROUP_DEFINITIONS.map((definition) => ({
-    name: definition.name,
-    type: 'select',
-    filter: definition.filter,
-    'include-all-proxies': true,
-    'empty-fallback': fallbackNodeName,
-    icon: definition.icon,
-  }));
+function buildTelegramDcProxyGroups(originalProxies) {
+  const proxies = Array.isArray(originalProxies) ? originalProxies : [];
+  const fallbackNodeNames = selectTelegramDcFallbackNodes(proxies);
+  return TGDC_PROXY_GROUP_DEFINITIONS.map((definition) => {
+    const group = {
+      name: definition.name,
+      type: 'select',
+      filter: definition.filter,
+      'include-all-proxies': true,
+      'empty-fallback': 'COMPATIBLE',
+      icon: definition.icon,
+    };
+    // 复用地区定义，并对齐内核的 Unicode 词边界、空白和小写匹配，避免中文紧贴缩写时误判。
+    const wordChars = '[\\p{L}\\p{Mn}\\p{Nd}\\p{Pc}\\u200C\\u200D]';
+    const spaceChars = '[\\u0009-\\u000D\\u0020\\u0085\\u00A0\\u1680\\u2000-\\u200A\\u2028\\u2029\\u202F\\u205F\\u3000]';
+    const regionPattern = definition.filter.replace(/^\(\?i\)/, '').toLowerCase()
+      .replace(/\\b([a-z]+)\\b/g, `(?<!${wordChars})$1(?!${wordChars})`)
+      .replace(/\\s/g, spaceChars);
+    const regionFilter = new RegExp(regionPattern, 'u');
+    // 内核将 İ 小写为单字符 i；先替换，避免 JS 将其扩展为 i 加组合点。
+    const hasRegionNode = proxies.some((proxy) =>
+      proxy && typeof proxy.name === 'string' && regionFilter.test(proxy.name.replace(/\u0130/g, 'I').toLowerCase())
+    );
+    if (!hasRegionNode && fallbackNodeNames.length > 0) {
+      // 只在地区无候选时放宽；显式列出全部保底节点，避免继续按地区过滤或混入其他来源。
+      delete group.filter;
+      delete group['include-all-proxies'];
+      group.proxies = fallbackNodeNames.slice();
+    }
+    return group;
+  });
 }
 
 const TGDC_RULES = [
@@ -1678,7 +1693,7 @@ function applyTelegramDcExperiment(result, originalProxies) {
   }
   result['rule-providers'] = providersWithTelegramDc;
 
-  // 原 📲 Telegram 组改为兜底组，并在“♻️ 自动选择”之后插入三个 DC/地区组；节点由 filter 自动筛选。空组由 Mihomo 原生回退。
+  // 原 📲 Telegram 组改为兜底组，并在“♻️ 自动选择”之后插入三个 DC/地区组；有地区节点时保持筛选，无地区节点时展示全部合格保底节点。
   const telegramFallback = (result['proxy-groups'] || []).find(
     (group) => group && group.name === '📲 Telegram'
   );
@@ -1699,7 +1714,7 @@ function applyTelegramDcExperiment(result, originalProxies) {
   proxyGroups.splice(
     insertIndex,
     0,
-    ...deepClone(buildTelegramDcProxyGroups(selectTelegramDcFallbackNode(originalProxies)))
+    ...deepClone(buildTelegramDcProxyGroups(originalProxies))
   );
   result['proxy-groups'] = proxyGroups;
 
