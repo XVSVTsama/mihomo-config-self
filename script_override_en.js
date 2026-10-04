@@ -21,7 +21,7 @@ const Compatible_With_Bettbox = {
  * ============================================================================
  *
  * Source:
- *JS script:
+ * JS script:
  *    https://raw.githubusercontent.com/XVSVTsama/mihomo-config-self/refs/heads/main/script_override.js
  * Template:
  *    https://raw.githubusercontent.com/XVSVTsama/mihomo-config-self/refs/heads/main/mihomo.yaml
@@ -50,7 +50,7 @@ const Compatible_With_Bettbox = {
  *
  * 3. In proxy-groups, "proxies: " is explicitly written in the template (the value is empty/null, that is,
  * The groups of "all single nodes here" in the template comments: 👉 manual switching, ♻️ automatic selection,
- * 🔄 Load Balancing, 📲 Telegram, 🎮 Games-Global) will automatically fill in all nodes in the subscription
+ * 🔄 Load balancing, 📲 Telegram, 🎮 Games-Global) will automatically fill in all nodes in the subscription
  * name; if the subscription also contains proxy-providers, these groups will be written to use references at the same time
  * provider. The remaining groups remain as they are in the template and will not be overwritten or supplemented by subscription nodes.
  *
@@ -101,12 +101,12 @@ const ruleOptionsEnable = {
   '入口解析': false,         // After opening, all three domestic entry nodes will join the same proxy group.
 };
 
-// When the same domain name rule key appears, whether to subscribe to the original configuration (true) or the template (false) takes precedence (the template is currently not configured)
+// When the same domain name rule key appears, whether to subscribe to the original configuration (true) or the template (false) takes precedence (the template is currently not configured
 // proxy-server-nameserver-policy, so this switch currently only affects the merge between subscription sources)
 const NAMESERVER_POLICY_PREFER_ORIGINAL = true;
 
 // ============================================================================
-// Domestic entrance analysis node maintenance area
+//Domestic entrance analysis node maintenance area
 // Only maintain the type / server / port and other optional fields below.
 // name should not be written here, it is fixed by ENTRY_RESOLUTION_OPTIONS to the domestic entrance resolution-operator.
 // Any Mihomo node field can be modified, deleted or added.
@@ -205,20 +205,16 @@ const TGDC_RULE_PROVIDERS = {
   },
 };
 
-// empty-fallback must be the actual outbound node name, proxy-group cannot be filled in.
-// fallback uses low_filter idea: exclude non-real nodes such as built-in/rejection/rematch/multiply/strategy group, etc.
-// Then take the first node in the original order of the subscribed nodes after overwriting; if there is no result, use COMPATIBLE.
+// When there is no matching node in the region group, all qualified nodes will be displayed in the original order of subscription for manual selection.
+// Exclude exceptions, built-in/rejection/rematching and prompt information only from nodes directly listed in the subscription; free, low magnification, and high magnification are all allowed.
+// If there are still no candidates, use COMPATIBLE; empty-fallback only accepts a single node name, and cannot fill in a policy group or multiple nodes.
 const TGDC_FALLBACK_EXCLUDE_FILTER =
   /群|返利|循环|官网|客服|网站|网址|获取|订阅|流量|到期|机场|下次|版本|官址|备用|过期|已用|联系|邮箱|工单|贩卖|通知|倒卖|防止|国内|地址|频道|电报|无法|说明|使用|提示|访问|支持|教程|关注|更新|作者|加入|超时|收藏|优惠|福利|邀请|好友|失联|选择|剩余|公益|发布|DIZTNA|通路|登录|禁止|定时|渠道|牢记|永久|余额|阁下|本站|刷新|导航|建议|重置|以下|⚠️|@|t\.me\/\+|\bexpire\b|\bhttps?:\/\/|\.com|\btraffic\b/iu;
-const TGDC_FALLBACK_LOW_RATE_FILTER =
-  /^(?!.*(?:剩|期)).*(?:(?<!\d)0\.[0-5]|(?<=[ |｜丨∣┃\-‐–—−－﹣])0[*×✕✖⨯⨉x倍])|(?:(?<=[ |｜丨∣┃\-‐–—−－﹣])[*×✕✖⨯⨉x]0(?= |倍|$))|^(?!.*(?:客户端|软件)).*下载|低倍|免费|(?<![A-Za-z])free(?![A-Za-z])/i;
-const TGDC_FALLBACK_HIGH_RATE_FILTER =
-  /(?<=[ |｜丨∣┃\-‐–—−－﹣])((?:[*×✕✖⨯⨉x]\s*(?:[2-9]\d*|[1-9]\d+)(?:\.\d+)?)|(?:(?<![\d.])(?:[2-9]\d*|[1-9]\d+)(?:\.\d+)?\s*(?:倍|[*×✕✖⨯⨉x])))/i;
 
-function selectTelegramDcFallbackNode(originalProxies) {
+function selectTelegramDcFallbackNodes(originalProxies) {
   const proxies = Array.isArray(originalProxies) ? originalProxies : [];
-  const fallbackProxy = proxies.find((proxy) => {
-    if (!proxy || typeof proxy !== 'object' || typeof proxy.name !== 'string' || proxy.name.length === 0) {
+  return proxies.filter((proxy) => {
+    if (!proxy || typeof proxy !== 'object' || typeof proxy.name !== 'string' || proxy.name.trim().length === 0) {
       return false;
     }
     const type = String(proxy.type || '').toLowerCase();
@@ -227,11 +223,8 @@ function selectTelegramDcFallbackNode(originalProxies) {
     }
     const name = proxy.name;
     if (TGDC_FALLBACK_EXCLUDE_FILTER.test(name)) return false;
-    if (TGDC_FALLBACK_LOW_RATE_FILTER.test(name)) return false;
-    if (TGDC_FALLBACK_HIGH_RATE_FILTER.test(name)) return false;
     return true;
-  });
-  return fallbackProxy?.name || 'COMPATIBLE';
+  }).map((proxy) => proxy.name);
 }
 
 const TGDC_PROXY_GROUP_DEFINITIONS = [
@@ -254,15 +247,37 @@ const TGDC_PROXY_GROUP_DEFINITIONS = [
   },
 ];
 
-function buildTelegramDcProxyGroups(fallbackNodeName) {
-  return TGDC_PROXY_GROUP_DEFINITIONS.map((definition) => ({
-    name: definition.name,
-    type: 'select',
-    filter: definition.filter,
-    'include-all-proxies': true,
-    'empty-fallback': fallbackNodeName,
-    icon: definition.icon,
-  }));
+function buildTelegramDcProxyGroups(originalProxies) {
+  const proxies = Array.isArray(originalProxies) ? originalProxies : [];
+  const fallbackNodeNames = selectTelegramDcFallbackNodes(proxies);
+  return TGDC_PROXY_GROUP_DEFINITIONS.map((definition) => {
+    const group = {
+      name: definition.name,
+      type: 'select',
+      filter: definition.filter,
+      'include-all-proxies': true,
+      'empty-fallback': 'COMPATIBLE',
+      icon: definition.icon,
+    };
+    // Reuse region definitions and align the kernel's Unicode word boundaries, whitespace, and lowercase matching to avoid misjudgments when Chinese abbreviations are closely linked.
+    const wordChars = '[\\p{L}\\p{Mn}\\p{Nd}\\p{Pc}\\u200C\\u200D]';
+    const spaceChars = '[\\u0009-\\u000D\\u0020\\u0085\\u00A0\\u1680\\u2000-\\u200A\\u2028\\u2029\\u202F\\u205F\\u3000]';
+    const regionPattern = definition.filter.replace(/^\(\?i\)/, '').toLowerCase()
+      .replace(/\\b([a-z]+)\\b/g, `(?<!${wordChars})$1(?!${wordChars})`)
+      .replace(/\\s/g, spaceChars);
+    const regionFilter = new RegExp(regionPattern, 'u');
+    // The kernel lowercases İ to a single character i; replace it first to avoid JS from expanding it to i plus a combination point.
+    const hasRegionNode = proxies.some((proxy) =>
+      proxy && typeof proxy.name === 'string' && regionFilter.test(proxy.name.replace(/\u0130/g, 'I').toLowerCase())
+    );
+    if (!hasRegionNode && fallbackNodeNames.length > 0) {
+      // Only relax when there are no candidates in the region; explicitly list all the bottom nodes to avoid continuing to filter by region or mixing in other sources.
+      delete group.filter;
+      delete group['include-all-proxies'];
+      group.proxies = fallbackNodeNames.slice();
+    }
+    return group;
+  });
 }
 
 const TGDC_RULES = [
@@ -1521,7 +1536,7 @@ function smartMergeDnsNode(config, result) {
 
   // When a policy only hits the domain name before hosts is rewritten, but the final domain name is not covered by the policy,
   //Add a precise policy for the final domain name. The original domain name only serves as the migration source and is not written into the final result;
-  // The original rule that directly matched the final domain name remains intact and takes precedence.
+  // The original rule that has directly matched the final domain name remains intact and takes precedence.
   const copyResolvedDomainPolicy = (policy, shouldCopy) => {
     for (const { original, effective } of nodeDomainPairs) {
       if (
@@ -1677,7 +1692,7 @@ function applyTelegramDcExperiment(result, originalProxies) {
   }
   result['rule-providers'] = providersWithTelegramDc;
 
-  //The original 📲 Telegram group is changed to a pocket group, and three DC/region groups are inserted after "♻️Automatic selection"; nodes are automatically filtered by filter. Empty groups are natively fallbacked by Mihomo.
+  // The original 📲 Telegram group is changed to a bottom-line group, and three DC/region groups are inserted after "♻️ Automatic selection"; filtering is maintained when there are regional nodes, and all qualified minimum nodes are displayed when there are no regional nodes.
   const telegramFallback = (result['proxy-groups'] || []).find(
     (group) => group && group.name === '📲 Telegram'
   );
@@ -1698,7 +1713,7 @@ function applyTelegramDcExperiment(result, originalProxies) {
   proxyGroups.splice(
     insertIndex,
     0,
-    ...deepClone(buildTelegramDcProxyGroups(selectTelegramDcFallbackNode(originalProxies)))
+    ...deepClone(buildTelegramDcProxyGroups(originalProxies))
   );
   result['proxy-groups'] = proxyGroups;
 
