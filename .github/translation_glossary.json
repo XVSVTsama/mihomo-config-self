@@ -43,5 +43,13 @@
   "分流组结构": "Proxy Group Structure",
   "三个入口节点都会加入“国内入口解析”代理组，由用户手动选择；此处顺序不代表自动优先级。节点名固定在这里，不应修改。": "All three entry nodes are added to the “国内入口解析” proxy group for manual user selection; this order does not represent automatic priority. Node names are fixed here and should not be changed.",
   "// Manus AI: covers Manus Desktop, Manus Helper, and other client processes.": "// Manus AI: covers Manus Desktop, Manus Helper, and other client processes.",
-  " Manus AI: Covers Manus Desktop, Manus Helper, and other client processes": "Manus AI: Covers Manus Desktop, Manus Helper, and the Android client process"
+  " Manus AI: Covers Manus Desktop, Manus Helper, and other client processes": "Manus AI: Covers Manus Desktop, Manus Helper, and the Android client process",
+  "英文同步会把实际的评论和 README 正文翻译成英文。策略组名称和引用、选项键、字符串值、URL、节点过滤器以及其他功能内容则保留中文源文件的原始值。即使包含中文，功能值的更改也会被拒绝。字符串、正则表达式、模板字面量以及 YAML 块标量内部的评论标记不会被当作可翻译的评论。": "English synchronization translates actual comments and README prose only. Proxy group names and references, option keys, string values, URLs, node filters, and other functional content retain their original values from the Chinese source. Changes to functional values are rejected even when they contain Chinese. Comment markers inside strings, regular expressions, template literals, and YAML block scalars are not treated as translatable comments.",
+  "**🤖 AI大模型 / ✖️ Twitter / 🎵 TikTok**：独立分流组，并且**硬编码**正则表达式过滤，强制仅使用带有“美国|住宅”标志的节点，以防封号或风控。": "**🤖 AI大模型 / ✖️ Twitter / 🎵 TikTok**: independent routing groups with the functional filter `美国|住宅`, which matches node names containing either `美国` or `住宅`. This filter is preserved in the English configuration.",
+  "**✖️ Twitter**：仅匹配名称包含**“美国|住宅”**的节点": "Node names containing `美国` or `住宅`",
+  "**🤖 AI大模型**：仅匹配名称包含**“美国|住宅”**的节点": "Node names containing `美国` or `住宅`",
+  "**🎵 TikTok**：仅匹配名称包含**“美国|住宅”**的节点": "Node names containing `美国|住宅`",
+  "2. **修改节点过滤规则（Filter）**：如果你购买的机场节点名称里没有 `美国` 或 `住宅` 字样，请务必手动修改配置文件中对应策略组的 `filter` 字段，否则你的 AI、推特和 TikTok 将完全无法联网。": "2. **Modify node filtering rules (Filter)**: The default filter in both languages is `美国|住宅`. If your subscription node names contain neither `美国` nor `住宅`, adjust the corresponding `filter` in the Chinese source and synchronize it to the English configuration.",
+  "美国|住宅": "US|Residential",
+  "🤖 AI大模型": "🤖 AI"
 }
