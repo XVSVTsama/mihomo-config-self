@@ -21,6 +21,7 @@ Provider rules:
 import http.client
 import json
 import os
+import re
 import socket
 import subprocess
 import sys
@@ -31,6 +32,10 @@ import urllib.parse
 import urllib.request
 from datetime import datetime
 from pathlib import Path
+
+from translation_boundaries import (
+    comment_spans, english_readme_switch, markdown_signature, prose_spans,
+)
 
 ROOT = Path(__file__).resolve().parents[2]
 GLOSSARY_PATH = ROOT / ".github" / "translation_glossary.json"
@@ -44,21 +49,6 @@ PAIRS = [
 # Keep chunks small enough for DeepSeek's final-answer output limit. Splitting at
 # blank lines preserves comment/code structure more often than arbitrary cuts.
 CHUNK_MAX_CHARS = 2000
-
-GROUP_NAME_MAP = """Proxy group names must be translated as:
-- "🔄 负载均衡" -> "🔄 Load Balance"
-- "👉 手动切换" -> "👉 Manual Select"
-- "♻️ 自动选择" -> "♻️ Auto Select"
-- "🤖 AI大模型" -> "🤖 AI"
-- "📲 Telegram" -> "📲 Telegram"
-- "🎮 Games-Global" -> "🎮 Games-Global"
-- "✖️ Twitter" -> "✖️ Twitter"
-- "🎵 TikTok" -> "🎵 TikTok"
-- "🌍 PROXY" -> "🌍 PROXY"
-- "FCM" -> "FCM"
-- "美国|住宅" -> "US|Residential"
-"""
-
 
 class ProviderError(Exception):
     def __init__(self, provider, message, truncated=False):
@@ -81,12 +71,12 @@ def build_prompt(kind, glossary=None):
 
     base_rules = f"""
 Rules:
-- Keep all code, YAML keys, JavaScript identifiers, URLs, regex filters and other functional values unchanged.
-- Translate comments and user-facing text into natural English.
-{GROUP_NAME_MAP}
+- Translate actual comments only. All text outside comments is functional code and must stay unchanged.
+- Keep YAML keys and values, JavaScript identifiers and string literals, proxy group names and every reference to them, URLs, regex filters, and template literals unchanged, even when they contain Chinese.
+- Comment-like characters inside strings, regular expressions, template literals, or YAML block scalars are functional content, not comments.
 {glossary_str}
-- If the source text (especially comments) matches or is semantically similar to an entry in the Glossary, you MUST use the provided English translation.
-- Keep emojis that are part of proxy group names.
+- Apply the Glossary to comments only; it never authorizes changing functional values.
+- Preserve comment delimiters and the position of each comment relative to the code.
 - Do not wrap the output in markdown code fences.
 - Return only the translated file content.
 """
@@ -96,7 +86,7 @@ Rules:
 Rules:
 - Keep all markdown structure, links, code blocks, URLs, and badge URLs unchanged.
 - Translate all user-facing text into natural English.
-- The language switch line must become: English | [中文](README.md)
+- The language switch has already been prepared; preserve its markup and destination exactly.
 {glossary_str}
 - If any section matches the Glossary, use the manual translation.
 - Do not wrap the output in markdown code fences.
@@ -218,6 +208,30 @@ def split_content(content, kind=None, max_chars=CHUNK_MAX_CHARS):
 
 def contains_cjk(text):
     return any("\u4e00" <= char <= "\u9fff" for char in text)
+
+
+def slice_spans(spans, offset, length):
+    end = offset + length
+    return [
+        (max(start, offset) - offset, min(stop, end) - offset)
+        for start, stop in spans if start < end and stop > offset
+    ]
+
+
+def translation_chunks(content, kind):
+    """Decide eligibility using whole-file syntax, never isolated fragments."""
+    spans = prose_spans(content) if kind == "readme" else comment_spans(content, kind)
+    chunks = []
+    offset = 0
+    for chunk in split_content(content, kind):
+        end = offset + len(chunk)
+        eligible = any(
+            contains_cjk(content[max(start, offset):min(stop, end)])
+            for start, stop in spans if start < end and stop > offset
+        )
+        chunks.append((chunk, eligible))
+        offset = end
+    return chunks
 
 
 def build_chunk_prompt(kind, glossary, chunk_index, total):
@@ -487,89 +501,50 @@ def google_translate_fragment(text, glossary, timeout=30):
     return lead + translated + trail
 
 
-def _comment_ranges(line, kind, state):
-    """Return (comment ranges, new_state) for one line.
-
-    Only comment/prose text is marked for translation so YAML keys, JS
-    identifiers and all functional values stay byte-identical and pass
-    check_code_sync.py.
-    """
-    if kind == "yaml":
-        idx = len(line)
-        for i, char in enumerate(line):
-            if char == "#" and (i == 0 or line[i - 1].isspace()):
-                idx = i
-                break
-        return ([(idx, len(line))] if idx < len(line) else []), False
-    if kind != "js":
-        return ([(0, len(line))] if contains_cjk(line) else []), state
-    in_block = state
-    ranges = []
-    i = 0
-    n = len(line)
-    while i < n:
-        if in_block:
-            j = line.find("*/", i)
-            if j == -1:
-                ranges.append((i, n))
-                i = n
-            else:
-                ranges.append((i, j + 2))
-                i = j + 2
-                in_block = False
-        else:
-            if line[i:i + 2] == "//" and not (i > 0 and line[i - 1] == ":"):
-                ranges.append((i, n))
-                i = n
-                continue
-            if line[i:i + 2] == "/*":
-                j = line.find("*/", i + 2)
-                if j == -1:
-                    ranges.append((i, n))
-                    in_block = True
-                    i = n
-                else:
-                    ranges.append((i, j + 2))
-                    i = j + 2
-                continue
-            i += 1
-    return ranges, in_block
-
-
 def google_translate_chunk(chunk, kind, glossary, timeout=30):
-    """Translate a chunk with Google, preserving all code/structure.
-
-    Line-by-line: only comment spans (yaml/js) or prose lines (readme) that
-    contain CJK are sent to Google; everything else is carried over untouched.
-    """
+    """Translate comment bodies with Google, preserving delimiters and code."""
     if kind == "readme":
-        return "\n".join(
-            google_translate_fragment(line, glossary, timeout)
-            if contains_cjk(line)
-            else line
-            for line in chunk.splitlines()
-        )
-    state = False
-    output = []
-    for line in chunk.splitlines():
-        ranges, state = _comment_ranges(line, kind, state)
-        if not ranges:
-            output.append(line)
-            continue
-        rebuilt = ""
-        pos = 0
-        for start, end in ranges:
-            rebuilt += line[pos:start]
-            fragment = line[start:end]
-            rebuilt += (
-                google_translate_fragment(fragment, glossary, timeout)
-                if contains_cjk(fragment)
-                else fragment
-            )
+        chunk = english_readme_switch(chunk)
+        output, pos = [], 0
+        for start, end in prose_spans(chunk):
+            output.append(chunk[pos:start])
+            output.append(google_translate_lines(chunk[start:end], glossary, timeout, markdown=True))
             pos = end
-        rebuilt += line[pos:]
-        output.append(rebuilt)
-    return "\n".join(output)
+        output.append(chunk[pos:])
+        return "".join(output)
+    output = []
+    pos = 0
+    for start, end in comment_spans(chunk, kind):
+        output.append(chunk[pos:start])
+        comment = chunk[start:end]
+        prefix_size = 1 if kind == "yaml" else 2
+        suffix_size = 2 if comment.startswith("/*") else 0
+        body_end = len(comment) - suffix_size
+        body = comment[prefix_size:body_end]
+        output.append(comment[:prefix_size])
+        output.append(google_translate_lines(body, glossary, timeout))
+        output.append(comment[body_end:])
+        pos = end
+    output.append(chunk[pos:])
+    return "".join(output)
+
+
+def google_translate_lines(text, glossary, timeout, markdown=False):
+    """Keep every line terminator, including those that affect JS ASI."""
+    output = []
+    for line in text.splitlines(keepends=True):
+        body = line.rstrip("\r\n\u2028\u2029")
+        if markdown:
+            prefix = re.match(r'^[ \t]*(?:(?:>[ \t]*)+)?(?:#{1,6}[ \t]+|[-*+][ \t]+|\d+[.)][ \t]+)?', body)[0]
+            pieces = re.split(r'(\*{1,3}|_{1,3}|\||\[|\])', body[len(prefix):])
+            translated = prefix + ''.join(
+                piece if index % 2 else google_translate_fragment(piece, glossary, timeout)
+                for index, piece in enumerate(pieces)
+            )
+        else:
+            translated = google_translate_fragment(body, glossary, timeout)
+        output.append(translated + line[len(body):])
+    return "".join(output)
 
 
 def emit_report(report, chain_str, written_count, total):
@@ -679,6 +654,7 @@ def translate_chunk(
     label="chunk",
     depth=0,
     keep_indentation=False,
+    eligible_spans=None,
 ):
     """Translate one chunk; if the provider truncated its output, retry smaller pieces.
 
@@ -687,7 +663,10 @@ def translate_chunk(
     split (at blank lines, then by line) keeps the run alive instead of stopping the
     file and, with it, the whole sync.
     """
-    if not contains_cjk(chunk):
+    if not contains_cjk(chunk) or (
+        eligible_spans is not None
+        and not any(contains_cjk(chunk[start:end]) for start, end in eligible_spans)
+    ):
         return chunk
     if provider == "google":
         return google_translate_chunk(chunk, kind, glossary, timeout=timeout)
@@ -715,8 +694,9 @@ def translate_chunk(
             "  output truncated at %s (%d chars); splitting into %d pieces and retrying"
             % (label, len(chunk), len(pieces))
         )
-        return join_translated_chunks(
-            [
+        translated, offset = [], 0
+        for piece_index, piece in enumerate(pieces):
+            translated.append(
                 translate_chunk(
                     provider,
                     kind,
@@ -730,15 +710,20 @@ def translate_chunk(
                     label="%s.%d" % (label, piece_index + 1),
                     depth=depth + 1,
                     keep_indentation=True,
+                    eligible_spans=None if eligible_spans is None else slice_spans(eligible_spans, offset, len(piece)),
                 )
-                for piece_index, piece in enumerate(pieces)
-            ]
-        )
+            )
+            offset += len(piece)
+        return join_translated_chunks(translated)
 
 
 def validate(text, kind):
     if not text.strip():
         return "translated file is empty"
+    if kind == "readme":
+        source = english_readme_switch((ROOT / "README.md").read_text(encoding="utf-8"))
+        if markdown_signature(source) != markdown_signature(text):
+            return "translated README changed protected code, HTML, or link destinations"
     if kind == "yaml":
         try:
             import yaml
@@ -887,7 +872,10 @@ def main():
 
         file_start = time.time()
         content = src_path.read_text(encoding="utf-8")
-        chunks = split_content(content, kind)
+        if kind == "readme":
+            content = english_readme_switch(content)
+        chunks = translation_chunks(content, kind)
+        spans = prose_spans(content) if kind == "readme" else comment_spans(content, kind)
         file_meta = {
             "source": src_name,
             "target": dst_name,
@@ -920,20 +908,26 @@ def main():
 
             translated_chunks = []
             failed = False
-            for chunk_index, chunk in enumerate(chunks, start=1):
+            # Google needs the complete lexical context: a chunk could start
+            # inside a quoted scalar, regexp, or multiline template literal.
+            active_chunks = [(content, any(eligible for _, eligible in chunks))] if provider == "google" else chunks
+            chunk_offset = 0
+            for chunk_index, (chunk, eligible) in enumerate(active_chunks, start=1):
+                chunk_spans = slice_spans(spans, chunk_offset, len(chunk))
+                chunk_offset += len(chunk)
                 log(
                     "  translating chunk %d/%d (%d chars)"
-                    % (chunk_index, len(chunks), len(chunk))
+                    % (chunk_index, len(active_chunks), len(chunk))
                 )
-                if not contains_cjk(chunk):
+                if not eligible:
                     translated_chunks.append(chunk)
-                    log("  skipped: no CJK text")
+                    log("  skipped: no translatable CJK comments/prose")
                     continue
                 prompt = build_chunk_prompt(
                     kind,
                     glossary,
                     chunk_index,
-                    len(chunks),
+                    len(active_chunks),
                 )
                 try:
                     translated_chunks.append(
@@ -947,7 +941,8 @@ def main():
                             provider_model(provider, gemini_model, deepseek_model),
                             request_timeout,
                             max_attempts,
-                            label="chunk %d/%d" % (chunk_index, len(chunks)),
+                            label="chunk %d/%d" % (chunk_index, len(active_chunks)),
+                            eligible_spans=chunk_spans,
                         )
                     )
                     used_provider = provider

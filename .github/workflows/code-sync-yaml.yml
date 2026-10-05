@@ -9,6 +9,9 @@ on:
     paths:
       - mihomo.yaml
       - mihomo_en.yaml
+      - .github/scripts/check_code_sync.py
+      - .github/scripts/translation_boundaries.py
+      - .github/workflows/code-sync-yaml.yml
   workflow_dispatch:
     inputs:
       enforce:
@@ -35,6 +38,8 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+      - name: Install PyYAML
+        run: pip install pyyaml
       - name: Check YAML code sync
         env:
           CHECK_ENFORCE: ${{ github.event.inputs.enforce || vars.CODE_SYNC_CHECK_ENFORCE || '' }}

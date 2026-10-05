@@ -83,6 +83,8 @@ https://raw.githubusercontent.com/XVSVTsama/mihomo-config-self/refs/heads/main/s
 
    脚本内嵌的标准模板与仓库 [mihomo.yaml](https://raw.githubusercontent.com/XVSVTsama/mihomo-config-self/refs/heads/main/mihomo.yaml) 保持同步(如遇差异，以js为准)。
 
+   中英文同步只翻译实际注释和 README 说明。策略组名及其引用、开关键、字符串值、URL、节点过滤正则等功能内容保留中文源中的原值；同步检查会拒绝这些内容的变化，包括含中文的功能值。字符串、正则、模板字符串和 YAML 块标量中的注释符号不会被当作可翻译注释。
+
 ## 节点域名与 DNS 联动模型
 
 [<kbd>在线阅读：节点域名、Hosts 与私有 DNS 联动模型</kbd>](https://XVSVTsama.github.io/mihomo-config-self/proxy-infrastructure-domain-protection-model.html)
@@ -114,11 +116,11 @@ https://raw.githubusercontent.com/XVSVTsama/mihomo-config-self/refs/heads/main/s
 
 本配置集成了模块化远程规则（Rule Providers）以及精细化的应用层级分流策略，完全为满足我个人的网络环境与使用痛点而生：
 
-* **使用规则TUN**：默认开启 `tun` 模式，采用 `gvisor` 协议栈，实现全设备/全协议接管，解决部分软件不走系统代理的问题。
+* **使用规则TUN**：默认开启 `tun` 模式，采用 `mips` 协议栈，实现全设备/全协议接管，解决部分软件不走系统代理的问题。
 * **激进的 DNS 解析体验**：采用 `fake-ip` 增强模式。内置基于国内直连与 DoH/DoT 混合的智能 DNS 策略，精准防止 DNS 污染。
 * **模块化规则集 (Rule Providers)**：全面拥抱 `mrs` 格式的远程规则集（感谢 [DustinWin](https://github.com/DustinWin/ruleset_geodata/releases)、[MetaCubeX](https://github.com/MetaCubeX/meta-rules-dat/tree/meta)、[echs-top](https://github.com/echs-top/proxy)、[reddishJade](https://github.com/reddishJade/private_proxy) 等维护者），剥离本地规则，实现自动无感更新。
 * **强迫症级场景分流**：
-    * **🤖 AI 大模型 / ✖️ Twitter / 🎵 TikTok**：独立分流组，并且**硬编码**了正则表达式过滤，强制只使用带有 "美国|住宅" 标识的节点，防止封号或风控。
+    * **🤖 AI大模型 / ✖️ Twitter / 🎵 TikTok**：独立分流组，使用功能性正则 `美国|住宅`，匹配名称包含 `美国` 或 `住宅` 的节点；英文配置保留同一过滤表达式。
     * **🎮 游戏**：独立 UDP 代理放行与主流游戏平台路由。
 * **高级广告/隐私拦截**：
     * 拦截 WebRTC / 语音 / 实时通信常用的 UDP 端口（3478-3479、5349-5350、19302-19309），防止其绕过分流策略。
@@ -139,9 +141,9 @@ https://raw.githubusercontent.com/XVSVTsama/mihomo-config-self/refs/heads/main/s
 | **📲 Telegram-DC2-DC4-Amsterdam** | TGDC 开启时，匹配荷兰/阿姆斯特丹节点 | 按 Telegram DC IP 规则优先命中；无匹配节点时回退到脚本选择的候选节点 |
 | **📲 Telegram-DC5-SG** | TGDC 开启时，匹配新加坡/香港节点 | DC5 实验候选组；无匹配节点时回退到脚本选择的候选节点 |
 | **🎮 Games-Global** | 国际服游戏流量 | / |
-| **✖️ Twitter** | 仅匹配名称包含 **"美国\|住宅"** 的节点 | 🚨 **节点命名不符将导致此策略组为空！** |
-| **🤖 AI大模型** | 仅匹配名称包含 **"美国\|住宅"** 的节点 | 🚨 **节点命名不符将导致此策略组为空！** |
-| **🎵 TikTok** | 仅匹配名称包含 **"美国\|住宅"** 的节点 | 🚨 **节点命名不符将导致此策略组为空！** |
+| **✖️ Twitter** | 匹配名称包含 `美国` 或 `住宅` 的节点 | 🚨 **节点命名不符将导致此策略组为空！** |
+| **🤖 AI大模型** | 匹配名称包含 `美国` 或 `住宅` 的节点 | 🚨 **节点命名不符将导致此策略组为空！** |
+| **🎵 TikTok** | 匹配名称包含 `美国` 或 `住宅` 的节点 | 🚨 **节点命名不符将导致此策略组为空！** |
 | **FCM** | Google FCM 相关域名（`hidden` 隐藏组） | 由 `FCM直连` 开关控制：开启=仅 `DIRECT`，关闭=仅 `👉 手动切换` |
 
 > 注：🔄 负载均衡 / 👉 手动切换 / ♻️ 自动选择 / 📲 Telegram / 🎮 Games-Global 在模板中 `proxies` 为空（注释"此处为所有单节点"），启用覆写脚本后会自动填入订阅的全部节点；不使用脚本时需手动填充。
@@ -152,7 +154,7 @@ https://raw.githubusercontent.com/XVSVTsama/mihomo-config-self/refs/heads/main/s
 
 由于这是自用配置，`proxies: ~` 处为空。你必须自己完成以下操作：
 1. **注入节点**：推荐直接使用上面的覆写脚本——订阅里的真实节点会自动填入 `proxies` 与各占位策略组，订阅自带的 `proxy-providers` 也会被保留；如果不用脚本，则需要手动把节点列表或 `proxy-providers` 填入本配置（`proxies: ~` 处默认留空）。
-2. **修改节点过滤规则 (Filter)**：如果你购买的机场节点名称中没有包含 `美国` 或 `住宅` 的字眼，请务必手动修改配置文件中对应策略组的 `filter` 字段，否则你的 AI、推特和 TikTok 将完全无法联网。
+2. **修改节点过滤规则 (Filter)**：中英文配置默认均使用 `美国|住宅`。如果订阅节点名称中没有包含 `美国` 或 `住宅`，请修改中文源文件中对应策略组的 `filter` 字段，再同步到英文配置。
 3. **按需删减规则**：如果你不需要屏蔽番茄小说海外版的广告，建议删除 `sub-rules` 中 `fanqie` 相关的规则，以节省性能。
 
 ---

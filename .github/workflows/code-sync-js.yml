@@ -9,6 +9,10 @@ on:
     paths:
       - script_override.js
       - script_override_en.js
+      - .github/scripts/check_code_sync.py
+      - .github/scripts/translation_boundaries.py
+      - .github/scripts/js_comment_spans.cjs
+      - .github/workflows/code-sync-js.yml
   workflow_dispatch:
     inputs:
       enforce:
@@ -35,6 +39,13 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Install JavaScript parser
+        run: |
+          npm install --no-save --no-package-lock --prefix "$RUNNER_TEMP/translation-parser" acorn@8.15.0
+          echo "NODE_PATH=$RUNNER_TEMP/translation-parser/node_modules" >> "$GITHUB_ENV"
       - name: Check JS code sync
         env:
           CHECK_ENFORCE: ${{ github.event.inputs.enforce || vars.CODE_SYNC_CHECK_ENFORCE || '' }}

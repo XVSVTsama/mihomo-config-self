@@ -21,7 +21,7 @@ tun:
   auto-route: true 
   auto-redirect: true
   strict-route: true
-  stack: gvisor                                           
+  stack: mips
   dns-hijack:
     - "any:53"  
     - "udp://any:53"
@@ -152,8 +152,10 @@ sniffer:
     - 210.2.4.8/32
     - 101.226.4.6/32
     - 218.30.118.6/32
+
 dns:
   enable: true                                             
+  cache-algorithm: arc
  #prefer-h3: true                                             
   ipv6: true                                       
   listen: '0.0.0.0:1053'  
@@ -162,12 +164,14 @@ dns:
   use-system-hosts: false                                            
   default-nameserver:     
     - tls://223.5.5.5#DIRECT
-    - tls://223.6.6.6#DIRECT
+    - 114.114.114.114#DIRECT
+    - https://1.12.12.12/dns-query#DIRECT
   proxy-server-nameserver: 
     - https://hrbgyitz34.cloudflare-gateway.com/dns-query#DIRECT
   direct-nameserver: 
     - https://dns.alidns.com/dns-query#DIRECT
     - https://doh.pub/dns-query#DIRECT
+  direct-nameserver-follow-policy: true
   nameserver:
     - https://cloudflare-dns.com/dns-query#👉 手动切换
   # - https://dns.adguard-dns.com/dns-query     # AdGuard Public DNS  # 94.140.14.14        94.140.15.15
@@ -177,7 +181,13 @@ dns:
   # - https://doh.dns.sb/dns-query              # DNS.SB Public DNS   # 185.222.222.222     45.11.45.11
   # - https://dns.twnic.tw/dns-query            # Quad101 Public DNS  # 101.101.101.10      101.102.103.10
   nameserver-policy:
-    'rule-set:private,direct,proxy@direct,cn,echs_cn,echs_direct':
+    'rule-set:douyin':
+    - system
+    - 180.184.1.1
+    - 180.184.2.2
+    'rule-set:private':
+    - system
+    'rule-set:proxy@direct,cn,echs_cn,echs_direct':
     - https://dns.alidns.com/dns-query#DIRECT
   prefer-h3: false
   respect-rules: false                                            
@@ -188,10 +198,10 @@ dns:
   fake-ip-filter: 
     - rule-set:fakeip-filter_domain
     - rule-set:private
-    - rule-set:direct
     - rule-set:cn
     - rule-set:echs_cn
     - rule-set:echs_direct
+    - rule-set:googlefcm
     - rule-set:applications
     - rule-set:pixiv
     - pixshaft.com
@@ -264,17 +274,17 @@ proxy-groups:
   - name: ✖️ Twitter
     icon: "https://www.clashverge.dev/assets/icons/twitter.svg"
     type: select
-    filter: "US|Residential"
+    filter: "美国|住宅"
     include-all-proxies: true
   - name: 🤖 AI大模型
     icon: "https://github.com/DustinWin/ruleset_geodata/releases/download/icons/ai.png"
     type: select
-    filter: "US|Residential"
+    filter: "美国|住宅"
     include-all-proxies: true
   - name: 🎵 TikTok
     icon: "https://github.com/DustinWin/ruleset_geodata/releases/download/icons/tiktok.png"
     type: select
-    filter: "US|Residential"
+    filter: "美国|住宅"
     include-all-proxies: true
   # FCM: Google FCM domain traffic splitting target (routes to this group after hitting RULE-SET,googlefcm,FCM).
   # This group is not hidden in the template to indicate that this proxy group actually exists and is a real traffic splitting target in the configuration;
@@ -289,6 +299,7 @@ proxy-groups:
     proxies:
       - 👉 手动切换
       - DIRECT
+
 .templates:
   domain_mrs: &domain_mrs { type: http, interval: 86400, behavior: domain, format: mrs }
   ipcidr_mrs: &ipcidr_mrs { type: http, interval: 86400, behavior: ipcidr, format: mrs }
@@ -304,11 +315,11 @@ rule-providers:
   TikTok: { <<: *domain_mrs, url: 'https://github.com/DustinWin/ruleset_geodata/releases/download/mihomo-ruleset/tiktok.mrs', path: ./ruleset/tiktok.mrs }
   ai-1: { <<: *domain_mrs, url: 'https://github.com/DustinWin/ruleset_geodata/releases/download/mihomo-ruleset/ai.mrs', path: ./ruleset/ai-1.mrs }
   ai-2: { <<: *domain_mrs, url: 'https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/category-ai-!cn.mrs', path: ./ruleset/ai-2.mrs }
-  apple: { <<: *domain_yaml, url: 'https://cdn.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/apple.txt', path: ./ruleset/apple.yaml }
+  apple@cn: { <<: *domain_mrs, url: 'https://fastly.jsdelivr.net/gh/appshubcc/bett-rules@meta/geo/geosite/apple@cn.mrs', path: ./ruleset/apple@cn.mrs }
   applications: { <<: *domain_yaml, url: 'https://cdn.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/applications.txt', path: ./ruleset/applications.yaml }
   cn: { <<: *domain_mrs, url: 'https://github.com/DustinWin/ruleset_geodata/releases/download/mihomo-ruleset/cn.mrs', path: ./ruleset/cn.mrs }
   cncidr: { <<: *ipcidr_mrs, url: 'https://github.com/DustinWin/ruleset_geodata/releases/download/mihomo-ruleset/cnip.mrs', path: ./ruleset/cncidr.mrs }
-  direct: { <<: *domain_yaml, url: 'https://cdn.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/direct.txt', path: ./ruleset/direct.yaml }
+  douyin: { <<: *domain_mrs, url: 'https://fastly.jsdelivr.net/gh/appshubcc/bett-rules@meta/geo/geosite/douyin.mrs', path: ./ruleset/douyin.mrs }
   echs_cn: { <<: *domain_mrs, url: 'https://raw.githubusercontent.com/echs-top/proxy/main/mrs/domain/cn.mrs', path: ./ruleset/echs_cn.mrs }
   echs_cn_ip: { <<: *ipcidr_mrs, url: 'https://raw.githubusercontent.com/echs-top/proxy/main/mrs/ip/cn.mrs', path: ./ruleset/echs_cn_ip.mrs }
   echs_direct: { <<: *domain_mrs, url: 'https://raw.githubusercontent.com/echs-top/proxy/main/mrs/domain/direct.mrs', path: ./ruleset/echs_direct.mrs }
@@ -320,7 +331,6 @@ rule-providers:
   google: { <<: *domain_yaml, url: 'https://cdn.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/google.txt', path: ./ruleset/google.yaml }
   google-cn: { <<: *domain_mrs, url: 'https://github.com/DustinWin/ruleset_geodata/releases/download/mihomo-ruleset/google-cn.mrs', path: ./ruleset/google-cn.mrs }
   googlefcm: { <<: *domain_mrs, url: 'https://fastly.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/googlefcm.mrs', path: ./ruleset/googlefcm.mrs }
-  icloud: { <<: *domain_yaml, url: 'https://cdn.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/icloud.txt', path: ./ruleset/icloud.yaml }
   lancidr: { <<: *ipcidr_yaml, url: 'https://cdn.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/lancidr.txt', path: ./ruleset/lancidr.yaml }
   pixiv: { <<: *domain_mrs, url: 'https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/pixiv.mrs', path: ./ruleset/pixiv.mrs }
   private: { <<: *domain_yaml, url: 'https://cdn.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/private.txt', path: ./ruleset/private.yaml }
@@ -331,6 +341,7 @@ rule-providers:
   twitter-x-blackmatrix7-No_Resolve: { <<: *classical_yaml, format: yaml, url: 'https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/refs/heads/master/rule/Clash/Twitter/Twitter_No_Resolve.yaml', path: ./ruleset/twitter-x-blackmartix7-noreslove.mrs }
   twitter-x-domain: { <<: *domain_mrs, url: 'https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/twitter.mrs', path: ./ruleset/twitter/x-domain.mrs }
   twitter-x-ip: { <<: *ipcidr_mrs, url: 'https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geoip/twitter.mrs', path: ./ruleset/twitter/x-ip.mrs }
+
 sub-rules:
   fanqie:
     - DOMAIN,p6-ad-sign.byteimg.com,REJECT
@@ -384,7 +395,7 @@ sub-rules:
 
     - MATCH,DIRECT                                           
 rules:
-  - AND,((NETWORK,UDP),(DST-PORT,3478-3479/5349-5350/19302-19309),(NOT,((RULE-SET,direct))),(NOT,((RULE-SET,cncidr))),(NOT,((RULE-SET,cn))),(NOT,((RULE-SET,applications))),(NOT,((RULE-SET,games))),(NOT,((RULE-SET,games-cn)))),REJECT
+  - AND,((NETWORK,UDP),(DST-PORT,3478-3479/5349-5350/19302-19309),(NOT,((RULE-SET,cncidr))),(NOT,((RULE-SET,cn))),(NOT,((RULE-SET,applications))),(NOT,((RULE-SET,games))),(NOT,((RULE-SET,games-cn)))),REJECT
   - RULE-SET,HijackingPlus,REJECT
 
   - SUB-RULE,(PROCESS-NAME,com.dragon.read.oversea.gp),fanqie
@@ -421,74 +432,71 @@ rules:
   - RULE-SET,telegramcidr,📲 Telegram,no-resolve
   - RULE-SET,telegram_domain,📲 Telegram
   # Manus AI: Covers Manus Desktop, Manus Helper, and the Android client process
-  - PROCESS-NAME-REGEX,(?i).*(manus|tech\.butterfly\.app).*,🤖 AI
+  - PROCESS-NAME-REGEX,(?i).*(manus|tech\.butterfly\.app).*,🤖 AI大模型
   # // Claude / Anthropic: process matches take precedence and cover Claude Desktop, Claude Code, etc.
-  - PROCESS-NAME-REGEX,(?i).*claude.*,🤖 AI
-  - PROCESS-NAME-REGEX,(?i).*anthropic.*,🤖 AI
+  - PROCESS-NAME-REGEX,(?i).*claude.*,🤖 AI大模型
+  - PROCESS-NAME-REGEX,(?i).*anthropic.*,🤖 AI大模型
   # // Claude / Anthropic: official API, web login, OAuth, MCP, CLI updates, and plugin dependencies.
-  - DOMAIN,api.anthropic.com,🤖 AI
-  - DOMAIN,console.anthropic.com,🤖 AI
-  - DOMAIN,statsig.anthropic.com,🤖 AI
-  - DOMAIN,status.anthropic.com,🤖 AI
-  - DOMAIN,sentry.anthropic.com,🤖 AI
-  - DOMAIN,support.anthropic.com,🤖 AI
-  - DOMAIN,mcp-proxy.anthropic.com,🤖 AI
-  - DOMAIN,platform.claude.com,🤖 AI
-  - DOMAIN,code.claude.com,🤖 AI
-  - DOMAIN,downloads.claude.ai,🤖 AI
-  - DOMAIN,bridge.claudeusercontent.com,🤖 AI
-  - DOMAIN,cdn.growthbook.io,🤖 AI
-  - DOMAIN,cdn.usefathom.com,🤖 AI
-  - DOMAIN,registry.npmjs.org,🤖 AI
-  - DOMAIN,storage.googleapis.com,🤖 AI
-  - DOMAIN,raw.githubusercontent.com,🤖 AI
-  - DOMAIN,formulae.brew.sh,🤖 AI
-  - DOMAIN,http-intake.logs.us5.datadoghq.com,🤖 AI
-  - DOMAIN,browser-intake-us5-datadoghq.com,🤖 AI
-  - DOMAIN,servd-anthropic-website.b-cdn.net,🤖 AI
-  - DOMAIN,claudemcpclient.com,🤖 AI
-  - DOMAIN,claudemcpcontent.com,🤖 AI
-  - DOMAIN-SUFFIX,anthropic.com,🤖 AI
-  - DOMAIN-SUFFIX,claude.ai,🤖 AI
-  - DOMAIN-SUFFIX,claude.com,🤖 AI
-  - DOMAIN-SUFFIX,claudeusercontent.com,🤖 AI
-  - DOMAIN-SUFFIX,clau.de,🤖 AI
-  - DOMAIN-SUFFIX,frame.claudeusercontent.com,🤖 AI
-  - DOMAIN-SUFFIX,modelcontextprotocol.io,🤖 AI
-  - IP-CIDR,160.79.104.0/21,🤖 AI,no-resolve
-  - IP-CIDR6,2607:6bc0::/48,🤖 AI,no-resolve
-  - RULE-SET,Gemini_Domain,🤖 AI
+  - DOMAIN,api.anthropic.com,🤖 AI大模型
+  - DOMAIN,console.anthropic.com,🤖 AI大模型
+  - DOMAIN,statsig.anthropic.com,🤖 AI大模型
+  - DOMAIN,status.anthropic.com,🤖 AI大模型
+  - DOMAIN,sentry.anthropic.com,🤖 AI大模型
+  - DOMAIN,support.anthropic.com,🤖 AI大模型
+  - DOMAIN,mcp-proxy.anthropic.com,🤖 AI大模型
+  - DOMAIN,platform.claude.com,🤖 AI大模型
+  - DOMAIN,code.claude.com,🤖 AI大模型
+  - DOMAIN,downloads.claude.ai,🤖 AI大模型
+  - DOMAIN,bridge.claudeusercontent.com,🤖 AI大模型
+  - DOMAIN,cdn.growthbook.io,🤖 AI大模型
+  - DOMAIN,cdn.usefathom.com,🤖 AI大模型
+  - DOMAIN,registry.npmjs.org,🤖 AI大模型
+  - DOMAIN,storage.googleapis.com,🤖 AI大模型
+  - DOMAIN,raw.githubusercontent.com,🤖 AI大模型
+  - DOMAIN,formulae.brew.sh,🤖 AI大模型
+  - DOMAIN,http-intake.logs.us5.datadoghq.com,🤖 AI大模型
+  - DOMAIN,browser-intake-us5-datadoghq.com,🤖 AI大模型
+  - DOMAIN,servd-anthropic-website.b-cdn.net,🤖 AI大模型
+  - DOMAIN,claudemcpclient.com,🤖 AI大模型
+  - DOMAIN,claudemcpcontent.com,🤖 AI大模型
+  - DOMAIN-SUFFIX,anthropic.com,🤖 AI大模型
+  - DOMAIN-SUFFIX,claude.ai,🤖 AI大模型
+  - DOMAIN-SUFFIX,claude.com,🤖 AI大模型
+  - DOMAIN-SUFFIX,claudeusercontent.com,🤖 AI大模型
+  - DOMAIN-SUFFIX,clau.de,🤖 AI大模型
+  - DOMAIN-SUFFIX,frame.claudeusercontent.com,🤖 AI大模型
+  - DOMAIN-SUFFIX,modelcontextprotocol.io,🤖 AI大模型
+  - IP-CIDR,160.79.104.0/21,🤖 AI大模型,no-resolve
+  - IP-CIDR6,2607:6bc0::/48,🤖 AI大模型,no-resolve
+  - RULE-SET,Gemini_Domain,🤖 AI大模型
 
-  - RULE-SET,Grok_Domain,🤖 AI
- # - RULE-SET,Grok_IP,🤖 AI
-  - IP-CIDR,17.253.4.0/23,🤖 AI,no-resolve
+  - RULE-SET,Grok_Domain,🤖 AI大模型
+ # - RULE-SET,Grok_IP,🤖 AI大模型
+  - IP-CIDR,17.253.4.0/23,🤖 AI大模型,no-resolve
 
   # CDN and Static Resources
-  - DOMAIN,anthropic.com.cdn.cloudflare.net,🤖 AI
+  - DOMAIN,anthropic.com.cdn.cloudflare.net,🤖 AI大模型
   # Authentication / Content
-  - DOMAIN,anthropic-com.ghost.io,🤖 AI
+  - DOMAIN,anthropic-com.ghost.io,🤖 AI大模型
   # Monitoring and Telemetry
-  - DOMAIN-SUFFIX,sentry.io,🤖 AI
-  - DOMAIN-SUFFIX,statsigapi.net,🤖 AI
-  - DOMAIN,browser-intake-us5-datadoghq.com,🤖 AI
-  - DOMAIN-KEYWORD,datadog,🤖 AI
-  - DOMAIN-KEYWORD,sift,🤖 AI
+  - DOMAIN-SUFFIX,sentry.io,🤖 AI大模型
+  - DOMAIN-SUFFIX,statsigapi.net,🤖 AI大模型
+  - DOMAIN,browser-intake-us5-datadoghq.com,🤖 AI大模型
+  - DOMAIN-KEYWORD,datadog,🤖 AI大模型
+  - DOMAIN-KEYWORD,sift,🤖 AI大模型
   # Compatible with third-party monitoring entries in older AI rules
-  - RULE-SET,ai-1,🤖 AI
-  - RULE-SET,ai-2,🤖 AI
+  - RULE-SET,ai-1,🤖 AI大模型
+  - RULE-SET,ai-2,🤖 AI大模型
 
   - RULE-SET,google,🌍 PROXY
   - RULE-SET,google-cn,🌍 PROXY
-
-  - RULE-SET,direct,DIRECT
 
   - PROCESS-NAME-REGEX,.*twitter.*,✖️ Twitter
   - RULE-SET,twitter-x-domain,✖️ Twitter
   - RULE-SET,twitter-x-ip,✖️ Twitter,no-resolve
   - RULE-SET,twitter-x-blackmatrix7-No_Resolve,✖️ Twitter
 
-  - RULE-SET,icloud,DIRECT
-  - RULE-SET,apple,DIRECT
+  - RULE-SET,apple@cn,DIRECT
   - RULE-SET,games-cn,DIRECT
 
   - PROCESS-NAME,bf6.exe,🎮 Games-Global
