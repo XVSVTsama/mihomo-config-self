@@ -607,21 +607,21 @@ const TEMPLATE = {
       "name": "✖️ Twitter",
       "icon": "https://www.clashverge.dev/assets/icons/twitter.svg",
       "type": "select",
-      "filter": "美国|住宅",
+      "filter": "(?i)^(?!.*(?:🇭🇰|香港|Hong\s*Kong|\bHK\b|🇸🇬|新加坡|Singapore|\bSG\b)).*(?:住宅|家宽|家寬|家庭宽带|家庭寬頻|原生住宅|住宅\s*IP|residential|home\s*broadband|home\s*internet|🇺🇸|美国|美國|\bUnited\s+States\b|\bU\.?S\.?(?:A\.?)?\b).*$",
       "include-all-proxies": true
     },
     {
       "name": "🤖 AI大模型",
       "icon": "https://github.com/DustinWin/ruleset_geodata/releases/download/icons/ai.png",
       "type": "select",
-      "filter": "美国|住宅",
+      "filter": "(?i)^(?!.*(?:🇭🇰|香港|Hong\s*Kong|\bHK\b|🇸🇬|新加坡|Singapore|\bSG\b)).*(?:住宅|家宽|家寬|家庭宽带|家庭寬頻|原生住宅|住宅\s*IP|residential|home\s*broadband|home\s*internet|🇺🇸|美国|美國|\bUnited\s+States\b|\bU\.?S\.?(?:A\.?)?\b).*$",
       "include-all-proxies": true
     },
     {
       "name": "🎵 TikTok",
       "icon": "https://github.com/DustinWin/ruleset_geodata/releases/download/icons/tiktok.png",
       "type": "select",
-      "filter": "美国|住宅",
+      "filter": "(?i)^(?!.*(?:🇭🇰|香港|Hong\s*Kong|\bHK\b|🇸🇬|新加坡|Singapore|\bSG\b)).*(?:住宅|家宽|家寬|家庭宽带|家庭寬頻|原生住宅|住宅\s*IP|residential|home\s*broadband|home\s*internet|🇺🇸|美国|美國|\bUnited\s+States\b|\bU\.?S\.?(?:A\.?)?\b).*$",
       "include-all-proxies": true
     },
     {
