@@ -294,6 +294,19 @@ const TGDC_RULES = [
 // 标准模板配置（与仓库 mihomo.yaml 保持同步，等价于该 yaml 文件的 JSON 表示）
 // ============================================================================
 
+// YAML 锚点模板：TEMPLATE 保持展开结构，最终返回结果时再附加锚点提示。
+// 这样既不破坏 JS 模板与 YAML 展开值同步的校验，也让 Bettbox / FlClash
+// 在重新序列化覆写结果时恢复 &name、*name 和 <<: 结构。
+// inline_classical 用于 TGDC 实验分流开启后动态注入的 inline classical provider。
+const YAML_ANCHOR_TEMPLATES = {
+  domain_mrs: { type: 'http', interval: 86400, behavior: 'domain', format: 'mrs' },
+  ipcidr_mrs: { type: 'http', interval: 86400, behavior: 'ipcidr', format: 'mrs' },
+  domain_yaml: { type: 'http', interval: 86400, behavior: 'domain' },
+  ipcidr_yaml: { type: 'http', interval: 86400, behavior: 'ipcidr' },
+  classical_yaml: { type: 'http', interval: 86400, behavior: 'classical' },
+  inline_classical: { type: 'inline', behavior: 'classical' }
+};
+
 const TEMPLATE = {
   "mode": "rule",
   "mixed-port": 7254,
@@ -607,21 +620,21 @@ const TEMPLATE = {
       "name": "✖️ Twitter",
       "icon": "https://www.clashverge.dev/assets/icons/twitter.svg",
       "type": "select",
-      "filter": "(?i)^(?!.*(?:🇭🇰|香港|Hong\s*Kong|\bHK\b|🇸🇬|新加坡|Singapore|\bSG\b)).*(?:住宅|家宽|家寬|家庭宽带|家庭寬頻|原生住宅|住宅\s*IP|residential|home\s*broadband|home\s*internet|🇺🇸|美国|美國|\bUnited\s+States\b|\bU\.?S\.?(?:A\.?)?\b).*$",
+      "filter": "(?i)^(?!.*(?:🇭🇰|香港|Hong\\s*Kong|\\bHK\\b|🇸🇬|新加坡|Singapore|\\bSG\\b)).*(?:住宅|家宽|家寬|家庭宽带|家庭寬頻|原生住宅|住宅\\s*IP|residential|home\\s*broadband|home\\s*internet|🇺🇸|美国|美國|\\bUnited\\s+States\\b|\\bU\\.?S\\.?(?:A\\.?)?\\b).*$",
       "include-all-proxies": true
     },
     {
       "name": "🤖 AI大模型",
       "icon": "https://github.com/DustinWin/ruleset_geodata/releases/download/icons/ai.png",
       "type": "select",
-      "filter": "(?i)^(?!.*(?:🇭🇰|香港|Hong\s*Kong|\bHK\b|🇸🇬|新加坡|Singapore|\bSG\b)).*(?:住宅|家宽|家寬|家庭宽带|家庭寬頻|原生住宅|住宅\s*IP|residential|home\s*broadband|home\s*internet|🇺🇸|美国|美國|\bUnited\s+States\b|\bU\.?S\.?(?:A\.?)?\b).*$",
+      "filter": "(?i)^(?!.*(?:🇭🇰|香港|Hong\\s*Kong|\\bHK\\b|🇸🇬|新加坡|Singapore|\\bSG\\b)).*(?:住宅|家宽|家寬|家庭宽带|家庭寬頻|原生住宅|住宅\\s*IP|residential|home\\s*broadband|home\\s*internet|🇺🇸|美国|美國|\\bUnited\\s+States\\b|\\bU\\.?S\\.?(?:A\\.?)?\\b).*$",
       "include-all-proxies": true
     },
     {
       "name": "🎵 TikTok",
       "icon": "https://github.com/DustinWin/ruleset_geodata/releases/download/icons/tiktok.png",
       "type": "select",
-      "filter": "(?i)^(?!.*(?:🇭🇰|香港|Hong\s*Kong|\bHK\b|🇸🇬|新加坡|Singapore|\bSG\b)).*(?:住宅|家宽|家寬|家庭宽带|家庭寬頻|原生住宅|住宅\s*IP|residential|home\s*broadband|home\s*internet|🇺🇸|美国|美國|\bUnited\s+States\b|\bU\.?S\.?(?:A\.?)?\b).*$",
+      "filter": "(?i)^(?!.*(?:🇭🇰|香港|Hong\\s*Kong|\\bHK\\b|🇸🇬|新加坡|Singapore|\\bSG\\b)).*(?:住宅|家宽|家寬|家庭宽带|家庭寬頻|原生住宅|住宅\\s*IP|residential|home\\s*broadband|home\\s*internet|🇺🇸|美国|美國|\\bUnited\\s+States\\b|\\bU\\.?S\\.?(?:A\\.?)?\\b).*$",
       "include-all-proxies": true
     },
     {
@@ -1024,6 +1037,40 @@ const TEMPLATE = {
     "MATCH,🌍 PROXY"
   ]
 };
+
+// 根据 provider 的实际字段匹配最具体的锚点模板，并把 YAML 合并键放在首位。
+// 该函数必须在 TGDC 动态 provider 注入之后调用，才能覆盖 Telegram DC 规则集。
+function applyYamlAnchorHints(result) {
+  result['.templates'] = deepClone(YAML_ANCHOR_TEMPLATES);
+  const providers = result['rule-providers'];
+  if (!providers || typeof providers !== 'object') {
+    return;
+  }
+
+  const candidates = Object.entries(YAML_ANCHOR_TEMPLATES).sort(
+    ([, a], [, b]) => Object.keys(b).length - Object.keys(a).length
+  );
+
+  Object.keys(providers).forEach((name) => {
+    const provider = providers[name];
+    if (!provider || typeof provider !== 'object') {
+      return;
+    }
+
+    const match = candidates.find(([, definition]) =>
+      Object.entries(definition).every(([key, value]) => provider[key] === value)
+    );
+    if (!match) {
+      return;
+    }
+
+    const [anchorName] = match;
+    providers[name] = {
+      '<<': `*${anchorName}`,
+      ...provider
+    };
+  });
+}
 
 // Bettbox 的可视化开关图标：客户端会读取全局 serviceConfigs（name 对应 ruleOptionsEnable 的 key，
 // icon 为该开关行显示的图标）。上面只覆盖代理组；功能开关的图标来源：
@@ -1814,6 +1861,7 @@ function main(config, profileName) {
 
   // ---- 2.5 TGDC 实验分流（默认关闭；由 UI 开关控制） ----
   applyTelegramDcExperiment(result, originalProxies);
+  applyYamlAnchorHints(result);
 
   // ---- 3. 节点列表换成订阅里的真实节点 ----
   result.proxies = originalProxies;
