@@ -149,7 +149,11 @@ def render_scalar(value, old_text=""):
         quote = old_text[0]
         if quote == "'":
             return "'" + text.replace("'", "''") + "'"
-        return '"' + text.replace('"', '\\"') + '"'
+        # JSON string escaping is also valid YAML double-quoted escaping, and
+        # unlike a bare quote escape it keeps regex backslashes intact: a
+        # literal "\b" must not become YAML's backspace escape, and "\s" is
+        # not a valid double-quoted escape at all.
+        return json.dumps(text, ensure_ascii=False)
     return quote_val(text)
 
 

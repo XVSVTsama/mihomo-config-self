@@ -39,7 +39,10 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          ref: ${{ github.event_name == 'workflow_run' && 'main' || github.sha }}
+          # Every entry point publishes to main, and the publish step needs a
+          # real branch: checking out github.sha leaves a detached HEAD that
+          # silently generated the English files and then failed to push them.
+          ref: main
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
@@ -50,8 +53,8 @@ jobs:
         run: |
           npm install --no-save --no-package-lock --prefix "$RUNNER_TEMP/translation-parser" acorn@8.15.0
           echo "NODE_PATH=$RUNNER_TEMP/translation-parser/node_modules" >> "$GITHUB_ENV"
-      - name: Install PyYAML
-        run: pip install pyyaml
+      - name: Install YAML dependencies
+        run: pip install pyyaml ruamel.yaml
       - name: Test translation boundaries
         run: python -m unittest discover -s .github/scripts/tests -p 'test_*.py'
       - name: Detect relevant changes
@@ -61,11 +64,23 @@ jobs:
             echo "run=true" >> "$GITHUB_OUTPUT"
           elif [ "$GITHUB_EVENT_NAME" = "workflow_run" ]; then
             # Triggered by Template Generate: script_override.js always needs
-            # translation; mihomo.yaml too if the generate run changed it.
+            # translation; mihomo.yaml too if either the triggering commit or
+            # the generate run changed it. The comparison must include the
+            # triggering commit itself -- diffing head_sha..HEAD hides the
+            # source files that commit changed, which is exactly how the YAML
+            # half of a combined JS+YAML update was skipped.
             HEAD_SHA="${{ github.event.workflow_run.head_sha }}"
-            CHANGED="$(git diff --name-only "$HEAD_SHA" HEAD)"
+            if git rev-parse --verify --quiet "${HEAD_SHA}^" >/dev/null; then
+              CHANGED="$(git diff --name-only "${HEAD_SHA}^" HEAD)"
+            else
+              CHANGED="$(git show --pretty=format: --name-only "$HEAD_SHA")"
+            fi
             TARGETS="script_override.js"
             if echo "$CHANGED" | grep -qE '(^|/)mihomo\.yaml$'; then
+              TARGETS="script_override.js,mihomo.yaml"
+            elif ! python .github/scripts/check_code_sync.py yaml mihomo.yaml mihomo_en.yaml >/dev/null 2>&1; then
+              # The generate run was a no-op but the English YAML is still out
+              # of sync, so translate it instead of skipping the pair again.
               TARGETS="script_override.js,mihomo.yaml"
             fi
             echo "run=true" >> "$GITHUB_OUTPUT"
@@ -118,12 +133,45 @@ jobs:
           if [ -z "$TARGETS" ] || echo ",$TARGETS," | grep -q ',script_override.js,'; then
             python .github/scripts/check_code_sync.py js script_override.js script_override_en.js
           fi
-      - name: Commit generated English files
+      - name: Commit and push generated English files
         if: steps.changes.outputs.run == 'true'
-        uses: stefanzweifel/git-auto-commit-action@v5
-        with:
-          commit_message: "chore: sync English translations from Chinese"
-          file_pattern: "mihomo_en.yaml script_override_en.js README_en.md"
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          # Only the generated English outputs are ever staged, so a dirty
+          # source tree can never be published by this step.
+          git add -- mihomo_en.yaml script_override_en.js README_en.md
+          if git diff --cached --quiet; then
+            echo "No generated English changes to publish."
+            exit 0
+          fi
+          git commit -m "chore: sync English translations from Chinese"
+          # The generated English files only match the Chinese source they were
+          # produced from. If that source moves while this run retries, the
+          # push is refused instead of publishing a mismatched pair; the newer
+          # run republishes from the newer source.
+          SOURCE_HASH="$(git hash-object -- mihomo.yaml script_override.js README.md)"
+          for attempt in 1 2 3 4 5; do
+            git fetch --quiet origin main
+            if ! git rebase origin/main; then
+              git rebase --abort || true
+              echo "::error::Generated English files conflict with origin/main; not published."
+              exit 1
+            fi
+            if [ "$(git hash-object -- mihomo.yaml script_override.js README.md)" != "$SOURCE_HASH" ]; then
+              echo "::error::Chinese sources changed during the run; refusing to publish stale English files."
+              exit 1
+            fi
+            if git push origin HEAD:main; then
+              echo "Published generated English files on attempt ${attempt}."
+              exit 0
+            fi
+            echo "::warning::Push attempt ${attempt} failed; refetching origin/main and retrying."
+            sleep 5
+          done
+          echo "::error::Failed to publish generated English files after 5 attempts."
+          exit 1
       - name: Upload English sync report
         if: steps.changes.outputs.run == 'true'
         uses: actions/upload-artifact@v4

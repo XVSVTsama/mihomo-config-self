@@ -50,11 +50,12 @@ jobs:
             git fetch origin main
             # Discard the previous attempt's working-tree state (if any).
             git reset --hard -q
-            # Work from the latest main (self-healing: the patch output only
-            # depends on TEMPLATE, not on how stale the base YAML is), and
-            # take script_override.js from the triggering commit.
+            # Work from the latest main. The generated YAML is a pure function
+            # of the TEMPLATE in script_override.js, so regenerating from the
+            # freshest copy of that file is what keeps the pair consistent:
+            # restoring this run's original commit here could write YAML that
+            # matches an outdated template while newer JS is already on main.
             git checkout -B sync-work origin/main
-            git show "$TRIGGER_SHA:script_override.js" > script_override.js
             if python .github/scripts/check_template_sync.py; then
               echo "mihomo.yaml already in sync with script_override.js; nothing to do."
               exit 0
@@ -63,6 +64,10 @@ jobs:
             echo "Self-verify with the template-sync check:"
             python .github/scripts/check_template_sync.py
             git add mihomo.yaml
+            if git diff --cached --quiet; then
+              echo "Nothing to publish; origin/main already carries this YAML."
+              exit 0
+            fi
             git -c user.name='github-actions[bot]' \
                 -c user.email='41898282+github-actions[bot]@users.noreply.github.com' \
                 commit -m "chore: sync mihomo.yaml from script_override.js (${TRIGGER_SHA:0:7})"
