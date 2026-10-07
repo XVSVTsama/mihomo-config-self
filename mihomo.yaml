@@ -83,7 +83,6 @@ ntp:
   # - 'time1.cloud.tencent.com' 
   port: 123
 
-
 sniffer:
   enable: true
   parse-pure-ip: true
