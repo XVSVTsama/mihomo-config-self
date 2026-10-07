@@ -36,7 +36,10 @@
   <a href="#remote-override">Remote Override JS</a> ·
   <a href="#core-features">Essential Highlights</a> ·
   <a href="#proxy-groups">Proxy Group Structure</a> ·
-  <a href="#before-use">Must-Modify Before Use</a>
+  <a href="#before-use">Must-Modify Before Use</a> ·
+  <a href="#acknowledgments">Acknowledgments</a> ·
+  <a href="#star-history">Star History</a> ·
+  <a href="#disclaimer">Disclaimer</a>
 </p>
 
 <p align="center">
@@ -75,18 +78,18 @@ https://raw.githubusercontent.com/XVSVTsama/mihomo-config-self/refs/heads/main/s
    - The real nodes in the subscription are automatically filled in `proxies` Compared with the pure single-node placeholder group (👉 manual switching, ♻️ automatic selection, 🔄 load balancing, 📲 Telegram, 🎮 Games-Global); 🍎 overseas Apple, 🌐 overseas Microsoft, 🎮 Steam platform (non-download/CDN) retains fixed policy items and additionally subscribes to a single node;
    - Subscription comes with `proxy-providers` will be preserved as is;
    - Dynamically merge DNS `proxy-server-nameserver-policy`(Subject to the script, the template does not preset this key);
-   - This can be accessed via the top of the script `ruleOptionsEnable` The switch disables policy groups individually and automatically cleans up related references.
+   - Available via script top `ruleOptionsEnable` The switch disables policy groups individually and automatically cleans up related references.
    - 🍎 Overseas Apple / 🌐 Overseas Microsoft: Domestic Apple and Microsoft rules are mandatory `DIRECT`; Overseas domain names/IPs are entered into independent groups respectively, and manual switching, automatic selection, load balancing, etc. are provided within the group.`DIRECT` and all subscribe to a single node.
-   - 🎮Steam platform (non-download/CDN): Steam domain name/IP rules enter the independent group, selected by default `DIRECT`；`games-cn` Still connected directly,`games` Still entering 🎮 Games-Global.
+   - 🎮 Steam platform (non-download/CDN): Steam domain name/IP rules enter the independent group, selected by default `DIRECT`；`games-cn` Still connected directly,`games` Still entering 🎮 Games-Global.
    - `FCM直连` Function switch: enabled by default, hidden group FCM only contains `DIRECT`; Prioritize use after closing `👉 手动切换`, if the policy group is closed, fall back to `🌍 PROXY`, if the group has also been closed, fall back to `DIRECT`(The FCM group is not removed).
    - `TGDC实验分流` Function switch: off by default. Once enabled, the script will prioritize Telegram traffic according to IP rules. `📲 Telegram-DC1-DC3-Miami`、`📲 Telegram-DC2-DC4-Amsterdam` and `📲 Telegram-DC5-SG` Three experimental groups; among them, the DC5 group matches nodes in Singapore and Hong Kong at the same time, because both places can serve as interconnection candidates for the DC. Three experimental groups used `include-all-proxies` Add name filtering to match node names such as the United States/Miami, Netherlands/Amsterdam, Singapore/Hong Kong, etc. If there are no matching regional nodes in an experimental group, the script will explicitly include all qualified nodes in the subscription (only exceptions, built-in/rejection/rematching and prompt information nodes are excluded; free, low-magnification, and high-magnification nodes are no longer excluded) for manual selection.`empty-fallback` for `COMPATIBLE`. After opening, the original `📲 Telegram` Group renamed `📲 Telegram(兜底)`, the original Telegram process, domain name and CIDR rules are uniformly pointed to this group, and the experimental DC/region IP rules are inserted first. When closed, no experimental groups, rule sets or rules are injected, and the original Telegram configuration remains unchanged.
-   - `入口解析` Function switch: off by default; when turned on, all three entry nodes of China Telecom, China Unicom, and China Mobile will be added `国内入口解析` 
+   - `入口解析` Function switch: off by default; when turned on, all three entry nodes of China Telecom, China Unicom, and China Mobile will be added `国内入口解析` A proxy group in which the user manually selects the actual ingress node to use and applies the selected ingress to resolve DNS for the end node. There is no automatic script priority among the three; the order in the configuration does not mean automatic switching or priority. This function will introduce time-sensitive domestic public nodes and is an experimental capability for testing purposes only.
    - The first line of the script is the Bettbox compatibility statement (`Compatible_With_Bettbox`): The Bettbox client agrees to identify the statement at the beginning of the script (not to read it in full). The script must follow this convention and the statement must remain on top, otherwise the "custom rule switch" entry will not be displayed.
    - `policyGroupOptions`：`Compatible_With_Bettbox` The fields in the statement declare the 12 policy groups classified into the Bettbox policy group switch classification (🌍 PROXY, 🔄 Load balancing, 👉 Manual switching, ♻️ Automatic selection, 📲 Telegram, 🎮 Games-Global, 🍎 Overseas Apple, 🌐 Overseas Microsoft, 🎮 Steam platform (non-download/CDN), ✖️ Twitter, 🤖 AI large model, 🎵 TikTok).
 
    Standard templates and repositories embedded in scripts [mihomo.yaml](https://raw.githubusercontent.com/XVSVTsama/mihomo-config-self/refs/heads/main/mihomo.yaml) Keep in sync (in case of discrepancies, js shall prevail).
 
-   Only actual comments and README instructions are translated into Chinese and English simultaneously. The policy group name and its references, switch keys, string values, URLs, node filtering rules and other functional contents retain the original values ​​in the Chinese source; the synchronization check will reject changes in these contents, including functional values ​​containing Chinese. Comment symbols in strings, regexes, template strings, and YAML block scalars are not treated as translatable comments.
+   Only the actual comments and README instructions are translated into Chinese and English simultaneously. The policy group name and its references, switch keys, string values, URLs, node filtering rules and other functional contents retain the original values ​​in the Chinese source; the synchronization check will reject changes in these contents, including functional values ​​containing Chinese. Comment symbols in strings, regexes, template strings, and YAML block scalars are not treated as translatable comments.
 
 ## Node domain name and DNS linkage model
 
@@ -95,7 +98,7 @@ https://raw.githubusercontent.com/XVSVTsama/mihomo-config-self/refs/heads/main/s
 > This document disassembles the configuration `hosts` The respective responsibilities of true and false mapping, private DoH resolution, DNS policy and fake-IP filter, and how the four work together in the same node resolution link. It is intended for people who want to write or understand node resolution override scripts and does not contain any real nodes, passwords, UUIDs or subscription credentials. (This section and its related `dns.use-hosts` The description of the effective effect is written by AI. )
 
 ## Recommended learning reference, subscription conversion project and client
-   [Looking for a truly studyable reference?](https://t.me/xvsvts/152)
+   [Looking for a real reference to learn from?](https://t.me/xvsvts/152)
 
    It is strongly recommended to use private subscription conversion front-end and back-end to prevent any public online conversion on the Internet, which will greatly reduce the leakage of sensitive node information:
    
@@ -120,11 +123,11 @@ Attached 🔴
 This configuration integrates modular remote rules (Rule Providers) and refined application-level offloading strategies, which are completely designed to meet my personal network environment and usage pain points:
 
 * **Use the rule TUN**: enabled by default `tun` mode, adopt `mips` The protocol stack realizes full device/full protocol takeover and solves the problem of some software not using the system agent.
-* **Radical DNS resolution experience**:use `fake-ip` Enhanced mode. Built-in smart DNS policy based on domestic direct connection and DoH/DoT hybrid to accurately prevent DNS pollution.
-* **Modular rule sets (Rule Providers)**: full embrace `mrs` formatted remote ruleset (thanks [DustinWin](https://github.com/DustinWin/ruleset_geodata/releases)、[MetaCubeX](https://github.com/MetaCubeX/meta-rules-dat/tree/meta)、[echs-top](https://github.com/echs-top/proxy)、[reddishJade](https://github.com/reddishJade/private_proxy) and other maintainers), strip away local rules and achieve automatic and non-intrusive updates.
+* **Radical DNS resolution experience**:use `fake-ip` Enhanced mode. Built-in intelligent DNS policy based on domestic direct connection and DoH/DoT hybrid to accurately prevent DNS pollution.
+* **Modular rule sets (Rule Providers)**: full embrace `mrs` formatted remote ruleset (thanks [DustinWin](https://github.com/DustinWin/ruleset_geodata/releases)、[MetaCubeX](https://github.com/MetaCubeX/meta-rules-dat/tree/meta)、[echs-top](https://github.com/echs-top/proxy)、[reddishJade](https://github.com/reddishJade/private_proxy) and other maintainers), strip off local rules and achieve automatic and non-intrusive updates.
 * **Obsessive-compulsive disorder level scene diversion**：
     * **🤖 AI Large Models / ✖️ Twitter / 🎵 TikTok**: Independent traffic group, using functional regularity to match residential/US nodes (residential/home broadband/residential/home broadband/🇺🇸/USA/USA/U.S. and other naming variants), and exclude Hong Kong/Singapore related nodes (🇭🇰/香港/Hong Kong/HK/🇸🇬/ Singapore/Singapore/SG); the English configuration retains the same filter expression.
-    * **🍎 Overseas Apple / 🌐 Overseas Microsoft**: Domestic rules force direct connection, and overseas domain names and IP rules are diverted to their respective manual policy groups.
+    * **🍎 Overseas Apple / 🌐 Overseas Microsoft**: Domestic rules force direct connection, and overseas domain name and IP rules are diverted to their respective manual policy groups.
     * **🎮 Games / Steam**:reserve `games-cn` Directly connected to `games` International game agent; Steam platform has another default setting `DIRECT` "Non-download/CDN" policy group.
 * **Advanced ad/privacy blocking**：
     * Block UDP ports (3478-3479, 5349-5350, 19302-19309) commonly used for WebRTC/voice/real-time communication to prevent them from bypassing the offloading policy.
@@ -151,7 +154,7 @@ This configuration integrates modular remote rules (Rule Providers) and refined 
 | **✖️ Twitter** | Match residential/American named nodes, exclude Hong Kong/Singapore nodes | 🚨 **Inconsistent node naming will cause this policy group to be empty!** |
 | **🤖 AI** | Match residential/American named nodes, exclude Hong Kong/Singapore nodes | 🚨 **Inconsistent node naming will cause this policy group to be empty!** |
 | **🎵 TikTok** | Match residential/American named nodes, exclude Hong Kong/Singapore nodes | 🚨 **Inconsistent node naming will cause this policy group to be empty!** |
-| **FCM** | Google FCM related domain names (`hidden` hidden group) | Depend on `FCM直连` Switch control: On =`DIRECT`;Off=manual group, fallback to when manual group is disabled `🌍 PROXY` or `DIRECT` |
+| **FCM** | Google FCM related domain names (`hidden` hidden group) | Depend on `FCM直连` Switch control: On=`DIRECT`;Off=manual group, fallback to when manual group is disabled `🌍 PROXY` or `DIRECT` |
 
 > Note: 🔄 Load balancing / 👉 Manual switching / ♻️ Automatic selection / 📲 Telegram / 🎮 Games-Global is a pure node placeholder group; 🍎 Overseas Apple / 🌐 Overseas Microsoft / 🎮 Steam platform (non-download/CDN) will first retain fixed policy items, and then the overwrite script will additionally subscribe to all single nodes. Nodes need to be populated manually when not using scripts.
 
@@ -166,10 +169,55 @@ Since this is a self-configuration,`proxies: ~` Everywhere is empty. You must do
 
 ---
 
-## ⚠️⚠️⚠️ Universe Disclaimer ⚠️⚠️⚠️
+<a id="acknowledgments"></a>
 
+## 🙏 Thanks
 
-1. **This is purely personal and does not provide any technical support.**: This warehouse code is only used as a reference for personal cloud backup and configuration.**It does not answer basic usage questions, does not accept non-BUG issues, and does not guarantee regular maintenance and updates.** If the configuration reports an error on your device, please consult the official Mihomo documentation to troubleshoot.
-2. **No network services are provided**: This configuration is purely for local routing rule distribution.**Absolutely not included, provided, or sold**Any form of scientific internet node, VPN service or server subscription.
-3. **Compliance and Legal Responsibilities**:Users are solely responsible for using this configuration at their own risk. Please strictly abide by the local laws and regulations of your country and region. For any network security issues, privacy leaks, data loss or legal disputes arising from the use, modification or dissemination of the contents of this repository,**The repository author is not responsible**。
-4. **Function damage warning**: The configuration contains aggressive ad removal (such as blocking specific domain names and IPs) and Fake-IP settings, which is very likely to cause some domestic APPs to be unable to load images, log in normally, or cause network connectivity problems. If you encounter network anomalies, please prioritize the troubleshooting in this configuration. `rules` and `fake-ip-filter`。
+This project is built on the open source kernel, client, ruleset and icon resources. The following acknowledgments are organized based on the current configuration and citation records in the warehouse history; citations or references do not mean that these projects have a cooperation or endorsement relationship with this warehouse. For specific resources, please refer to the descriptions and licenses of each upstream project.
+
+### Kernel and client
+
+- [Mihomo](https://github.com/MetaCubeX/mihomo): Provides core capabilities on which configuration depends.
+- [Bettbox](https://github.com/appshubcc/Bettbox): Graphical client, and overwriting script adaptation reference for this project.
+- [FlClash](https://github.com/chen08209/FlClash): Mihomo graphical client.
+
+### Rule set author and original project
+
+- [MetaCubeX/meta-rules-dat](https://github.com/MetaCubeX/meta-rules-dat): GeoSite, GeoIP and other rule data.
+- [DustinWin/ruleset_geodata](https://github.com/DustinWin/ruleset_geodata): Mihomo format rule set and related icon resources.
+- [echs-top/proxy](https://github.com/echs-top/proxy): Domestic, direct connection and proxy domain name/IP rule sets.
+- [appshubcc/bett-rules](https://github.com/appshubcc/bett-rules): Apple, Microsoft, Steam, Douyin and other rule data.
+- [reddishJade/private_proxy](https://github.com/reddishJade/private_proxy): Telegram IP and other rule sets.
+- [Accademia/Additional_Rule_For_Clash](https://github.com/Accademia/Additional_Rule_For_Clash): Supplementary rules for Gemini, Grok, etc.
+- [Loyalsoldier/clash-rules](https://github.com/Loyalsoldier/clash-rules): Applications, Google, LAN, private and other rules that have been cited.
+- [blackmatrix7/ios_rule_script](https://github.com/blackmatrix7/ios_rule_script): Twitter rules once quoted.
+
+### Icon author and original project
+
+- [Koolson/Qure](https://github.com/Koolson/Qure) and [MiToverG422/Qure](https://github.com/MiToverG422/Qure): Strategy group and region icons.
+- [DustinWin/ruleset_geodata](https://github.com/DustinWin/ruleset_geodata): Policy group icon provided by the rule project.
+- [AIsouler/MyClash](https://github.com/AIsouler/MyClash): SVG icons for Apple, Microsoft, Steam, etc.
+- [Clash Verge](https://www.clashverge.dev/): Some policy group icon resources.
+- The Dutch flag icon was drawn by this project itself and hosted on [`assets/icons/Netherlands.png`](assets/icons/Netherlands.png)。
+
+### Scripting and Configuration Reference
+
+- [AIsouler/MyClash](https://github.com/AIsouler/MyClash): Reference for scripts, configuration structure and README presentation.
+- [echs-top/proxy](https://github.com/echs-top/proxy): Reference for script ideas and rule organization.
+- [HenryChiao/MIHOMO_YAMLS](https://github.com/HenryChiao/MIHOMO_YAMLS): Mihomo YAML configuration and rule organization reference.
+
+The above references are for learning and comparison. The specific implementation is subject to the code of this warehouse.
+
+<a id="star-history"></a>
+
+## ⭐ Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=XVSVTsama/mihomo-config-self&type=Date)](https://star-history.com/#XVSVTsama/mihomo-config-self&Date)
+
+<a id="disclaimer"></a>
+
+## ⚠️ Disclaimer
+
+1. This repository contains configuration files, override scripts and instructions related to Mihomo. The specific capabilities, uses and operating results depend on the usage environment, client and user settings. Please understand and make your own judgment before use.
+2. The configuration includes DNS, Fake-IP, domain name/IP diversion and interception rules, which may affect some applications or network connections. When encountering an exception, please troubleshoot by yourself based on Mihomo official documentation and local configuration.
+3. Users should evaluate the risks involved in using, modifying or disseminating the contents of this warehouse and comply with applicable laws and regulations in their region. The consequences arising from the use of the contents of this warehouse shall be borne by the user himself.
