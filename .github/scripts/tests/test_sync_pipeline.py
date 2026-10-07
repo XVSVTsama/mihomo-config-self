@@ -121,6 +121,50 @@ class WorkflowShapeTests(unittest.TestCase):
         )
         self.assertIn("git checkout -B sync-work origin/main", generate)
 
+    def test_template_sync_explains_a_yaml_only_edit(self):
+        diagnose = step_run("template-sync.yml", "Explain how to fix template drift")
+        self.assertIn("mihomo.yaml", diagnose)
+        self.assertIn("script_override.js", diagnose)
+        for step in workflow_steps("template-sync.yml"):
+            if step.get("name") == "Explain how to fix template drift":
+                self.assertIn("failure()", step.get("if", ""))
+                return
+        self.fail("the diagnostic step lost its failure() guard")
+
+
+class TemplateDriftMessageTests(unittest.TestCase):
+    """The check must say what to change, not only what differs."""
+
+    def setUp(self):
+        if not shutil.which("node"):
+            self.skipTest("node is required to evaluate the JavaScript template")
+        self.directory = tempfile.TemporaryDirectory()
+        self.addCleanup(self.directory.cleanup)
+        self.tree = Path(self.directory.name)
+        scripts = self.tree / ".github" / "scripts"
+        scripts.mkdir(parents=True)
+        for name in ("check_template_sync.py",):
+            shutil.copy2(ROOT / ".github" / "scripts" / name, scripts / name)
+        shutil.copy2(ROOT / "script_override.js", self.tree / "script_override.js")
+        document = yaml.safe_load((ROOT / "mihomo.yaml").read_text(encoding="utf-8"))
+        document["mixed-port"] = (document.get("mixed-port") or 0) + 1
+        (self.tree / "mihomo.yaml").write_text(
+            yaml.safe_dump(document, allow_unicode=True, default_flow_style=False),
+            encoding="utf-8",
+        )
+
+    def test_drift_failure_names_the_source_of_truth(self):
+        result = subprocess.run(
+            [sys.executable, str(self.tree / ".github" / "scripts" / "check_template_sync.py")],
+            cwd=self.tree, text=True, encoding="utf-8", capture_output=True,
+            env=dict(os.environ, PYTHONDONTWRITEBYTECODE="1"),
+        )
+        output = result.stdout + result.stderr
+        self.assertEqual(result.returncode, 1, output)
+        self.assertIn("Template sync failed", output)
+        self.assertIn("source of truth", output)
+        self.assertIn("sync_template_yaml.py", output)
+
 
 class GitFixture(unittest.TestCase):
     """A local bare remote plus a clone, mirroring the runner's checkout."""

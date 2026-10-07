@@ -124,6 +124,15 @@ def main():
         print("Template sync failed with %d difference(s):" % len(differences))
         for path, message in differences:
             print("  %s: %s" % (path, message))
+        print()
+        print("script_override.js is the source of truth, not mihomo.yaml:")
+        print("  1. Edit TEMPLATE in script_override.js (that also updates the")
+        print("     script users load directly).")
+        print("  2. Let the Template Generate workflow rewrite mihomo.yaml, or")
+        print("     run 'python .github/scripts/sync_template_yaml.py' and push")
+        print("     the result.")
+        print("Editing mihomo.yaml on its own is overwritten, because the")
+        print("generator treats YAML as the derived artifact.")
         sys.exit(1)
     print("Template sync OK: mihomo.yaml and script_override.js TEMPLATE match.")
 
