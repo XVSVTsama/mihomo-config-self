@@ -261,18 +261,15 @@ proxy-groups:
     interval: 300
     tolerance: 50
     proxies: # 此处为所有单节点（由覆写脚本自动填入订阅全部节点）
-  -
-    name: 🍎 海外苹果
+  - name: 🍎 海外苹果
     icon: https://fastly.jsdelivr.net/gh/AIsouler/MyClash@main/Icons/svg/Apple.svg
     type: select
     proxies: null
-  -
-    name: 🌐 海外微软
+  - name: 🌐 海外微软
     icon: https://fastly.jsdelivr.net/gh/AIsouler/MyClash@main/Icons/svg/Microsoft.svg
     type: select
     proxies: null
-  -
-    name: 🎮 Steam平台（非下载/CDN）
+  - name: 🎮 Steam平台（非下载/CDN）
     icon: https://fastly.jsdelivr.net/gh/AIsouler/MyClash@main/Icons/svg/Steam.svg
     type: select
     default-selected: DIRECT
