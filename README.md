@@ -36,7 +36,10 @@
   <a href="#remote-override">远程覆写js</a> ·
   <a href="#core-features">核心特性</a> ·
   <a href="#proxy-groups">分流组结构</a> ·
-  <a href="#before-use">使用前必改</a>
+  <a href="#before-use">使用前必改</a> ·
+  <a href="#acknowledgments">致谢</a> ·
+  <a href="#star-history">Star History</a> ·
+  <a href="#disclaimer">免责声明</a>
 </p>
 
 <p align="center">
@@ -166,10 +169,55 @@ https://raw.githubusercontent.com/XVSVTsama/mihomo-config-self/refs/heads/main/s
 
 ---
 
-## ⚠️⚠️⚠️  宇宙免责声明  ⚠️⚠️⚠️
+<a id="acknowledgments"></a>
 
+## 🙏 致谢
 
-1. **纯属个人折腾，不提供任何技术支持**：本仓库代码仅作为个人云端备份与配置参考。**不解答基础使用问题，不接受非 BUG 类的 Issue，不保证定期维护与更新。** 如果配置在您的设备上报错，请自行查阅 Mihomo 官方文档排查。
-2. **不提供任何网络服务**：本配置纯粹为本地路由规则分发，**绝对不包含、不提供、不售卖**任何形式的科学上网节点、VPN 服务或服务器订阅。
-3. **合规与法律责任**：使用者须自行承担使用此配置的所有风险。请严格遵守您所在国家和地区的当地法律法规。对于因使用、修改或传播本仓库内容而导致的任何网络安全问题、隐私泄露、数据丢失或法律纠纷，**仓库作者概不负责**。
-4. **功能破坏预警**：配置中包含激进的去广告（如拦截特定域名和 IP）以及 Fake-IP 设置，这极有可能导致部分国内 APP 无法正常加载图片、登录或产生网络连通性问题。如遇网络异常，请优先排查本配置中的 `rules` 与 `fake-ip-filter`。
+本项目建立在开源内核、客户端、规则集与图标资源之上。以下致谢依据当前配置及仓库历史中的引用记录整理；引用或参考不代表这些项目与本仓库存在合作或背书关系。具体资源请以各上游项目的说明和许可为准。
+
+### 内核与客户端
+
+- [Mihomo](https://github.com/MetaCubeX/mihomo)：提供配置所依赖的核心能力。
+- [Bettbox](https://github.com/appshubcc/Bettbox)：图形化客户端，以及本项目覆写脚本适配参考。
+- [FlClash](https://github.com/chen08209/FlClash)：Mihomo 图形化客户端。
+
+### 规则集作者与原项目
+
+- [MetaCubeX/meta-rules-dat](https://github.com/MetaCubeX/meta-rules-dat)：GeoSite、GeoIP 等规则数据。
+- [DustinWin/ruleset_geodata](https://github.com/DustinWin/ruleset_geodata)：Mihomo 格式规则集及相关图标资源。
+- [echs-top/proxy](https://github.com/echs-top/proxy)：国内、直连及代理等域名/IP 规则集。
+- [appshubcc/bett-rules](https://github.com/appshubcc/bett-rules)：Apple、Microsoft、Steam、Douyin 等规则数据。
+- [reddishJade/private_proxy](https://github.com/reddishJade/private_proxy)：Telegram IP 等规则集。
+- [Accademia/Additional_Rule_For_Clash](https://github.com/Accademia/Additional_Rule_For_Clash)：Gemini、Grok 等补充规则。
+- [Loyalsoldier/clash-rules](https://github.com/Loyalsoldier/clash-rules)：曾引用的 applications、Google、LAN、private 等规则。
+- [blackmatrix7/ios_rule_script](https://github.com/blackmatrix7/ios_rule_script)：曾引用的 Twitter 规则。
+
+### 图标作者与原项目
+
+- [Koolson/Qure](https://github.com/Koolson/Qure) 与 [MiToverG422/Qure](https://github.com/MiToverG422/Qure)：策略组及地区图标。
+- [DustinWin/ruleset_geodata](https://github.com/DustinWin/ruleset_geodata)：规则项目提供的策略组图标。
+- [AIsouler/MyClash](https://github.com/AIsouler/MyClash)：Apple、Microsoft、Steam 等 SVG 图标。
+- [Clash Verge](https://www.clashverge.dev/)：部分策略组图标资源。
+- 荷兰国旗图标由本项目自行绘制，并托管于 [`assets/icons/Netherlands.png`](assets/icons/Netherlands.png)。
+
+### 脚本与配置参考
+
+- [AIsouler/MyClash](https://github.com/AIsouler/MyClash)：脚本、配置结构与 README 呈现方式参考。
+- [echs-top/proxy](https://github.com/echs-top/proxy)：脚本思路与规则组织参考。
+- [HenryChiao/MIHOMO_YAMLS](https://github.com/HenryChiao/MIHOMO_YAMLS)：Mihomo YAML 配置与规则组织参考。
+
+以上参考均用于学习与对照，具体实现以本仓库代码为准。
+
+<a id="star-history"></a>
+
+## ⭐ Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=XVSVTsama/mihomo-config-self&type=Date)](https://star-history.com/#XVSVTsama/mihomo-config-self&Date)
+
+<a id="disclaimer"></a>
+
+## ⚠️ 免责声明
+
+1. 本仓库收录与 Mihomo 相关的配置文件、覆写脚本及说明。具体能力、用途与运行结果取决于使用环境、客户端和使用者的设置，请在使用前自行了解并判断。
+2. 配置包含 DNS、Fake-IP、域名/IP 分流及拦截规则，可能影响部分应用或网络连接。遇到异常时，请结合 Mihomo 官方文档和本地配置自行排查。
+3. 使用者应自行评估使用、修改或传播本仓库内容所涉及的风险，并遵守所在地区适用的法律法规。因使用本仓库内容产生的后果，由使用者自行承担。
