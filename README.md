@@ -72,15 +72,17 @@ https://raw.githubusercontent.com/XVSVTsama/mihomo-config-self/refs/heads/main/s
 ```
 
    在 Bettbox / FlClash 系客户端中给订阅挂上该脚本即可：
-   - 订阅里的真实节点自动填入 `proxies` 与各"单节点"占位策略组（👉 手动切换、♻️ 自动选择、🔄 负载均衡、📲 Telegram、🎮 Games-Global）；
+   - 订阅里的真实节点自动填入 `proxies` 与纯单节点占位组（👉 手动切换、♻️ 自动选择、🔄 负载均衡、📲 Telegram、🎮 Games-Global）；🍎 海外苹果、🌐 海外微软、🎮 Steam平台（非下载/CDN）则保留固定策略项并追加订阅单节点；
    - 订阅自带的 `proxy-providers` 会被原样保留；
    - 动态合并 DNS 的 `proxy-server-nameserver-policy`（以脚本为准，模板不预置该键）；
    - 可通过脚本顶部 `ruleOptionsEnable` 开关单独禁用策略组，并自动清理相关引用。
-   - `FCM直连` 功能开关：默认开启，隐藏组 FCM 仅含 `DIRECT`；关闭后仅保留 `👉 手动切换`（开关只改 FCM 组内节点，不会移除该组）。
+   - 🍎 海外苹果 / 🌐 海外微软：国内 Apple、Microsoft 规则强制 `DIRECT`；海外域名/IP 分别进入独立组，组内提供手动切换、自动选择、负载均衡、`DIRECT` 和全部订阅单节点。
+   - 🎮 Steam平台（非下载/CDN）：Steam 域名/IP 规则进入独立组，默认选择 `DIRECT`；`games-cn` 仍直连，`games` 仍进入 🎮 Games-Global。
+   - `FCM直连` 功能开关：默认开启，隐藏组 FCM 仅含 `DIRECT`；关闭后优先使用 `👉 手动切换`，若该策略组已关闭则回退到 `🌍 PROXY`，若该组也已关闭则回退到 `DIRECT`（不移除 FCM 组）。
    - `TGDC实验分流` 功能开关：默认关闭。开启后，脚本会把 Telegram 流量按 IP 规则优先分到 `📲 Telegram-DC1-DC3-Miami`、`📲 Telegram-DC2-DC4-Amsterdam` 和 `📲 Telegram-DC5-SG` 三个实验组；其中 DC5 组同时匹配新加坡与香港节点，因为两地均可作为该 DC 的互联候选。三个实验组使用 `include-all-proxies` 加名称过滤，分别匹配美国/迈阿密、荷兰/阿姆斯特丹、新加坡/香港等节点名称。若某个实验组没有匹配地区节点，脚本会把订阅中全部合格节点（仅排除异常、内置/拒绝/重匹配和提示信息节点；免费、低倍率、高倍率节点不再排除）显式列入该组供手动选择，`empty-fallback` 为 `COMPATIBLE`。开启后，原 `📲 Telegram` 组更名为 `📲 Telegram(兜底)`，原 Telegram 进程、域名和 CIDR 规则统一指向该组，实验性 DC/地区 IP 规则则优先插入。关闭时不注入实验组、规则集或规则，原 Telegram 配置保持不变。
    - `入口解析` 功能开关：默认关闭；开启后会将电信、联通、移动三个入口节点全部加入 `国内入口解析` 代理组，由用户在该组中手动选择实际使用的入口节点，并为最终节点解析 DNS 应用所选入口。三者没有脚本自动优先级；配置中的排列顺序不代表自动切换或优先选用。该功能会引入有时效性的国内公共节点，属于实验性能力，仅供测试使用。
    - 脚本首行为 Bettbox 兼容声明（`Compatible_With_Bettbox`）：Bettbox 客户端约定在脚本开头识别该声明（并非全量读取），脚本需遵循此约定，声明必须保持置顶，否则"自定义规则开关"入口不显示。
-   - `policyGroupOptions`：`Compatible_With_Bettbox` 声明中的字段，声明了归入 Bettbox 策略组开关分类的 9 个策略组（🌍 PROXY、🔄 负载均衡、👉 手动切换、♻️ 自动选择、📲 Telegram、🎮 Games-Global、✖️ Twitter、🤖 AI大模型、🎵 TikTok）。
+   - `policyGroupOptions`：`Compatible_With_Bettbox` 声明中的字段，声明了归入 Bettbox 策略组开关分类的 12 个策略组（🌍 PROXY、🔄 负载均衡、👉 手动切换、♻️ 自动选择、📲 Telegram、🎮 Games-Global、🍎 海外苹果、🌐 海外微软、🎮 Steam平台（非下载/CDN）、✖️ Twitter、🤖 AI大模型、🎵 TikTok）。
 
    脚本内嵌的标准模板与仓库 [mihomo.yaml](https://raw.githubusercontent.com/XVSVTsama/mihomo-config-self/refs/heads/main/mihomo.yaml) 保持同步(如遇差异，以js为准)。
 
@@ -122,7 +124,8 @@ https://raw.githubusercontent.com/XVSVTsama/mihomo-config-self/refs/heads/main/s
 * **模块化规则集 (Rule Providers)**：全面拥抱 `mrs` 格式的远程规则集（感谢 [DustinWin](https://github.com/DustinWin/ruleset_geodata/releases)、[MetaCubeX](https://github.com/MetaCubeX/meta-rules-dat/tree/meta)、[echs-top](https://github.com/echs-top/proxy)、[reddishJade](https://github.com/reddishJade/private_proxy) 等维护者），剥离本地规则，实现自动无感更新。
 * **强迫症级场景分流**：
     * **🤖 AI大模型 / ✖️ Twitter / 🎵 TikTok**：独立分流组，使用功能性正则匹配住宅/美国系节点（住宅/家宽/家庭宽带/residential/home broadband/🇺🇸/美国/美國/U.S. 等多种命名变体），并排除香港/新加坡相关节点（🇭🇰/香港/Hong Kong/HK/🇸🇬/新加坡/Singapore/SG）；英文配置保留同一过滤表达式。
-    * **🎮 游戏**：独立 UDP 代理放行与主流游戏平台路由。
+    * **🍎 海外苹果 / 🌐 海外微软**：国内规则强制直连，海外域名与 IP 规则分流到各自的手动策略组。
+    * **🎮 游戏 / Steam**：保留 `games-cn` 直连与 `games` 国际游戏代理；Steam 平台另设默认 `DIRECT` 的「非下载/CDN」策略组。
 * **高级广告/隐私拦截**：
     * 拦截 WebRTC / 语音 / 实时通信常用的 UDP 端口（3478-3479、5349-5350、19302-19309），防止其绕过分流策略。
     * **SUB-RULE 进程级拦截**：针对特定海外阅读应用（如番茄小说海外版 `com.dragon.read.oversea.gp`）写死了深度的去广告与隐私追踪拦截规则。
@@ -137,6 +140,9 @@ https://raw.githubusercontent.com/XVSVTsama/mihomo-config-self/refs/heads/main/s
 | **🔄 负载均衡** | 采用 `sticky-sessions` (粘性会话) 策略 | 保证同一域名短时间内 IP 不变 |
 | **👉 手动切换** | 手动选择特定节点 | / |
 | **♻️ 自动选择** | `url-test` 自动测试并选择延迟最低的节点 | 容差设置为 50ms |
+| **🍎 海外苹果** | 海外 Apple 域名/IP 规则 | 国内 Apple 规则强制 `DIRECT`；可选手动、自动、负载均衡、`DIRECT` 和全部节点 |
+| **🌐 海外微软** | 海外 Microsoft 域名/IP 规则 | 国内 Microsoft 规则强制 `DIRECT`；可选手动、自动、负载均衡、`DIRECT` 和全部节点 |
+| **🎮 Steam平台（非下载/CDN）** | Steam 域名/IP 规则 | 默认选择 `DIRECT`；`games-cn` 仍直连，`games` 仍走 Games-Global |
 | **📲 Telegram** | TGDC 关闭时默认走代理，防止断联 | 匹配进程名与特定 IP 段；开启 TGDC 后更名为 `📲 Telegram(兜底)` |
 | **📲 Telegram-DC1-DC3-Miami** | TGDC 开启时，匹配美国/迈阿密节点 | 按 Telegram DC IP 规则优先命中；无地区匹配时列出全部合格节点供手动选择 |
 | **📲 Telegram-DC2-DC4-Amsterdam** | TGDC 开启时，匹配荷兰/阿姆斯特丹节点 | 按 Telegram DC IP 规则优先命中；无地区匹配时列出全部合格节点供手动选择 |
@@ -145,16 +151,16 @@ https://raw.githubusercontent.com/XVSVTsama/mihomo-config-self/refs/heads/main/s
 | **✖️ Twitter** | 匹配住宅/美国系命名节点，排除香港/新加坡节点 | 🚨 **节点命名不符将导致此策略组为空！** |
 | **🤖 AI大模型** | 匹配住宅/美国系命名节点，排除香港/新加坡节点 | 🚨 **节点命名不符将导致此策略组为空！** |
 | **🎵 TikTok** | 匹配住宅/美国系命名节点，排除香港/新加坡节点 | 🚨 **节点命名不符将导致此策略组为空！** |
-| **FCM** | Google FCM 相关域名（`hidden` 隐藏组） | 由 `FCM直连` 开关控制：开启=仅 `DIRECT`，关闭=仅 `👉 手动切换` |
+| **FCM** | Google FCM 相关域名（`hidden` 隐藏组） | 由 `FCM直连` 开关控制：开启=`DIRECT`；关闭=手动组，手动组禁用时回退到 `🌍 PROXY` 或 `DIRECT` |
 
-> 注：🔄 负载均衡 / 👉 手动切换 / ♻️ 自动选择 / 📲 Telegram / 🎮 Games-Global 在模板中 `proxies` 为空（注释"此处为所有单节点"），启用覆写脚本后会自动填入订阅的全部节点；不使用脚本时需手动填充。
+> 注：🔄 负载均衡 / 👉 手动切换 / ♻️ 自动选择 / 📲 Telegram / 🎮 Games-Global 是纯节点占位组；🍎 海外苹果 / 🌐 海外微软 / 🎮 Steam平台（非下载/CDN）会先保留固定策略项，再由覆写脚本追加订阅全部单节点。不使用脚本时需手动填充节点。
 
 <a id="before-use"></a>
 
 ## 🛠️ 使用前必改 (抄作业必看)
 
 由于这是自用配置，`proxies: ~` 处为空。你必须自己完成以下操作：
-1. **注入节点**：推荐直接使用上面的覆写脚本——订阅里的真实节点会自动填入 `proxies` 与各占位策略组，订阅自带的 `proxy-providers` 也会被保留；如果不用脚本，则需要手动把节点列表或 `proxy-providers` 填入本配置（`proxies: ~` 处默认留空）。
+1. **注入节点**：推荐直接使用上面的覆写脚本——订阅里的真实节点会自动填入 `proxies`、纯节点占位组以及海外苹果/微软/Steam 组（保留固定策略项后追加节点），订阅自带的 `proxy-providers` 也会被保留；如果不用脚本，则需要手动把节点列表或 `proxy-providers` 填入本配置（`proxies: ~` 处默认留空）。
 2. **修改节点过滤规则 (Filter)**：中英文配置默认使用长正则：匹配住宅/美国系命名节点（住宅/家宽/家庭宽带/residential/home broadband/🇺🇸/美国/美國/U.S. 等多种命名变体），并排除香港/新加坡相关节点（🇭🇰/香港/Hong Kong/HK/🇸🇬/新加坡/Singapore/SG）。如果订阅节点名称中没有包含上述任何住宅或美国标识，或节点名称带有香港/新加坡字样，请修改中文源文件中对应策略组的 `filter` 字段，再同步到英文配置。
 3. **按需删减规则**：如果你不需要屏蔽番茄小说海外版的广告，建议删除 `sub-rules` 中 `fanqie` 相关的规则，以节省性能。
 

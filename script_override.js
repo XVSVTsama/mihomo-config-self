@@ -10,6 +10,9 @@ const Compatible_With_Bettbox = {
     '♻️ 自动选择',
     '📲 Telegram',
     '🎮 Games-Global',
+    '🍎 海外苹果',
+    '🌐 海外微软',
+    '🎮 Steam平台（非下载/CDN）',
     '✖️ Twitter',
     '🤖 AI大模型',
     '🎵 TikTok',
@@ -48,11 +51,12 @@ const Compatible_With_Bettbox = {
  *    2. proxies：使用订阅原始配置里的真实节点列表（模板里这一项本来就是空的，
  *       只是占位）。
  *
- *    3. proxy-groups 里，模板中显式写了 "proxies: " （值为空/null，也就是
- *       模板注释里"此处为所有单节点"的那几个分组：👉 手动切换、♻️ 自动选择、
- *       🔄 负载均衡、📲 Telegram、🎮 Games-Global）会自动填入订阅里全部节点
- *       的名字；若订阅还带 proxy-providers，这些分组会同时写入 use 引用全部
- *       provider。其余分组保持模板里原样，不会被订阅节点覆盖或补充。
+ *    3. proxy-groups 中的纯节点占位组（proxies: null：👉 手动切换、♻️ 自动选择、
+ *       🔄 负载均衡、📲 Telegram、🎮 Games-Global）会自动填入订阅里全部节点名；
+ *       🍎 海外苹果、🌐 海外微软、🎮 Steam平台（非下载/CDN）也使用 null 占位，
+ *       但运行时会先保留各自固定策略项，再追加全部订阅节点。若订阅还带
+ *       proxy-providers，这些占位组会同时写入 use 引用全部 provider。其余分组
+ *       保持模板原样，不会被订阅节点覆盖或补充。
  *
  *    4.【特别处理】DNS 与 hosts：
  *       - hosts 仅在 dns.use-hosts=true 且 dns.listen 与真正参与节点解析的 DNS 端点
@@ -88,6 +92,9 @@ const ruleOptionsEnable = {
   '♻️ 自动选择': true,     // 延迟自动选择策略组
   '📲 Telegram': true,     // Telegram 通讯软件策略组
   '🎮 Games-Global': true, // 游戏策略组
+  '🍎 海外苹果': true,     // 海外 Apple 平台服务
+  '🌐 海外微软': true,     // 海外 Microsoft 平台服务
+  '🎮 Steam平台（非下载/CDN）': true, // Steam 平台服务，不负责下载/CDN
   '✖️ Twitter': true,      // Twitter 社交平台策略组
   '🤖 AI大模型': true,     // AI 大模型策略组
   '🎵 TikTok': true,       // TikTok 视频平台策略组
@@ -96,7 +103,7 @@ const ruleOptionsEnable = {
   '强制证书验证': false,   // 开启时统一把订阅节点 skip-cert-verify 置为 false（强制校验证书）；关闭时不干预，保留订阅节点原有设置。对全部节点一视同仁
   '启用 Reality 增强': true, // 是否为带非空 public-key/short-id 的 Reality 节点启用 support-x25519mlkem768（X25519MLKEM768 后量子密钥协商）
   'IPv6优先': false,         // 开启后按节点 ip-version 优先使用 IPv6
-  'FCM直连': true,          // 默认打开：隐藏组 FCM 仅含 DIRECT；关闭后仅保留 👉 手动切换（不移除 FCM 组）。开关图标取自 FCM 代理组的 icon 字段。
+  'FCM直连': true,          // 默认打开：隐藏组 FCM 仅含 DIRECT；关闭后优先使用 👉 手动切换，若该组已关闭则回退到 🌍 PROXY，再回退到 DIRECT（不移除 FCM 组）。开关图标取自 FCM 代理组的 icon 字段。
   'TGDC实验分流': false,     // 开启 Telegram DC/地区实验分流；关闭时不改变原 Telegram 规则、策略组和规则集。
   '入口解析': false,         // 开启后，三个国内入口节点全部加入同一个代理组。
 };
@@ -592,6 +599,25 @@ const TEMPLATE = {
       "proxies": null
     },
     {
+      "name": "🍎 海外苹果",
+      "icon": "https://fastly.jsdelivr.net/gh/AIsouler/MyClash@main/Icons/svg/Apple.svg",
+      "type": "select",
+      "proxies": null
+    },
+    {
+      "name": "🌐 海外微软",
+      "icon": "https://fastly.jsdelivr.net/gh/AIsouler/MyClash@main/Icons/svg/Microsoft.svg",
+      "type": "select",
+      "proxies": null
+    },
+    {
+      "name": "🎮 Steam平台（非下载/CDN）",
+      "icon": "https://fastly.jsdelivr.net/gh/AIsouler/MyClash@main/Icons/svg/Steam.svg",
+      "type": "select",
+      "default-selected": "DIRECT",
+      "proxies": null
+    },
+    {
       "name": "📲 Telegram",
       "icon": "https://github.com/DustinWin/ruleset_geodata/releases/download/icons/telegram.png",
       "type": "select",
@@ -688,6 +714,62 @@ const TEMPLATE = {
       "format": "mrs",
       "url": "https://fastly.jsdelivr.net/gh/appshubcc/bett-rules@meta/geo/geosite/apple@cn.mrs",
       "path": "./ruleset/apple@cn.mrs"
+    },
+    "microsoft@cn": {
+      "type": "http",
+      "interval": 86400,
+      "behavior": "domain",
+      "format": "mrs",
+      "url": "https://fastly.jsdelivr.net/gh/appshubcc/bett-rules@meta/geo/geosite/microsoft@cn.mrs",
+      "path": "./ruleset/microsoft@cn.mrs"
+    },
+    "microsoft": {
+      "type": "http",
+      "interval": 86400,
+      "behavior": "domain",
+      "format": "mrs",
+      "url": "https://fastly.jsdelivr.net/gh/appshubcc/bett-rules@meta/geo/geosite/microsoft.mrs",
+      "path": "./ruleset/microsoft.mrs"
+    },
+    "microsoft_ip": {
+      "type": "http",
+      "interval": 86400,
+      "behavior": "ipcidr",
+      "format": "mrs",
+      "url": "https://fastly.jsdelivr.net/gh/appshubcc/bett-rules@meta/geo/geoip/microsoft.mrs",
+      "path": "./ruleset/microsoft_ip.mrs"
+    },
+    "apple": {
+      "type": "http",
+      "interval": 86400,
+      "behavior": "domain",
+      "format": "mrs",
+      "url": "https://fastly.jsdelivr.net/gh/appshubcc/bett-rules@meta/geo/geosite/apple.mrs",
+      "path": "./ruleset/apple.mrs"
+    },
+    "apple_ip": {
+      "type": "http",
+      "interval": 86400,
+      "behavior": "ipcidr",
+      "format": "mrs",
+      "url": "https://fastly.jsdelivr.net/gh/appshubcc/bett-rules@meta/geo/geoip/apple.mrs",
+      "path": "./ruleset/apple_ip.mrs"
+    },
+    "steam": {
+      "type": "http",
+      "interval": 86400,
+      "behavior": "domain",
+      "format": "mrs",
+      "url": "https://fastly.jsdelivr.net/gh/appshubcc/bett-rules@meta/geo/geosite/steam.mrs",
+      "path": "./ruleset/steam.mrs"
+    },
+    "steam_ip": {
+      "type": "http",
+      "interval": 86400,
+      "behavior": "ipcidr",
+      "format": "mrs",
+      "url": "https://fastly.jsdelivr.net/gh/appshubcc/bett-rules@meta/geo/geoip/steam.mrs",
+      "path": "./ruleset/steam_ip.mrs"
     },
     "douyin": {
       "type": "http",
@@ -936,6 +1018,13 @@ const TEMPLATE = {
     "RULE-SET,HijackingPlus,REJECT",
     "SUB-RULE,(PROCESS-NAME,com.dragon.read.oversea.gp),fanqie",
     "DOMAIN-KEYWORD,ikuuu,🌍 PROXY",
+    "RULE-SET,microsoft@cn,DIRECT",
+    "RULE-SET,apple@cn,DIRECT",
+    "RULE-SET,games-cn,DIRECT",
+    "RULE-SET,microsoft,🌐 海外微软",
+    "RULE-SET,microsoft_ip,🌐 海外微软,no-resolve",
+    "RULE-SET,apple,🍎 海外苹果",
+    "RULE-SET,apple_ip,🍎 海外苹果,no-resolve",
     "RULE-SET,applications,DIRECT",
     "RULE-SET,echs_cn,DIRECT",
     "RULE-SET,echs_cn_ip,DIRECT,no-resolve",
@@ -1014,8 +1103,8 @@ const TEMPLATE = {
     "RULE-SET,twitter-x-domain,✖️ Twitter",
     "RULE-SET,twitter-x-ip,✖️ Twitter,no-resolve",
     "RULE-SET,twitter-x-blackmatrix7-No_Resolve,✖️ Twitter",
-    "RULE-SET,apple@cn,DIRECT",
-    "RULE-SET,games-cn,DIRECT",
+    "RULE-SET,steam,🎮 Steam平台（非下载/CDN）",
+    "RULE-SET,steam_ip,🎮 Steam平台（非下载/CDN）,no-resolve",
     "PROCESS-NAME,bf6.exe,🎮 Games-Global",
     "RULE-SET,games,🎮 Games-Global",
     "RULE-SET,TikTok,🎵 TikTok",
@@ -1863,11 +1952,43 @@ function main(config, profileName) {
     .filter((name) => typeof name === 'string' && name.length > 0);
 
   result['proxy-groups'].forEach((group) => {
-    if (isAllNodesPlaceholder(group)) {
+    if (!isAllNodesPlaceholder(group)) {
+      return;
+    }
+
+    let fixedProxies = [];
+    if (group.name === '🍎 海外苹果' || group.name === '🌐 海外微软') {
+      fixedProxies = [
+        '👉 手动切换',
+        '♻️ 自动选择',
+        '🔄 负载均衡',
+        'DIRECT'
+      ];
+    } else if (group.name === '🎮 Steam平台（非下载/CDN）') {
+      fixedProxies = [
+        'DIRECT',
+        '👉 手动切换',
+        '♻️ 自动选择',
+        '🔄 负载均衡'
+      ];
+    }
+
+    if (fixedProxies.length > 0) {
+      // 策略组在前、订阅节点在后；不把已关闭的嵌套组重新加回来。
+      const enabledFixedProxies = fixedProxies.filter(
+        (name) => !disabledGroupNames.has(name)
+      );
+      group.proxies = [
+        ...enabledFixedProxies,
+        ...allNodeNames.filter((name) => !fixedProxies.includes(name))
+      ];
+    } else {
+      // 其他原有占位组继续保持“仅填入全部订阅节点”的行为。
       group.proxies = allNodeNames.slice();
-      if (originalProxyProviders) {
-        group.use = Object.keys(originalProxyProviders);
-      }
+    }
+
+    if (originalProxyProviders) {
+      group.use = Object.keys(originalProxyProviders);
     }
   });
 
@@ -1876,7 +1997,14 @@ function main(config, profileName) {
   const fcmDirectEnabled = ruleOptionsEnable['FCM直连'] === true;
   result['proxy-groups'].forEach((group) => {
     if (group && group.name === 'FCM') {
-      group.proxies = fcmDirectEnabled ? ['DIRECT'] : ['👉 手动切换'];
+      if (fcmDirectEnabled) {
+        group.proxies = ['DIRECT'];
+      } else if (disabledGroupNames.has('👉 手动切换')) {
+        // 手动组已关闭时沿用全局兜底，避免 FCM 引用一个不存在的策略组。
+        group.proxies = [fallbackTarget];
+      } else {
+        group.proxies = ['👉 手动切换'];
+      }
     }
   });
 
