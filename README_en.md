@@ -72,15 +72,17 @@ https://raw.githubusercontent.com/XVSVTsama/mihomo-config-self/refs/heads/main/s
 ```
 
    Just attach this script to the subscription in the Bettbox / FlClash client:
-   - The real nodes in the subscription are automatically filled in `proxies` With each "single node" placeholder strategy group (👉 manual switching, ♻️ automatic selection, 🔄 load balancing, 📲 Telegram, 🎮 Games-Global);
+   - The real nodes in the subscription are automatically filled in `proxies` Compared with the pure single-node placeholder group (👉 manual switching, ♻️ automatic selection, 🔄 load balancing, 📲 Telegram, 🎮 Games-Global); 🍎 overseas Apple, 🌐 overseas Microsoft, 🎮 Steam platform (non-download/CDN) retains fixed policy items and additionally subscribes to a single node;
    - Subscription comes with `proxy-providers` will be preserved as is;
    - Dynamically merge DNS `proxy-server-nameserver-policy`(Subject to the script, the template does not preset this key);
-   - Available via script top `ruleOptionsEnable` The switch disables policy groups individually and automatically cleans up related references.
-   - `FCM直连` Function switch: enabled by default, hidden group FCM only contains `DIRECT`;Only retained after closing `👉 手动切换`(The switch only changes the nodes within the FCM group and does not remove the group).
+   - This can be accessed via the top of the script `ruleOptionsEnable` The switch disables policy groups individually and automatically cleans up related references.
+   - 🍎 Overseas Apple / 🌐 Overseas Microsoft: Domestic Apple and Microsoft rules are mandatory `DIRECT`; Overseas domain names/IPs are entered into independent groups respectively, and manual switching, automatic selection, load balancing, etc. are provided within the group.`DIRECT` and all subscribe to a single node.
+   - 🎮Steam platform (non-download/CDN): Steam domain name/IP rules enter the independent group, selected by default `DIRECT`；`games-cn` Still connected directly,`games` Still entering 🎮 Games-Global.
+   - `FCM直连` Function switch: enabled by default, hidden group FCM only contains `DIRECT`; Prioritize use after closing `👉 手动切换`, if the policy group is closed, fall back to `🌍 PROXY`, if the group has also been closed, fall back to `DIRECT`(The FCM group is not removed).
    - `TGDC实验分流` Function switch: off by default. Once enabled, the script will prioritize Telegram traffic according to IP rules. `📲 Telegram-DC1-DC3-Miami`、`📲 Telegram-DC2-DC4-Amsterdam` and `📲 Telegram-DC5-SG` Three experimental groups; among them, the DC5 group matches nodes in Singapore and Hong Kong at the same time, because both places can serve as interconnection candidates for the DC. Three experimental groups used `include-all-proxies` Add name filtering to match node names such as the United States/Miami, Netherlands/Amsterdam, Singapore/Hong Kong, etc. If there are no matching regional nodes in an experimental group, the script will explicitly include all qualified nodes in the subscription (only exceptions, built-in/rejection/rematching and prompt information nodes are excluded; free, low-magnification, and high-magnification nodes are no longer excluded) for manual selection.`empty-fallback` for `COMPATIBLE`. After opening, the original `📲 Telegram` Group renamed `📲 Telegram(兜底)`, the original Telegram process, domain name and CIDR rules are uniformly pointed to this group, and the experimental DC/region IP rules are inserted first. When closed, no experimental groups, rule sets or rules are injected, and the original Telegram configuration remains unchanged.
-   - `入口解析` Function switch: off by default; when turned on, all three entry nodes of China Telecom, China Unicom, and China Mobile will be added `国内入口解析` A proxy group in which the user manually selects the actual ingress node to use and applies the selected ingress to resolve DNS for the end node. There is no automatic script priority among the three; the order in the configuration does not mean automatic switching or priority. This function will introduce time-sensitive domestic public nodes and is an experimental capability for testing purposes only.
+   - `入口解析` Function switch: off by default; when turned on, all three entry nodes of China Telecom, China Unicom, and China Mobile will be added `国内入口解析` 
    - The first line of the script is the Bettbox compatibility statement (`Compatible_With_Bettbox`): The Bettbox client agrees to identify the statement at the beginning of the script (not to read it in full). The script must follow this convention and the statement must remain on top, otherwise the "custom rule switch" entry will not be displayed.
-   - `policyGroupOptions`：`Compatible_With_Bettbox` The fields in the declaration declare 9 policy groups classified into the Bettbox policy group switch classification (🌍 PROXY, 🔄 Load balancing, 👉 Manual switching, ♻️ Automatic selection, 📲 Telegram, 🎮 Games-Global, ✖️ Twitter, 🤖 AI large model, 🎵 TikTok).
+   - `policyGroupOptions`：`Compatible_With_Bettbox` The fields in the statement declare the 12 policy groups classified into the Bettbox policy group switch classification (🌍 PROXY, 🔄 Load balancing, 👉 Manual switching, ♻️ Automatic selection, 📲 Telegram, 🎮 Games-Global, 🍎 Overseas Apple, 🌐 Overseas Microsoft, 🎮 Steam platform (non-download/CDN), ✖️ Twitter, 🤖 AI large model, 🎵 TikTok).
 
    Standard templates and repositories embedded in scripts [mihomo.yaml](https://raw.githubusercontent.com/XVSVTsama/mihomo-config-self/refs/heads/main/mihomo.yaml) Keep in sync (in case of discrepancies, js shall prevail).
 
@@ -93,7 +95,7 @@ https://raw.githubusercontent.com/XVSVTsama/mihomo-config-self/refs/heads/main/s
 > This document disassembles the configuration `hosts` The respective responsibilities of true and false mapping, private DoH resolution, DNS policy and fake-IP filter, and how the four work together in the same node resolution link. It is intended for people who want to write or understand node resolution override scripts and does not contain any real nodes, passwords, UUIDs or subscription credentials. (This section and its related `dns.use-hosts` The description of the effective effect is written by AI. )
 
 ## Recommended learning reference, subscription conversion project and client
-   [Looking for a real reference to learn from?](https://t.me/xvsvts/152)
+   [Looking for a truly studyable reference?](https://t.me/xvsvts/152)
 
    It is strongly recommended to use private subscription conversion front-end and back-end to prevent any public online conversion on the Internet, which will greatly reduce the leakage of sensitive node information:
    
@@ -103,7 +105,7 @@ https://raw.githubusercontent.com/XVSVTsama/mihomo-config-self/refs/heads/main/s
 
    Is the above conversion setup too troublesome? There is also local conversion🎁
    
-   [SubCase](https://github.com/sionnx/SubCase)  appization/Sub-Store support🍃
+   [SubCase](https://github.com/sionnx/SubCase)  Appization/Sub-Store support🍃
    
    [flclash-converter](https://github.com/JINXPIL/flclash-converter)  🟢Easy to use🟢/🔴non-Flclash project
 Attached 🔴
@@ -118,11 +120,12 @@ Attached 🔴
 This configuration integrates modular remote rules (Rule Providers) and refined application-level offloading strategies, which are completely designed to meet my personal network environment and usage pain points:
 
 * **Use the rule TUN**: enabled by default `tun` mode, adopt `mips` The protocol stack realizes full device/full protocol takeover and solves the problem of some software not using the system agent.
-* **Radical DNS resolution experience**:use `fake-ip` Enhanced mode. Built-in intelligent DNS policy based on domestic direct connection and DoH/DoT hybrid to accurately prevent DNS pollution.
-* **Modular rule sets (Rule Providers)**: full embrace `mrs` formatted remote ruleset (thanks [DustinWin](https://github.com/DustinWin/ruleset_geodata/releases)、[MetaCubeX](https://github.com/MetaCubeX/meta-rules-dat/tree/meta)、[echs-top](https://github.com/echs-top/proxy)、[reddishJade](https://github.com/reddishJade/private_proxy) and other maintainers), strip off local rules and achieve automatic and non-intrusive updates.
+* **Radical DNS resolution experience**:use `fake-ip` Enhanced mode. Built-in smart DNS policy based on domestic direct connection and DoH/DoT hybrid to accurately prevent DNS pollution.
+* **Modular rule sets (Rule Providers)**: full embrace `mrs` formatted remote ruleset (thanks [DustinWin](https://github.com/DustinWin/ruleset_geodata/releases)、[MetaCubeX](https://github.com/MetaCubeX/meta-rules-dat/tree/meta)、[echs-top](https://github.com/echs-top/proxy)、[reddishJade](https://github.com/reddishJade/private_proxy) and other maintainers), strip away local rules and achieve automatic and non-intrusive updates.
 * **Obsessive-compulsive disorder level scene diversion**：
     * **🤖 AI Large Models / ✖️ Twitter / 🎵 TikTok**: Independent traffic group, using functional regularity to match residential/US nodes (residential/home broadband/residential/home broadband/🇺🇸/USA/USA/U.S. and other naming variants), and exclude Hong Kong/Singapore related nodes (🇭🇰/香港/Hong Kong/HK/🇸🇬/ Singapore/Singapore/SG); the English configuration retains the same filter expression.
-    * **🎮 Games**: Independent UDP proxy release and mainstream game platform routing.
+    * **🍎 Overseas Apple / 🌐 Overseas Microsoft**: Domestic rules force direct connection, and overseas domain names and IP rules are diverted to their respective manual policy groups.
+    * **🎮 Games / Steam**:reserve `games-cn` Directly connected to `games` International game agent; Steam platform has another default setting `DIRECT` "Non-download/CDN" policy group.
 * **Advanced ad/privacy blocking**：
     * Block UDP ports (3478-3479, 5349-5350, 19302-19309) commonly used for WebRTC/voice/real-time communication to prevent them from bypassing the offloading policy.
     * **SUB-RULE process-level interception**: For specific overseas reading applications (such as Tomato novel overseas version `com.dragon.read.oversea.gp`) has written in-depth advertising and privacy tracking blocking rules.
@@ -137,6 +140,9 @@ This configuration integrates modular remote rules (Rule Providers) and refined 
 | **🔄 Load balancing** | use `sticky-sessions` (sticky session) strategy | Ensure that the IP of the same domain name remains unchanged within a short period of time |
 | **👉 Manual Select** | Manually select specific nodes | / |
 | **♻️ Automatic selection** | `url-test` Automatically test and select the node with the lowest latency | Tolerance set to 50ms |
+| **🍎 Overseas Apple** | Overseas Apple domain name/IP rules | Domestic Apple rules enforcement `DIRECT`; Optional manual, automatic, load balancing,`DIRECT` and all nodes |
+| **🌐 Overseas Microsoft** | Overseas Microsoft domain name/IP rules | Domestic Microsoft rules enforcement `DIRECT`; Optional manual, automatic, load balancing,`DIRECT` and all nodes |
+| **🎮 Steam Platform (Non-Download/CDN)** | Steam Domain/IP Rules | Default selection `DIRECT`；`games-cn` Still connected directly,`games` Still Go Games-Global |
 | **📲 Telegram** | When TGDC is closed, it will use the proxy by default to prevent disconnection. | Match the process name with a specific IP range; change the name after turning on TGDC `📲 Telegram(兜底)` |
 | **📲 Telegram-DC1-DC3-Miami** | When TGDC is enabled, match the US/Miami nodes | Prioritize hits according to Telegram DC IP rules; if there is no region matching, all qualified nodes will be listed for manual selection. |
 | **📲 Telegram-DC2-DC4-Amsterdam** | When TGDC is enabled, matches Netherlands/Amsterdam nodes | Prioritize hits according to Telegram DC IP rules; if there is no region matching, all qualified nodes will be listed for manual selection. |
@@ -145,16 +151,16 @@ This configuration integrates modular remote rules (Rule Providers) and refined 
 | **✖️ Twitter** | Match residential/American named nodes, exclude Hong Kong/Singapore nodes | 🚨 **Inconsistent node naming will cause this policy group to be empty!** |
 | **🤖 AI** | Match residential/American named nodes, exclude Hong Kong/Singapore nodes | 🚨 **Inconsistent node naming will cause this policy group to be empty!** |
 | **🎵 TikTok** | Match residential/American named nodes, exclude Hong Kong/Singapore nodes | 🚨 **Inconsistent node naming will cause this policy group to be empty!** |
-| **FCM** | Google FCM related domain names (`hidden` hidden group) | Depend on `FCM直连` Switch Control: On = Only `DIRECT`, off = only `👉 手动切换` |
+| **FCM** | Google FCM related domain names (`hidden` hidden group) | Depend on `FCM直连` Switch control: On =`DIRECT`;Off=manual group, fallback to when manual group is disabled `🌍 PROXY` or `DIRECT` |
 
-> Note: 🔄 Load balancing / 👉 Manual switching / ♻️ Automatic selection / 📲 Telegram / 🎮 Games-Global in the template `proxies` Is empty (comment "Here are all single nodes"). After enabling the override script, all nodes of the subscription will be automatically filled in; when the script is not used, it needs to be filled in manually.
+> Note: 🔄 Load balancing / 👉 Manual switching / ♻️ Automatic selection / 📲 Telegram / 🎮 Games-Global is a pure node placeholder group; 🍎 Overseas Apple / 🌐 Overseas Microsoft / 🎮 Steam platform (non-download/CDN) will first retain fixed policy items, and then the overwrite script will additionally subscribe to all single nodes. Nodes need to be populated manually when not using scripts.
 
 <a id="before-use"></a>
 
 ## 🛠️ Must be modified before use (must read when copying homework)
 
-Since this is a personal configuration,`proxies: ~` Everywhere is empty. You must do the following yourself:
-1. **Inject node**: It is recommended to use the above override script directly - the real nodes in the subscription will be automatically filled in `proxies` With each placeholder policy group, subscribe to the `proxy-providers` will also be retained; if no script is used, you need to manually add the node list or `proxy-providers` Fill in this configuration (`proxies: ~` is left blank by default).
+Since this is a self-configuration,`proxies: ~` Everywhere is empty. You must do the following yourself:
+1. **Inject node**: It is recommended to use the above override script directly - the real nodes in the subscription will be automatically filled in `proxies`, pure node placeholder group and overseas Apple/Microsoft/Steam group (retain fixed policy items and then add nodes), subscribe to the included `proxy-providers` will also be retained; if no script is used, you need to manually add the node list or `proxy-providers` Fill in this configuration (`proxies: ~` is left blank by default).
 2. **Modify node filtering rules (Filter)**: Chinese and English configurations use long regular expressions by default: match residential/US named nodes (residential/home broadband/🇺🇸/USA/USA/U.S. and other naming variants), and exclude Hong Kong/Singapore related nodes (🇭🇰/香港/Hong Kong/HK/🇸🇬/ Singapore/Singapore/SG). If the subscription node name does not contain any of the above residential or US identifiers, or the node name contains the words Hong Kong/Singapore, please modify the corresponding policy group in the Chinese source file. `filter` field, and then synchronize it to the English configuration.
 3. **Delete rules as needed**: If you don’t need to block ads for the overseas version of Tomato Novels, it is recommended to delete them. `sub-rules` middle `fanqie` Related rules to save performance.
 

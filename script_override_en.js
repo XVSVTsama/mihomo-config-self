@@ -10,6 +10,9 @@ const Compatible_With_Bettbox = {
     '♻️ 自动选择',
     '📲 Telegram',
     '🎮 Games-Global',
+    '🍎 海外苹果',
+    '🌐 海外微软',
+    '🎮 Steam平台（非下载/CDN）',
     '✖️ Twitter',
     '🤖 AI大模型',
     '🎵 TikTok',
@@ -48,11 +51,12 @@ const Compatible_With_Bettbox = {
  * 2. proxies: Use the real node list in the original subscription configuration (this item in the template is originally empty,
  *Just a placeholder).
  *
- * 3. In proxy-groups, "proxies: " is explicitly written in the template (the value is empty/null, that is,
- * The groups of "all single nodes here" in the template comments: 👉 manual switching, ♻️ automatic selection,
- * 🔄 Load balancing, 📲 Telegram, 🎮 Games-Global) will automatically fill in all nodes in the subscription
- * name; if the subscription also comes with proxy-providers, these groups will be written to use references at the same time
- * provider. The remaining groups remain as they are in the template and will not be overwritten or supplemented by subscription nodes.
+ * 3. Pure node placeholder group in proxy-groups (proxies: null: 👉 manual switching, ♻️ automatic selection,
+ * 🔄 Load Balancing, 📲 Telegram, 🎮 Games-Global) will automatically fill in all node names in the subscription;
+ * 🍎 Overseas Apple, 🌐 Overseas Microsoft, 🎮 Steam platform (non-download/CDN) also use null placeholder,
+ * However, when running, each fixed policy item will be retained first, and then all subscription nodes will be added. If you subscribe, you will also get
+ * proxy-providers, these placeholder groups will write use to reference all providers at the same time. remaining groups
+ * Keep the template as is and will not be overwritten or supplemented by subscribed nodes.
  *
  * 4.【Special handling】DNS and hosts:
  * - hosts only if dns.use-hosts=true and dns.listen is related to the DNS endpoint actually participating in node resolution
@@ -81,13 +85,16 @@ const ruleOptionsEnable = {
  * There are also function switches (such as FCM direct connection): only the nodes in the group are adjusted, and the startup and shutdown of the policy group are not involved.
  */
 
-  // --- Agent group (policy group) individual control switch ---
+  // --- Agent group (policy group) independent control switch ---
   '🌍 PROXY': true,        // Master Agent Policy Group
   '🔄 负载均衡': true,     // Load balancing policy group
   '👉 手动切换': true,    // Manually select a policy group
   '♻️ 自动选择': true,     // Delay automatic selection of policy groups
   '📲 Telegram': true,     // Telegram messaging software policy group
   '🎮 Games-Global': true, // Game strategy group
+  '🍎 海外苹果': true,     // Overseas Apple platform services
+  '🌐 海外微软': true,     // Overseas Microsoft platform services
+  '🎮 Steam平台（非下载/CDN）': true, // Steam platform service, not responsible for downloads/CDN
   '✖️ Twitter': true,      // Twitter Social Platforms Strategy Group
   '🤖 AI大模型': true,     // AI large model strategy group
   '🎵 TikTok': true,       // TikTok Video Platform Strategy Group
@@ -95,8 +102,8 @@ const ruleOptionsEnable = {
   // ---Node and network function switches ---
   '强制证书验证': false,   // When it is turned on, skip-cert-verify of the subscription node is set to false (forced certificate verification); when it is turned off, there is no intervention and the original settings of the subscription node are retained. Treat all nodes equally
   '启用 Reality 增强': true, // Whether to enable support-x25519mlkem768 (X25519MLKEM768 post-quantum key negotiation) for Reality nodes with non-empty public-key/short-id
-  'IPv6优先': false,         // After enabling, IPv6 will be used first according to the node ip-version.
-  'FCM直连': true,          // On by default: Hide group FCM with DIRECT only; when closed, only keep 👉 Manual switch (without removing FCM group). The switch icon is taken from the icon field of the FCM agent group.
+  'IPv6优先': false,         // After turning on, IPv6 will be used first according to the node ip-version.
+  'FCM直连': true,          // Open by default: Hide group FCM only contains DIRECT; after closing, use 👉 manual switching first. If the group is closed, fall back to 🌍 PROXY, and then fall back to DIRECT (without removing the FCM group). The switch icon is taken from the icon field of the FCM agent group.
   'TGDC实验分流': false,     // Enables the Telegram DC/regional experiment; when disabled, the original Telegram rules, policy groups, and rule providers are left unchanged.
   '入口解析': false,         // Master switch: when enabled, only the first enabled operator in Telecom > Unicom > Mobile order takes effect.
 };
@@ -592,6 +599,25 @@ const TEMPLATE = {
       "proxies": null
     },
     {
+      "name": "🍎 海外苹果",
+      "icon": "https://fastly.jsdelivr.net/gh/AIsouler/MyClash@main/Icons/svg/Apple.svg",
+      "type": "select",
+      "proxies": null
+    },
+    {
+      "name": "🌐 海外微软",
+      "icon": "https://fastly.jsdelivr.net/gh/AIsouler/MyClash@main/Icons/svg/Microsoft.svg",
+      "type": "select",
+      "proxies": null
+    },
+    {
+      "name": "🎮 Steam平台（非下载/CDN）",
+      "icon": "https://fastly.jsdelivr.net/gh/AIsouler/MyClash@main/Icons/svg/Steam.svg",
+      "type": "select",
+      "default-selected": "DIRECT",
+      "proxies": null
+    },
+    {
       "name": "📲 Telegram",
       "icon": "https://github.com/DustinWin/ruleset_geodata/releases/download/icons/telegram.png",
       "type": "select",
@@ -688,6 +714,62 @@ const TEMPLATE = {
       "format": "mrs",
       "url": "https://fastly.jsdelivr.net/gh/appshubcc/bett-rules@meta/geo/geosite/apple@cn.mrs",
       "path": "./ruleset/apple@cn.mrs"
+    },
+    "microsoft@cn": {
+      "type": "http",
+      "interval": 86400,
+      "behavior": "domain",
+      "format": "mrs",
+      "url": "https://fastly.jsdelivr.net/gh/appshubcc/bett-rules@meta/geo/geosite/microsoft@cn.mrs",
+      "path": "./ruleset/microsoft@cn.mrs"
+    },
+    "microsoft": {
+      "type": "http",
+      "interval": 86400,
+      "behavior": "domain",
+      "format": "mrs",
+      "url": "https://fastly.jsdelivr.net/gh/appshubcc/bett-rules@meta/geo/geosite/microsoft.mrs",
+      "path": "./ruleset/microsoft.mrs"
+    },
+    "microsoft_ip": {
+      "type": "http",
+      "interval": 86400,
+      "behavior": "ipcidr",
+      "format": "mrs",
+      "url": "https://fastly.jsdelivr.net/gh/appshubcc/bett-rules@meta/geo/geoip/microsoft.mrs",
+      "path": "./ruleset/microsoft_ip.mrs"
+    },
+    "apple": {
+      "type": "http",
+      "interval": 86400,
+      "behavior": "domain",
+      "format": "mrs",
+      "url": "https://fastly.jsdelivr.net/gh/appshubcc/bett-rules@meta/geo/geosite/apple.mrs",
+      "path": "./ruleset/apple.mrs"
+    },
+    "apple_ip": {
+      "type": "http",
+      "interval": 86400,
+      "behavior": "ipcidr",
+      "format": "mrs",
+      "url": "https://fastly.jsdelivr.net/gh/appshubcc/bett-rules@meta/geo/geoip/apple.mrs",
+      "path": "./ruleset/apple_ip.mrs"
+    },
+    "steam": {
+      "type": "http",
+      "interval": 86400,
+      "behavior": "domain",
+      "format": "mrs",
+      "url": "https://fastly.jsdelivr.net/gh/appshubcc/bett-rules@meta/geo/geosite/steam.mrs",
+      "path": "./ruleset/steam.mrs"
+    },
+    "steam_ip": {
+      "type": "http",
+      "interval": 86400,
+      "behavior": "ipcidr",
+      "format": "mrs",
+      "url": "https://fastly.jsdelivr.net/gh/appshubcc/bett-rules@meta/geo/geoip/steam.mrs",
+      "path": "./ruleset/steam_ip.mrs"
     },
     "douyin": {
       "type": "http",
@@ -936,6 +1018,13 @@ const TEMPLATE = {
     "RULE-SET,HijackingPlus,REJECT",
     "SUB-RULE,(PROCESS-NAME,com.dragon.read.oversea.gp),fanqie",
     "DOMAIN-KEYWORD,ikuuu,🌍 PROXY",
+    "RULE-SET,microsoft@cn,DIRECT",
+    "RULE-SET,apple@cn,DIRECT",
+    "RULE-SET,games-cn,DIRECT",
+    "RULE-SET,microsoft,🌐 海外微软",
+    "RULE-SET,microsoft_ip,🌐 海外微软,no-resolve",
+    "RULE-SET,apple,🍎 海外苹果",
+    "RULE-SET,apple_ip,🍎 海外苹果,no-resolve",
     "RULE-SET,applications,DIRECT",
     "RULE-SET,echs_cn,DIRECT",
     "RULE-SET,echs_cn_ip,DIRECT,no-resolve",
@@ -1014,8 +1103,8 @@ const TEMPLATE = {
     "RULE-SET,twitter-x-domain,✖️ Twitter",
     "RULE-SET,twitter-x-ip,✖️ Twitter,no-resolve",
     "RULE-SET,twitter-x-blackmatrix7-No_Resolve,✖️ Twitter",
-    "RULE-SET,apple@cn,DIRECT",
-    "RULE-SET,games-cn,DIRECT",
+    "RULE-SET,steam,🎮 Steam平台（非下载/CDN）",
+    "RULE-SET,steam_ip,🎮 Steam平台（非下载/CDN）,no-resolve",
     "PROCESS-NAME,bf6.exe,🎮 Games-Global",
     "RULE-SET,games,🎮 Games-Global",
     "RULE-SET,TikTok,🎵 TikTok",
@@ -1417,7 +1506,7 @@ function smartMergeDnsNode(config, result) {
   const newHosts = result.hosts || {};
   const proxies = Array.isArray(config.proxies) ? config.proxies : [];
 
-  // Keep domain names before node mapping to identify and migrate policies, and record separately domain names that still require DNS for actual connections.
+  // Keep the domain names before node mapping to identify and migrate policies, and record separately the domain names that still require DNS for the actual connection.
   // Nodes mapped to IP do not generate DNS policies; only the policy for the final domain name is retained when mapped to another domain name.
   const originalDomains = new Set();
   const originalDomainByProxy = new Map();
@@ -1677,7 +1766,7 @@ function applyTelegramDcExperiment(result, originalProxies) {
     return;
   }
 
-  // Insert the Telegram ruleset before the original Telegram ruleset; keep other providers in their original order.
+  // Insert the Telegram ruleset before the original Telegram ruleset; keep the original order of other providers.
   const originalProviders = result['rule-providers'] || {};
   const providersWithTelegramDc = {};
   let inserted = false;
@@ -1857,17 +1946,49 @@ function main(config, profileName) {
     }
   });
 
-  // ---- 5. Fill in the group marked "All single nodes here" with the real node name of the subscription ----
+  // ---- 5. Fill in the group marked "Here are all single nodes" with the real node name of the subscription ----
   const allNodeNames = originalProxies
     .map((p) => p && p.name)
     .filter((name) => typeof name === 'string' && name.length > 0);
 
   result['proxy-groups'].forEach((group) => {
-    if (isAllNodesPlaceholder(group)) {
+    if (!isAllNodesPlaceholder(group)) {
+      return;
+    }
+
+    let fixedProxies = [];
+    if (group.name === '🍎 海外苹果' || group.name === '🌐 海外微软') {
+      fixedProxies = [
+        '👉 手动切换',
+        '♻️ 自动选择',
+        '🔄 负载均衡',
+        'DIRECT'
+      ];
+    } else if (group.name === '🎮 Steam平台（非下载/CDN）') {
+      fixedProxies = [
+        'DIRECT',
+        '👉 手动切换',
+        '♻️ 自动选择',
+        '🔄 负载均衡'
+      ];
+    }
+
+    if (fixedProxies.length > 0) {
+      // The policy group comes first and the subscription node comes last; closed nested groups are not added back.
+      const enabledFixedProxies = fixedProxies.filter(
+        (name) => !disabledGroupNames.has(name)
+      );
+      group.proxies = [
+        ...enabledFixedProxies,
+        ...allNodeNames.filter((name) => !fixedProxies.includes(name))
+      ];
+    } else {
+      // Other original placeholder groups continue to maintain the behavior of "only filling in all subscription nodes".
       group.proxies = allNodeNames.slice();
-      if (originalProxyProviders) {
-        group.use = Object.keys(originalProxyProviders);
-      }
+    }
+
+    if (originalProxyProviders) {
+      group.use = Object.keys(originalProxyProviders);
     }
   });
 
@@ -1876,7 +1997,14 @@ function main(config, profileName) {
   const fcmDirectEnabled = ruleOptionsEnable['FCM直连'] === true;
   result['proxy-groups'].forEach((group) => {
     if (group && group.name === 'FCM') {
-      group.proxies = fcmDirectEnabled ? ['DIRECT'] : ['👉 手动切换'];
+      if (fcmDirectEnabled) {
+        group.proxies = ['DIRECT'];
+      } else if (disabledGroupNames.has('👉 手动切换')) {
+        // When the manual group is turned off, the global policy group will be used to prevent FCM from referencing a non-existent policy group.
+        group.proxies = [fallbackTarget];
+      } else {
+        group.proxies = ['👉 手动切换'];
+      }
     }
   });
 
