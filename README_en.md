@@ -71,7 +71,7 @@ English annotation (maybe lagging behind the former):
 https://raw.githubusercontent.com/XVSVTsama/mihomo-config-self/refs/heads/main/script_override_en.js
 ```
 
-   Just add this script to the subscription in the Bettbox / FlClash client:
+   Just attach this script to the subscription in the Bettbox / FlClash client:
    - The real nodes in the subscription are automatically filled in `proxies` With each "single node" placeholder strategy group (👉 manual switching, ♻️ automatic selection, 🔄 load balancing, 📲 Telegram, 🎮 Games-Global);
    - Subscription comes with `proxy-providers` will be preserved as is;
    - Dynamically merge DNS `proxy-server-nameserver-policy`(Subject to the script, the template does not preset this key);
@@ -118,10 +118,10 @@ Attached 🔴
 This configuration integrates modular remote rules (Rule Providers) and refined application-level offloading strategies, which are completely designed to meet my personal network environment and usage pain points:
 
 * **Use the rule TUN**: enabled by default `tun` mode, adopt `mips` The protocol stack realizes full device/full protocol takeover and solves the problem of some software not using the system agent.
-* **Radical DNS resolution experience**:use `fake-ip` Enhanced mode. Built-in smart DNS policy based on domestic direct connection and DoH/DoT hybrid to accurately prevent DNS pollution.
+* **Radical DNS resolution experience**:use `fake-ip` Enhanced mode. Built-in intelligent DNS policy based on domestic direct connection and DoH/DoT hybrid to accurately prevent DNS pollution.
 * **Modular rule sets (Rule Providers)**: full embrace `mrs` formatted remote ruleset (thanks [DustinWin](https://github.com/DustinWin/ruleset_geodata/releases)、[MetaCubeX](https://github.com/MetaCubeX/meta-rules-dat/tree/meta)、[echs-top](https://github.com/echs-top/proxy)、[reddishJade](https://github.com/reddishJade/private_proxy) and other maintainers), strip off local rules and achieve automatic and non-intrusive updates.
 * **Obsessive-compulsive disorder level scene diversion**：
-    * **🤖 AI large model / ✖️ Twitter / 🎵 TikTok**: Independent traffic group, using functional regularity to match residential/US nodes (residential/home broadband/residential/home broadband/🇺🇸/USA/USA/U.S. and other naming variants), and exclude Hong Kong/Singapore related nodes (🇭🇰/香港/Hong Kong/HK/🇸🇬/ Singapore/Singapore/SG); the English configuration retains the same filter expression.
+    * **🤖 AI Large Models / ✖️ Twitter / 🎵 TikTok**: Independent traffic group, using functional regularity to match residential/US nodes (residential/home broadband/residential/home broadband/🇺🇸/USA/USA/U.S. and other naming variants), and exclude Hong Kong/Singapore related nodes (🇭🇰/香港/Hong Kong/HK/🇸🇬/ Singapore/Singapore/SG); the English configuration retains the same filter expression.
     * **🎮 Games**: Independent UDP proxy release and mainstream game platform routing.
 * **Advanced ad/privacy blocking**：
     * Block UDP ports (3478-3479, 5349-5350, 19302-19309) commonly used for WebRTC/voice/real-time communication to prevent them from bypassing the offloading policy.
@@ -153,7 +153,7 @@ This configuration integrates modular remote rules (Rule Providers) and refined 
 
 ## 🛠️ Must be modified before use (must read when copying homework)
 
-Since this is a self-configuration,`proxies: ~` Everywhere is empty. You must do the following yourself:
+Since this is a personal configuration,`proxies: ~` Everywhere is empty. You must do the following yourself:
 1. **Inject node**: It is recommended to use the above override script directly - the real nodes in the subscription will be automatically filled in `proxies` With each placeholder policy group, subscribe to the `proxy-providers` will also be retained; if no script is used, you need to manually add the node list or `proxy-providers` Fill in this configuration (`proxies: ~` is left blank by default).
 2. **Modify node filtering rules (Filter)**: Chinese and English configurations use long regular expressions by default: match residential/US named nodes (residential/home broadband/🇺🇸/USA/USA/U.S. and other naming variants), and exclude Hong Kong/Singapore related nodes (🇭🇰/香港/Hong Kong/HK/🇸🇬/ Singapore/Singapore/SG). If the subscription node name does not contain any of the above residential or US identifiers, or the node name contains the words Hong Kong/Singapore, please modify the corresponding policy group in the Chinese source file. `filter` field, and then synchronize it to the English configuration.
 3. **Delete rules as needed**: If you don’t need to block ads for the overseas version of Tomato Novels, it is recommended to delete them. `sub-rules` middle `fanqie` Related rules to save performance.
@@ -163,7 +163,7 @@ Since this is a self-configuration,`proxies: ~` Everywhere is empty. You must do
 ## ⚠️⚠️⚠️ Universe Disclaimer ⚠️⚠️⚠️
 
 
-1. **This is purely personal and does not provide any technical support.**: This warehouse code is only used as a reference for personal cloud backup and configuration.**It does not answer basic usage questions, does not accept non-BUG issues, and does not guarantee regular maintenance and updates.** If the configuration reports an error on your device, please consult Mihomo's official documentation to troubleshoot.
+1. **This is purely personal and does not provide any technical support.**: This warehouse code is only used as a reference for personal cloud backup and configuration.**It does not answer basic usage questions, does not accept non-BUG issues, and does not guarantee regular maintenance and updates.** If the configuration reports an error on your device, please consult the official Mihomo documentation to troubleshoot.
 2. **No network services are provided**: This configuration is purely for local routing rule distribution.**Absolutely not included, provided, or sold**Any form of scientific internet node, VPN service or server subscription.
 3. **Compliance and Legal Responsibilities**:Users are solely responsible for using this configuration at their own risk. Please strictly abide by the local laws and regulations of your country and region. For any network security issues, privacy leaks, data loss or legal disputes arising from the use, modification or dissemination of the contents of this repository,**The repository author is not responsible**。
 4. **Function damage warning**: The configuration contains aggressive ad removal (such as blocking specific domain names and IPs) and Fake-IP settings, which is very likely to cause some domestic APPs to be unable to load images, log in normally, or cause network connectivity problems. If you encounter network anomalies, please prioritize the troubleshooting in this configuration. `rules` and `fake-ip-filter`。

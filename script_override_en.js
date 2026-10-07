@@ -21,7 +21,7 @@ const Compatible_With_Bettbox = {
  * ============================================================================
  *
  * Source:
- *JS script:
+ * JS script:
  *    https://raw.githubusercontent.com/XVSVTsama/mihomo-config-self/refs/heads/main/script_override.js
  * Template:
  *    https://raw.githubusercontent.com/XVSVTsama/mihomo-config-self/refs/heads/main/mihomo.yaml
@@ -41,7 +41,7 @@ const Compatible_With_Bettbox = {
  * 1. Except for the parts specially stated in Articles 2, 3, and 4 below, the final configuration uses TEMPLATE
  * (corresponding to the mihomo.yaml template) shall prevail, that is, the fields already written in the template will replace the original subscription configuration.
  * Fields with the same name (such as dns details, rules, rule-providers, sniffers,
- * The grouping structure of tun, proxy-groups, etc.). Top-level fields not defined by the template in the original subscription configuration will not be retained.
+ * The grouping structure of tun, proxy-groups, etc.). Top-level fields that are not defined by the template in the original subscription configuration will not be retained.
  * (such as allow-lan and bind-address that come with some subscriptions), the only exception is proxy-providers:
  * If the subscription comes with proxy-providers, the final configuration will be retained and injected as it is.
  *
@@ -50,7 +50,7 @@ const Compatible_With_Bettbox = {
  *
  * 3. In proxy-groups, "proxies: " is explicitly written in the template (the value is empty/null, that is,
  * The groups of "all single nodes here" in the template comments: 👉 manual switching, ♻️ automatic selection,
- * 🔄 Load Balancing, 📲 Telegram, 🎮 Games-Global) will automatically fill in all nodes in the subscription
+ * 🔄 Load balancing, 📲 Telegram, 🎮 Games-Global) will automatically fill in all nodes in the subscription
  * name; if the subscription also comes with proxy-providers, these groups will be written to use references at the same time
  * provider. The remaining groups remain as they are in the template and will not be overwritten or supplemented by subscription nodes.
  *
@@ -92,7 +92,7 @@ const ruleOptionsEnable = {
   '🤖 AI大模型': true,     // AI large model strategy group
   '🎵 TikTok': true,       // TikTok Video Platform Strategy Group
 
-  // --- Node and network function switch ---
+  // ---Node and network function switches ---
   '强制证书验证': false,   // When it is turned on, skip-cert-verify of the subscription node is set to false (forced certificate verification); when it is turned off, there is no intervention and the original settings of the subscription node are retained. Treat all nodes equally
   '启用 Reality 增强': true, // Whether to enable support-x25519mlkem768 (X25519MLKEM768 post-quantum key negotiation) for Reality nodes with non-empty public-key/short-id
   'IPv6优先': false,         // After enabling, IPv6 will be used first according to the node ip-version.
@@ -101,14 +101,14 @@ const ruleOptionsEnable = {
   '入口解析': false,         // Master switch: when enabled, only the first enabled operator in Telecom > Unicom > Mobile order takes effect.
 };
 
-// When the same domain name rule key appears, whether to subscribe to the original configuration (true) or the template (false) takes precedence (the template is currently not configured)
+// When the same domain name rule key appears, whether to subscribe to the original configuration (true) or the template (false) takes precedence (the template is currently not configured
 // proxy-server-nameserver-policy, so this switch currently only affects merging between subscription sources)
 const NAMESERVER_POLICY_PREFER_ORIGINAL = true;
 
 // ============================================================================
 // Domestic entrance analysis node maintenance area
 // Only the type / server / port and other optional fields below are maintained.
-// Do not write name here, it is fixed by ENTRY_RESOLUTION_OPTIONS to domestic entrance resolution-operator.
+// Do not write name here, it is fixed by ENTRY_RESOLUTION_OPTIONS to the domestic entrance resolution-operator.
 // Any Mihomo node field can be modified, deleted, or added.
 // ============================================================================
 const DOMESTIC_ENTRY_PROXIES = {
@@ -259,7 +259,7 @@ function buildTelegramDcProxyGroups(originalProxies) {
       'empty-fallback': 'COMPATIBLE',
       icon: definition.icon,
     };
-    // Reuse region definitions and align the kernel's Unicode word boundaries, whitespace, and lowercase matching to avoid misjudgments when Chinese abbreviations are closely abbreviated.
+    // Reuse region definitions and align the kernel's Unicode word boundaries, whitespace, and lowercase matching to avoid misjudgments when Chinese abbreviations are closely spaced.
     const wordChars = '[\\p{L}\\p{Mn}\\p{Nd}\\p{Pc}\\u200C\\u200D]';
     const spaceChars = '[\\u0009-\\u000D\\u0020\\u0085\\u00A0\\u1680\\u2000-\\u200A\\u2028\\u2029\\u202F\\u205F\\u3000]';
     const regionPattern = definition.filter.replace(/^\(\?i\)/, '').toLowerCase()
@@ -1162,7 +1162,7 @@ function asNameserverList(nameservers) {
 
   return typeof nameservers === "string" ? [nameservers] : [];
 }
-// Compares two nameserver lists for equality (ignoring order and duplication, comparing by set)
+// Compares two nameserver lists for equality (ignore order and duplication, compare by set)
 function sameNameserverSet(a, b) {
   if (!Array.isArray(a) || !Array.isArray(b)) return false;
   const sa = new Set(a);
@@ -1417,7 +1417,7 @@ function smartMergeDnsNode(config, result) {
   const newHosts = result.hosts || {};
   const proxies = Array.isArray(config.proxies) ? config.proxies : [];
 
-  // Keep the domain names before node mapping to identify and migrate policies, and record separately the domain names that still require DNS for the actual connection.
+  // Keep domain names before node mapping to identify and migrate policies, and record separately domain names that still require DNS for actual connections.
   // Nodes mapped to IP do not generate DNS policies; only the policy for the final domain name is retained when mapped to another domain name.
   const originalDomains = new Set();
   const originalDomainByProxy = new Map();
@@ -1677,7 +1677,7 @@ function applyTelegramDcExperiment(result, originalProxies) {
     return;
   }
 
-  // Insert the Telegram ruleset before the original Telegram ruleset; keep the original order of other providers.
+  // Insert the Telegram ruleset before the original Telegram ruleset; keep other providers in their original order.
   const originalProviders = result['rule-providers'] || {};
   const providersWithTelegramDc = {};
   let inserted = false;
