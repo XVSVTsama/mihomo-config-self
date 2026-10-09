@@ -11,7 +11,7 @@ const Compatible_With_Bettbox = {
     '📲 Telegram',
     '🎮 Games-Global',
     '🍎 海外苹果',
-    '🪟 海外微软/GitHub',
+    '💠 海外微软',
     '🎮 Steam平台（非下载/CDN）',
     '✖️ Twitter',
     '🤖 AI大模型',
@@ -51,12 +51,12 @@ const Compatible_With_Bettbox = {
  *    2. proxies：使用订阅原始配置里的真实节点列表（模板里这一项本来就是空的，
  *       只是占位）。
  *
- *    3. proxy-groups 中的纯节点占位组（proxies: null：👉 手动切换、♻️ 自动选择、
- *       🔄 负载均衡、📲 Telegram、🎮 Games-Global）会自动填入订阅里全部节点名；
- *       🍎 海外苹果、🪟 海外微软/GitHub、🎮 Steam平台（非下载/CDN）也使用 null 占位，
- *       但运行时会先保留各自固定策略项，再追加全部订阅节点。若订阅还带
- *       proxy-providers，这些占位组会同时写入 use 引用全部 provider。其余分组
- *       保持模板原样，不会被订阅节点覆盖或补充。
+    *    3. proxy-groups 中的纯节点占位组（proxies: null：👉 手动切换、♻️ 自动选择、
+    *       🔄 负载均衡、📲 Telegram、🎮 Games-Global）会自动填入订阅里全部节点名；
+    *       🍎 海外苹果、💠 海外微软、🎮 Steam平台（非下载/CDN）也使用 null 占位，
+    *       但运行时会先保留各自固定策略项，再追加全部订阅节点。若订阅还带
+    *       proxy-providers，这些占位组会同时写入 use 引用全部 provider。其余分组
+    *       保持模板原样，不会被订阅节点覆盖或补充。
  *
  *    4.【特别处理】DNS 与 hosts：
  *       - hosts 仅在 dns.use-hosts=true 且 dns.listen 与真正参与节点解析的 DNS 端点
@@ -93,7 +93,7 @@ const ruleOptionsEnable = {
   '📲 Telegram': true,     // Telegram 通讯软件策略组
   '🎮 Games-Global': true, // 游戏策略组
   '🍎 海外苹果': true,     // 海外 Apple 平台服务
-  '🪟 海外微软/GitHub': true, // 海外 Microsoft / GitHub 平台服务
+  '💠 海外微软': true,     // 海外 Microsoft 平台服务
   '🎮 Steam平台（非下载/CDN）': true, // Steam 平台服务，不负责下载/CDN
   '✖️ Twitter': true,      // Twitter 社交平台策略组
   '🤖 AI大模型': true,     // AI 大模型策略组
@@ -605,8 +605,8 @@ const TEMPLATE = {
       "proxies": null
     },
     {
-      "name": "🪟 海外微软/GitHub",
-      "icon": "https://fastly.jsdelivr.net/gh/XVSVTsama/mihomo-config-self@main/assets/icons/microsoft-github.svg",
+      "name": "💠 海外微软",
+      "icon": "https://fastly.jsdelivr.net/gh/XVSVTsama/mihomo-config-self@main/assets/icons/microsoft.svg",
       "type": "select",
       "proxies": null
     },
@@ -1021,8 +1021,8 @@ const TEMPLATE = {
     "RULE-SET,microsoft@cn,DIRECT",
     "RULE-SET,apple@cn,DIRECT",
     "RULE-SET,games-cn,DIRECT",
-    "RULE-SET,microsoft,🪟 海外微软/GitHub",
-    "RULE-SET,microsoft_ip,🪟 海外微软/GitHub,no-resolve",
+    "RULE-SET,microsoft,💠 海外微软",
+    "RULE-SET,microsoft_ip,💠 海外微软,no-resolve",
     "RULE-SET,apple,🍎 海外苹果",
     "RULE-SET,apple_ip,🍎 海外苹果,no-resolve",
     "RULE-SET,applications,DIRECT",
@@ -1956,7 +1956,7 @@ function main(config, profileName) {
     }
 
     let fixedProxies = [];
-    if (group.name === '🍎 海外苹果' || group.name === '🪟 海外微软/GitHub') {
+    if (group.name === '🍎 海外苹果' || group.name === '💠 海外微软') {
       fixedProxies = [
         '👉 手动切换',
         '♻️ 自动选择',
