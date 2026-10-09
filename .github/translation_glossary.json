@@ -56,5 +56,6 @@
   "🤖 AI大模型 / ✖️ Twitter / 🎵 TikTok": "🤖 AI Large Models / ✖️ Twitter / 🎵 TikTok",
   "🍎 海外苹果": "🍎 Overseas Apple",
   "🌐 海外微软": "🌐 Overseas Microsoft",
-  "🎮 Steam平台（非下载/CDN）": "🎮 Steam Platform (Non-Download/CDN)"
+  "🎮 Steam平台（非下载/CDN）": "🎮 Steam Platform (Non-Download/CDN)",
+  "图标副本托管在 `assets/icons/` 并通过 jsDelivr 引用。DustinWin/ruleset_geodata、Clash Verge 以及 AIsouler/MyClash 的相关资产遵循其上游项目声明的 GPL-3.0 或 MIT 许可证。Koolson/Qure 和 MiToverG422/Qure 未提供可识别的 SPDX 许可证文件；重新分发时须署名，商业使用应先与相关权利人确认。适用的 GPL/MIT 许可证副本保留在 `assets/icons/licenses/` 中。": "Icon copies are hosted in `assets/icons/` and referenced through jsDelivr. The relevant assets from DustinWin/ruleset_geodata, Clash Verge, and AIsouler/MyClash follow the GPL-3.0 or MIT licenses declared by their upstream projects. Koolson/Qure and MiToverG422/Qure do not provide an identifiable SPDX license file; attribution is required when redistributing them, and commercial use should be confirmed with the relevant rights holders first. Copies of the applicable GPL/MIT licenses are retained in `assets/icons/licenses/`."
 }
