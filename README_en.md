@@ -200,6 +200,8 @@ This project is built on the open source kernel, client, ruleset and icon resour
 - [Clash Verge](https://www.clashverge.dev/): Some policy group icon resources.
 - The Dutch flag icon was drawn by this project itself and hosted on [`assets/icons/Netherlands.png`](assets/icons/Netherlands.png)。
 
+Icon copies are hosted in `assets/icons/` and referenced through jsDelivr. The relevant assets from DustinWin/ruleset_geodata, Clash Verge, and AIsouler/MyClash follow the GPL-3.0 or MIT licenses declared by their upstream projects. Koolson/Qure and MiToverG422/Qure do not provide an identifiable SPDX license file; attribution is required when redistributing them, and commercial use should be confirmed with the relevant rights holders first. Copies of the applicable GPL/MIT licenses are retained in `assets/icons/licenses/`.
+
 ### Scripting and Configuration Reference
 
 - [AIsouler/MyClash](https://github.com/AIsouler/MyClash): Reference for scripts, configuration structure and README presentation.
