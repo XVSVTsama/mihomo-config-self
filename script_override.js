@@ -500,7 +500,8 @@ const TEMPLATE = {
     ],
     "nameserver-policy": {
       "rule-set:proxy@direct,cn,echs_cn,echs_direct": [
-        "https://dns.alidns.com/dns-query#DIRECT"
+        "https://dns.alidns.com/dns-query#DIRECT",
+        "https://doh.pub/dns-query#DIRECT"
       ],
       "rule-set:private": [
         "system"
