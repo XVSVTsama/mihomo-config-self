@@ -188,6 +188,7 @@ dns:
     - system
     'rule-set:proxy@direct,cn,echs_cn,echs_direct':
     - https://dns.alidns.com/dns-query#DIRECT
+    - https://doh.pub/dns-query#DIRECT
   prefer-h3: false
   respect-rules: false                                            
   enhanced-mode: fake-ip                  
